@@ -1,0 +1,5 @@
+--require babel-register
+--timeout 50000
+-R spec
+test/*.js
+
