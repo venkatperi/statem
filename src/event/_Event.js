@@ -1,3 +1,4 @@
+// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -19,44 +20,42 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import type {From} from '../types';
 
-import {
-  keepStateAndData,
-  nextState,
-  reply,
-  StateMachine,
-} from '../../';
+export type CallEvent = { type: 'call', from: From }
+export type CastEvent = { type: 'cast' }
+export type InfoEvent = { type: 'info' }
 
-export default class Button extends StateMachine {
+export type InternalEvent = { type: 'internal' }
 
-  initialState = 'off'
+export type StateTimeoutEvent = { type: 'stateTimeout' }
 
-  data = 0
+export type TimeoutEvent =
+  { type: 'timeout', name: Object }
+  | StateTimeoutEvent
 
-  handlers = {
-    'cast#flip#off': ( event, args, current, data ) =>
-      nextState( 'on', data + 1 ),
+export type ExternalEvent =
+  CallEvent
+  | CastEvent
+  | InfoEvent
 
-    'cast#flip#on': ( event, args, current, data ) =>
-      nextState( 'off', data ),
+function makeRoute( e, state ) {
+  let x = e.args ?
+    Object.entries( e.args ).map( ( [k, v] ) => `${k}/${v}` ) :
+    undefined
+  const eventArgs = x ? `/${x}` : ''
 
-    'call/:from#getCount#:state': ( event, args, current, data ) =>
-      keepStateAndData( reply( args.from, data ) ),
-
-    'call/:from#getState#:state': ( event, args, current, data ) =>
-      keepStateAndData( reply( args.from, current ) ),
-  }
-
-  flip() {
-    this.cast( 'flip' )
-  }
-
-  async getCount() {
-    return await this.call( 'getCount' )
-  }
-
-  async getState() {
-    return await this.call( 'getState' )
-  }
-
+  const route = typeof(e.context) === 'object' ?
+    Object.entries( e.context ).map( ( [k, v] ) => `${k}/${v}` ) :
+    e.context
+  return `${e.type}${eventArgs}#${route}#${state}`
 }
+
+type EventHelpers = {
+  makeRoute: makeRoute
+}
+
+export type Event =
+  ExternalEvent
+  | TimeoutEvent
+  | InternalEvent

@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,28 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import type {From} from './types';
+export type Postpone = { type: 'postpone', postpone: boolean }
 
-export type CallEvent = { type: 'call', from: From }
-export type CastEvent = { type: 'cast' }
-export type InfoEvent = { type: 'info' }
-
-export type InternalEvent = { type: 'internal' }
-
-export type StateTimeoutEvent = { type: 'stateTimeout' }
-
-export type TimeoutEvent =
-  { type: 'timeout', name: Object }
-  | StateTimeoutEvent
-
-export type ExternalEvent =
-  CallEvent
-  | CastEvent
-  | InfoEvent
-
-export type Event =
-  ExternalEvent
-  | TimeoutEvent
-  | InternalEvent
-
-
+export function postpone( postpone: boolean ): Postpone {
+  return {
+    type: 'postpone',
+    postpone,
+  }
+}

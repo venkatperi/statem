@@ -20,14 +20,16 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {reply} from './src/Action'
+import {reply} from './src/action/Enter'
+
 import {
   keepState,
   keepStateAndData,
   nextState,
   repeatState,
   repeatStateAndData,
-} from './src/Result';
+} from './src/result/Result';
+
 import StateMachine from './src/StateMachine'
 
 export {

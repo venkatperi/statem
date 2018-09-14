@@ -27,21 +27,31 @@ import {
   StateMachine,
 } from '../../';
 
-export default class Button extends StateMachine {
+export default class Service extends StateMachine {
 
-  initialState = 'off'
-
-  data = 0
+  initialState = 'new'
 
   handlers = {
-    'cast#flip#off': ( event, args, current, data ) =>
-      nextState( 'on', data + 1 ),
+    'cast#next#new': ( event, args, current, data ) =>
+      nextState( 'starting', data ),
 
-    'cast#flip#on': ( event, args, current, data ) =>
-      nextState( 'off', data ),
+    'cast#next#starting': ( event, args, current, data ) =>
+      nextState( 'running', data ),
 
-    'call/:from#getCount#:state': ( event, args, current, data ) =>
-      keepStateAndData( reply( args.from, data ) ),
+    'cast#error(/:error)#starting': ( event, args, current, data ) =>
+      nextState( 'cancelling', Object.assign( {}, data, { error: args.error } ) ),
+
+    'cast#next#cancelling': ( event, args, current, data ) =>
+      nextState( 'failed', data ),
+
+    'cast#next#running': ( event, args, current, data ) =>
+      nextState( 'stopping', data ),
+
+    'cast#next#stopping': ( event, args, current, data ) =>
+      nextState( 'terminated', data ),
+
+    'cast#error(/:error)#stopping': ( event, args, current, data ) =>
+      nextState( 'failed', Object.assign( {}, data, { error: args.error } ) ),
 
     'call/:from#getState#:state': ( event, args, current, data ) =>
       keepStateAndData( reply( args.from, current ) ),

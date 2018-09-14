@@ -19,44 +19,26 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import {StateMachine} from "../StateMachine";
 
-import {
-  keepStateAndData,
-  nextState,
-  reply,
-  StateMachine,
-} from '../../';
+type Data = any;
 
-export default class Button extends StateMachine {
+class Action {
 
-  initialState = 'off'
+}
 
-  data = 0
+type Actions = Array<Action>;
 
-  handlers = {
-    'cast#flip#off': ( event, args, current, data ) =>
-      nextState( 'on', data + 1 ),
+class Result {
+    type: string;
+    newData?: Data;
+    actions?: Array<Action>;
 
-    'cast#flip#on': ( event, args, current, data ) =>
-      nextState( 'off', data ),
+    constructor(newData?: Data, actions?: Actions) {
+        this.newData = newData
+        this.actions = actions
+    }
 
-    'call/:from#getCount#:state': ( event, args, current, data ) =>
-      keepStateAndData( reply( args.from, data ) ),
-
-    'call/:from#getState#:state': ( event, args, current, data ) =>
-      keepStateAndData( reply( args.from, current ) ),
-  }
-
-  flip() {
-    this.cast( 'flip' )
-  }
-
-  async getCount() {
-    return await this.call( 'getCount' )
-  }
-
-  async getState() {
-    return await this.call( 'getState' )
-  }
-
+    process(sm: StateMachine) {
+    }
 }

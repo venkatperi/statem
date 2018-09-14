@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "flow": "flow"
+    "build": "babel index.js src/*.js src/**/*.js -d dist/",
+    "flow": "flow",
+    "test": "mocha",
+    "doc": "mkdir -p doc && documentation build ./src/Service.js -f md -o doc/api.md",
+    "clean": "rm -rf dist",
+    "preparew": "npm run clean && npm run build"
   },
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
@@ -27,6 +31,7 @@
     "sinon-chai-in-order": "^0.1.0"
   },
   "dependencies": {
+    "flow-to-typescript": "^1.0.0",
     "roarr": "^2.11.0",
     "route-parser": "0.0.5",
     "ulid": "^2.3.0"

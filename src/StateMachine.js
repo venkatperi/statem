@@ -21,15 +21,22 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Route from 'route-parser'
+import type {Actions} from 'src/action/Action';
 
 import Logger from '../Logger';
-import {Event} from './Event';
+import {
+  CallEvent,
+  CastEvent,
+  Event,
+  EventContext,
+} from './event/Event';
 import {Responses} from './Responses';
 import type {
   KeepStateResult,
   NextStateResult,
   RepeatStateResult,
-} from './Result';
+} from './result/Result';
+
 import type {
   Data,
   Handler,
@@ -38,36 +45,49 @@ import type {
   State,
 } from './types';
 
-const log = Logger( 'Result' )
+const log = Logger( 'StateMachine' )
 
 export default class StateMachine {
-
-  events: Array<Event> = []
-  routes: Array<RouteHandler> = []
   handlers = {}
   initialState: State
-  state: State
-  data: Data
-  responses = new Responses()
+
+  _data: Data
+  _responses = new Responses()
+  _state: State
+  _routes: Array<RouteHandler> = []
 
   _resultHandlers = {
-    'nextState': this._handleNextStateResult.bind(this),
-    'keepState': this._handleKeepStateResult.bind(this),
-    'repeatState': this._handleRepeatStateResult.bind(this),
+    'nextState': this._handleNextStateResult.bind( this ),
+    'nextStateWithData': this._handleNextStateResult.bind( this ),
+    'keepState': this._handleKeepStateResult.bind( this ),
+    'repeatState': this._handleRepeatStateResult.bind( this ),
+  }
+
+  get state(): State {
+    return this._state
+  }
+
+  get data(): Data {
+    return this._data
+  }
+
+  set state( state: State ) {
+    log.info( `state=${state}` )
+    this._state = state
+  }
+
+  set data( data: Data ) {
+    this._data = data
   }
 
   /**
-   * Makes a synchronous call and waits for its reply.
+   * Makes a call and waits for its reply.
    *
    */
-  async call( request: any, timeout: number = Infinity ) {
-    const [from, promise] = this.responses.create()
+  async call( request: EventContext, timeout: number = Infinity ) {
+    const [from, promise] = this._responses.create()
 
-    const result = this._handleEvent( Object.assign( {
-      type: `call/${from}`,
-      context: request,
-      // args: { from },
-    } ) )
+    const result = this._handleEvent( new CallEvent( from, request ) )
     this._handleResult( result )
     return await promise
   }
@@ -79,32 +99,14 @@ export default class StateMachine {
    *
    * The appropriate state function will be called to handle the request.
    */
-  cast( request: any ) {
+  cast( request: EventContext ) {
     try {
-      const result = this._handleEvent( Object.assign( {
-        type: 'cast',
-        context: request,
-      } ) )
+      const result = this._handleEvent( new CastEvent( request ) )
       this._handleResult( result )
     } catch ( e ) {
       console.log( e )
       // ignore error for cast
     }
-  }
-
-  /**
-   * Replies to a client.
-   *
-   * This function can be used to explicitly send a reply to
-   * a client that called call() when the reply cannot be
-   * specified in the return value of a state function.
-   *
-   * The function always returns successfully.
-   *
-   * @param client
-   * @param reply
-   */
-  reply( client, reply: Reply ) {
   }
 
   /**
@@ -118,6 +120,12 @@ export default class StateMachine {
     this.onInit( options )
   }
 
+  /**
+   * Stops the state machine
+   *
+   * @param reason
+   * @param timeout
+   */
   stop( reason: string, timeout: number ) {
   }
 
@@ -126,10 +134,12 @@ export default class StateMachine {
    * if no specific handler exists.
    *
    * @param event
+   * @param args {Object}
    * @param state
    * @param data {Object}
    */
-  handleEvent( event: Event, state: State, data: ?Object ) {
+  handleEvent( event: Event, args: Object, state: State, data: ?Object ) {
+    throw new Error( `no handler for ${event}: ${args}` )
   }
 
   /**
@@ -152,7 +162,7 @@ export default class StateMachine {
   }
 
   addHandler( route: string, handler: Handler ) {
-    this.routes.push( { route: new Route( route ), handler } )
+    this._routes.push( { route: new Route( route ), handler } )
   }
 
   _initHandlers() {
@@ -161,82 +171,62 @@ export default class StateMachine {
     }
   }
 
-  _makeRoute( e ): string {
-    let x = e.args ? Object.entries( e.args ).map( ( [k, v] ) => `${k}/${v}` ) : undefined
-    const eventArgs = x ? `/${x}` : ''
-
-    const route = typeof(e.context) === 'object' ?
-      Object.entries( e.context ).map( ( [k, v] ) => `${k}/${v}` ) :
-      e.context
-    return `${e.type}${eventArgs}#${route}#${this.state}`
+  _makeRoute( e: Event ): string {
+    return `${e.route}#${this.state}`
   }
 
-  _addEvents( ...events ) {
-    this.events = this.events.concat( ...events )
-    this._handleEvents()
-  }
-
-  _handleEvents() {
-    for ( const e of this.events ) {
-      this._handleEvent( e )
-    }
-  }
-
-  _handleEvent( e ) {
+  _handleEvent( e: Event ) {
     const route = this._makeRoute( e )
-    log.info('handleEvent: %j', route)
-    for ( const r of this.routes ) {
+    log.info( 'handleEvent: %j', route )
+    for ( const r of this._routes ) {
       const res = r.route.match( route )
       if ( res ) {
         return r.handler( e, res, this.state, this.data )
       }
     }
-    throw new Error( `no matching route! ${route}` )
+    this.handleEvent( e, {}, this.state, this.data )
   }
 
   _handleResult( res ) {
-    log.info('handleResult: %j', res)
-    if ( !res.type ) throw new Error( `result has no type: ${res}` )
-    return this._resultHandlers[res.type]( res )
+    log.info( 'handleResult: %j', res )
+    res.process( this )
+    // if ( !res.type ) throw new Error( `result has no type: ${res}` )
+    // return this._resultHandlers[res.type]( res )
   }
 
   _handleNextStateResult( res: NextStateResult ) {
-    this._setState( res.nextState )
+    this.state = res.nextState
     if ( res.newData != null )
-      this._setData( res.newData )
+      this.data = res.newData
 
     for ( let a of (res.actions || []) ) {
       this._handleAction( a )
     }
   }
-
 
   _handleKeepStateResult( res: KeepStateResult ) {
     if ( res.newData != null )
-      this._setData( res.newData )
+      this.data = res.newData
 
     for ( let a of (res.actions || []) ) {
       this._handleAction( a )
     }
   }
-
 
   _handleRepeatStateResult( res: RepeatStateResult ) {
     if ( res.newData != null )
-      this._setData( res.newData )
+      this.data = res.newData
 
     for ( let a of (res.actions || []) ) {
       this._handleAction( a )
     }
   }
 
-
-  _setState( state ) {
-    this.state = state
-  }
-
-  _setData( data ) {
-    this.data = data
+  handleActions( actions: ?Actions ) {
+    actions = Array.isArray( actions ) ? actions : [actions]
+    for ( let a of actions ) {
+      this._handleAction( a )
+    }
   }
 
   _handleAction( a ) {
@@ -247,8 +237,11 @@ export default class StateMachine {
     }
   }
 
-  _handleReplyAction( a: Reply ) {
-    this.responses.resolve( a.from, a.reply )
+  _handleReplyAction( a
+                        :
+                        Reply,
+  ) {
+    this._responses.resolve( a.from, a.reply )
   }
 }
 
