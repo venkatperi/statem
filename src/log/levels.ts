@@ -19,25 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+export type Level = 'debug'
+    | 'verbose'
+    | 'info'
+    | 'warn'
+    | 'error'
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
-
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+export const levels: {
+    [k in Level]: {
+        level: number,
+        style: { fg: string, bg?: string },
+        disp: string
     }
-
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
-    }
-
-
+} = {
+    debug: {level: 100, style: {fg: 'blue'}, disp: 'D'},
+    verbose: {level: 1000, style: {fg: 'grey'}, disp: 'V'},
+    info: {level: 2000, style: {fg: 'green'}, disp: 'I'},
+    warn: {level: 4000, style: {fg: 'black', bg: 'yellow'}, disp: 'W"'},
+    error: {level: 5000, style: {fg: 'red', bg: 'black'}, disp: 'E'},
 }
+

@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,28 +19,39 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Deferred from './Deferred'
+import * as npmlog from 'npmlog'
+import {Logger} from "./Logger";
+import {levels} from "./levels";
 
-export class Responses {
-  pending = {}
-  nextId = 1
 
-  create(): number {
-    const defer = new Deferred()
-    const id = this.nextId++
-    this.pending[id] = defer
-    return [id, defer.promise]
-  }
+Object.entries(levels).forEach(([k, v]) => npmlog.addLevel(k, v.level, v.style, v.disp))
 
-  remove( id ) {
-    delete this.pending[id]
-  }
+// @ts-ignore
+npmlog.level = global._logLevel || 'info';
+// @ts-ignore
+npmlog.prefixStyle = {fg: 'grey'}
 
-  resolve( id, x ) {
-    this.pending[id].resolve( x )
-  }
 
-  reject( id, x ) {
-    this.pending[id].reject( x )
-  }
+export class NpmLogger extends Logger {
+    tag: string
+
+    debug(msg, ...args) {
+        npmlog['debug'](this.tag, ...args)
+    }
+
+    error(msg, ...args) {
+        npmlog.error(this.tag, msg, ...args)
+    }
+
+    info(msg, ...args) {
+        npmlog['info'](this.tag, msg, ...args)
+    }
+
+    warn(msg, ...args) {
+        npmlog['warn'](this.tag, msg, ...args)
+    }
+
+    verbose(msg, ...args) {
+        npmlog['verbose'](this.tag, msg, ...args)
+    }
 }

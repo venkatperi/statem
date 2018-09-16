@@ -20,23 +20,41 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+import {EventContext} from "../types";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+export default class Event implements Executable {
+    readonly type: string
+    context: EventContext
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+    constructor(context: EventContext) {
+        this.context = context
+    }
+
+    protected get contextRoute(): string {
+        switch (typeof this.context) {
+            case 'object' :
+                return Object.entries(this.context)
+                    .map(([k, v]) => `${k}/${v}`)
+                    .join('/')
+
+            case null:
+            case undefined:
+                return undefined
+
+            default:
+                return this.context
+        }
+    }
+
+    protected get typeRoute(): string {
+        return this.type
+    }
+
+    get route(): string {
+        return `${this.typeRoute}#${this.contextRoute}`
     }
 
     exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
     }
 
 

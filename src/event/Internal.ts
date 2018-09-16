@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,42 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import type {From} from '../types';
+import Event from "./event";
 
-export type CallEvent = { type: 'call', from: From }
-export type CastEvent = { type: 'cast' }
-export type InfoEvent = { type: 'info' }
-
-export type InternalEvent = { type: 'internal' }
-
-export type StateTimeoutEvent = { type: 'stateTimeout' }
-
-export type TimeoutEvent =
-  { type: 'timeout', name: Object }
-  | StateTimeoutEvent
-
-export type ExternalEvent =
-  CallEvent
-  | CastEvent
-  | InfoEvent
-
-function makeRoute( e, state ) {
-  let x = e.args ?
-    Object.entries( e.args ).map( ( [k, v] ) => `${k}/${v}` ) :
-    undefined
-  const eventArgs = x ? `/${x}` : ''
-
-  const route = typeof(e.context) === 'object' ?
-    Object.entries( e.context ).map( ( [k, v] ) => `${k}/${v}` ) :
-    e.context
-  return `${e.type}${eventArgs}#${route}#${state}`
+export default class Internal extends Event {
+    type = 'internal'
 }
-
-type EventHelpers = {
-  makeRoute: makeRoute
-}
-
-export type Event =
-  ExternalEvent
-  | TimeoutEvent
-  | InternalEvent

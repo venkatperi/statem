@@ -19,25 +19,40 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+import Deferred from './Deferred'
+import uniqid = require('uniqid');
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+export default class Pending {
+    private pending: { [K in string]: Deferred<any> } = {}
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+    create(): string {
+        const defer = new Deferred()
+        const id: string = uniqid()
+        this.pending[id] = defer
+        return id
     }
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
+    get(id: string): Promise<any> {
+        return this.pending[id].promise
+    }
+
+    remove(id: string): void {
+        delete this.pending[id]
+    }
+
+    resolve(id: string, x: any): void {
+        this.pending[id].resolve(x)
+    }
+
+    reject(id: string, x: any): void {
+        this.pending[id].reject(x)
+    }
+
+    cleanup() {
+        let completed = Object.entries(this.pending).filter(([id, defer]) => defer.completed)
+        for (let [id] of completed) {
+            this.remove(id)
         }
     }
-
-
 }
+

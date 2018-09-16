@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,7 +19,17 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export type State = {
-  name: string
-}
+import {From} from "../types";
+import Action from "./action";
 
+export default class Reply extends Action {
+    type = 'reply'
+    from: From
+    reply: any
+
+    constructor(from: From, reply: any) {
+        super()
+        this.from = from
+        this.reply = reply
+    }
+}

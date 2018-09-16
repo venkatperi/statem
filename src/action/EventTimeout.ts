@@ -19,20 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import type {Event} from 'src/event/Event';
-import type {EventContext} from 'src/types';
+import Timeout from "./Timeout";
 
-export type NextEvent = {
-  type: 'nextEvent',
-  event: Event,
-  context: EventContext
-}
-
-
-function nextEventAction( event: Event, context: EventContext ): NextEvent {
-  return {
-    type: 'nextEvent',
-    event,
-    context,
-  }
+export default class EventTimeout extends Timeout {
+    type = 'eventTimeout'
 }

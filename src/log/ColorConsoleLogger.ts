@@ -19,25 +19,19 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+import ConsoleLogger from "./ConsoleLogger";
+import {Level, levels} from "./levels";
+import chalk from "chalk";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+export default class ColorConsoleLogger extends ConsoleLogger {
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+    formatPrefix(level: Level) {
+        let s = levels[level].style
+        let c = chalk.keyword(s.fg)
+        if (s.bg)
+            c = c.bgKeyword(s.bg)
+        return c(super.formatPrefix(level))
     }
-
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
-    }
-
 
 }
+

@@ -19,11 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export type Postpone = { type: 'postpone', postpone: boolean }
+import Event from "./event";
 
-export function postpone( postpone: boolean ): Postpone {
-  return {
-    type: 'postpone',
-    postpone,
-  }
+export default class Cast extends Event {
+    type = 'cast'
 }

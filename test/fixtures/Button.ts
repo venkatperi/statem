@@ -19,25 +19,41 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+import {Action, Result} from "../..";
+import StateMachine from "../../src/StateMachine";
+import {Results} from "../../src/result";
+import {Actions} from "../../src/action";
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+export default class Button extends StateMachine {
+    initialState = 'off'
+
+    data = 0
+
+    handlers = {
+        'cast#flip#off': (event, args, current, data) =>
+            Results.nextState('on', data + 1),
+
+        'cast#flip#on': (event, args, current, data) =>
+            Results.nextState('off', data),
+
+        'call/:from#getCount#:state': (event, args, current, data) =>
+            Results.keepStateAndData(Actions.reply(args.from, data)),
+
+        'call/:from#getState#:state': (event, args, current) =>
+            Results.keepStateAndData(Actions.reply(args.from, current)),
     }
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
+    flip() {
+        this.cast('flip')
     }
 
+    async getCount() {
+        return await this.call('getCount')
+    }
+
+    async getState() {
+        return await this.call('getState')
+    }
 
 }

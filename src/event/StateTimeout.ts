@@ -19,23 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export type Reply = { type: 'reply', from: string, reply: Object }
-export type Hibernate = { type: 'hibernate', hibernate: boolean }
+import Timeout from "./timeout";
 
-export function reply( from: string, reply: Object ): Reply {
-  return {
-    type: 'reply',
-    from,
-    reply,
-  }
+export default class StateTimeout extends Timeout {
+    type = 'stateTimeout'
 }
-
-export function hibernate( hibernate: boolean ): Hibernate {
-  return {
-    type: 'hibernate',
-    hibernate,
-  }
-}
-
-
-

@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,48 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as assert from 'assert';
-import Button from './fixtures/Button'
+import {Data, State} from "../types";
+import {ActionList, Actions} from "../action";
+import NextState from "./NextState";
 
-let button = null
+export default class Stop extends NextState {
+    type = 'stop'
 
-describe( 'button', () => {
-
-  before(() => {
-    button = new Button()
-    button.start()
-  })
-
-  it( 'initial count is 0', async () => {
-    const count = await button.getCount()
-    assert.equal(count, 0)
-  } )
-
-  it( 'initial state is OFF', async () => {
-    const s = await button.getState()
-    assert.equal(s, 'off')
-  } )
-
-  it( 'after flip, state is on', async () => {
-    button.flip()
-    const s = await button.getState()
-    assert.equal(s, 'on')
-  } )
-
-  it( 'count is 1', async () => {
-    const count = await button.getCount()
-    assert.equal(count, 1)
-  } )
-
-  it( 'after flip, state is off', async () => {
-    button.flip()
-    const s = await button.getState()
-    assert.equal(s, 'off')
-  } )
-
-  it( 'count is still 1', async () => {
-    const count = await button.getCount()
-    assert.equal(count, 1)
-  } )
-
-} )
+    constructor(nextState: State, newData?: Data, actions?: ActionList) {
+        super(nextState, newData, actions)
+    }
+}

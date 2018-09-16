@@ -19,25 +19,41 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+import Result from './Result'
+import {Data, State} from "../types";
+import NextState from "./NextState";
+import RepeatState from "./RepeatState";
+import RepeatStateAndData from "./RepeatStateAndData";
+import KeepState from "./KeepState";
+import KeepStateAndData from "./KeepStateAndData";
+import Stop from "./Stop";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+export default Result
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+export type ResultList = Array<Result>
+
+export namespace Results {
+    export function nextState(nextState: State, newData?: Data, ...actions): NextState {
+        return new NextState(nextState, newData, actions)
     }
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
+    export function repeatState(newData?: Data, ...actions) {
+        return new RepeatState(newData, actions)
     }
 
+    export function repeatStateAndData(...actions) {
+        return new RepeatStateAndData(actions)
+    }
 
+    export function keepState(newData?: Data, ...actions) {
+        return new KeepState(newData, actions)
+    }
+
+    export function keepStateAndData(...actions) {
+        return new KeepStateAndData(actions)
+    }
+
+    export function stop(nextState: State, newData?: Data, ...actions) {
+        return new Stop(nextState, newData, actions)
+    }
 }

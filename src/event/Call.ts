@@ -19,25 +19,19 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
+import {EventContext, From} from "../types";
+import Event from "./event";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+export default class Call extends Event {
+    type = 'call'
+    from: From
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
+    constructor(from: From, context: EventContext) {
+        super(context)
+        this.from = from
     }
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
+    get typeRoute(): string {
+        return `${this.type}/${this.from}`
     }
-
-
 }

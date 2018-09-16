@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,24 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {reply} from './src/action/Enter'
+import Timeout from "./Timeout";
 
-import {
-  keepState,
-  keepStateAndData,
-  nextState,
-  repeatState,
-  repeatStateAndData,
-} from './src/result/Result';
-
-import StateMachine from './src/StateMachine'
-
-export {
-  StateMachine,
-  reply,
-  nextState,
-  keepState,
-  keepStateAndData,
-  repeatStateAndData,
-  repeatState,
+export default class StateTimeout extends Timeout {
+    type = 'stateTimeout'
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel index.js src/*.js src/**/*.js -d dist/",
     "flow": "flow",
-    "test": "mocha",
+    "test": "mocha --register ts-node/register test/*.ts",
     "doc": "mkdir -p doc && documentation build ./src/Service.js -f md -o doc/api.md",
     "clean": "rm -rf dist",
     "preparew": "npm run clean && npm run build"
@@ -14,7 +14,10 @@
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
   "devDependencies": {
-    "flow-bin": "^0.80.0",
+    "@types/node": "^10.9.4",
+    "@types/npmlog": "^4.1.1",
+    "@types/route-parser": "^0.1.1",
+    "@types/uniqid": "^4.1.2",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
@@ -24,16 +27,25 @@
     "d3": "^3.5.5",
     "dagre-d3": "^0.4.18",
     "documentation": "^8.1.2",
+    "flow-bin": "^0.80.0",
     "jsdom": "^12.0.0",
+    "mocha": "^5.2.0",
+    "mocha-typescript": "^1.1.17",
     "sigma": "^1.2.1",
     "sinon": "^6.1.5",
     "sinon-chai": "^3.2.0",
-    "sinon-chai-in-order": "^0.1.0"
+    "sinon-chai-in-order": "^0.1.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.0.3"
   },
   "dependencies": {
+    "chalk": "^2.4.1",
     "flow-to-typescript": "^1.0.0",
+    "lodash": "^4.17.11",
+    "npmlog": "^4.1.2",
     "roarr": "^2.11.0",
     "route-parser": "0.0.5",
-    "ulid": "^2.3.0"
+    "ulid": "^2.3.0",
+    "uniqid": "^5.0.3"
   }
 }

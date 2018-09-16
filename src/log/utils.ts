@@ -19,25 +19,25 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
-import Action, {ActionList} from "../action";
 
-export default class Result implements Executable {
-    readonly type: string;
-    newData?: Data;
-    actions?: Array<Action>;
+/**
+ * Returns a logging prefix with the given tag and level
+ *
+ * @param tag
+ * @return {string}
+ * @param prefixLen
+ * @param fill
+ */
+export function prefix(tag: string, prefixLen = 12, fill?: string): string {
+    return tag.length > prefixLen ?
+        `..${tag.substr(tag.length - prefixLen + 2)}` :
+        tag.padStart(prefixLen, fill);
+}
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
-        this.actions = actions
-    }
+export function pz2(num) {
+    return num.toString().padStart(2, '0')
+}
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
-    }
-
-
+export function pz3(num) {
+    return num.toString().padStart(3, '0')
 }

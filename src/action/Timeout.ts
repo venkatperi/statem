@@ -1,4 +1,3 @@
-// @flow
 //  Copyright 2018, Venkat Peri.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,38 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export default class Deferred {
-  /**
-   *  A method to resolve the associated Promise with the value passed.
-   * If the promise is already settled it does nothing.
-   *
-   * @param {any} value : This value is used to resolve the promise
-   * If the value is a Promise then the associated promise assumes the state
-   * of Promise passed as value.
-   */
-  resolve: ( any ) => void
+import Action from "./action";
 
-  /**
-   *  A method to reject the associated Promise with the value passed.
-   * If the promise is already settled it does nothing.
-   *
-   * @param {any} reason: The reason for the rejection of the Promise.
-   * Generally its an Error object. If however a Promise is passed, then the Promise
-   * itself will be the reason for rejection no matter the state of the Promise.
-   */
-  reject: ( any ) => void
+export default class Timeout extends Action {
+    time: number
 
-  /**
-   * A newly created Promise object.
-   * Initially in pending state.
-   */
-  promise: Promise
-
-  constructor() {
-    let that = this
-    this.promise = new Promise( function ( resolve, reject ) {
-      that.resolve = resolve;
-      that.reject = reject;
-    } )
-  }
+    constructor(time: number) {
+        super()
+        this.time = time
+    }
 }
