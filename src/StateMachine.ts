@@ -22,20 +22,26 @@
 
 import Route = require("route-parser");
 import EventEmitter = require('events');
+import ntimer = require('ntimer');
+import NTimer = ntimer.Timer;
 import {Data, EventContext, State} from "./types";
 import Result from "./result/result";
 import Pending from "./util/Pending";
 import Event, {Events} from "./event";
 
-import logger from './log'
+import Logger from './Logger'
 import Action from "./action/Action";
 import Reply from "./action/Reply";
-import NextEvent from "./action/NextEvent";
 import {ResultBuilder} from "./result/builder/ResultBuilder";
 import NextState from "./result/NextState";
 import NextStateWithData from "./result/NextStateWithData";
+import StateTimeout from "./action/StateTimeout";
+import EventTimeout from "./action/EventTimeout";
+import GenericTimeout from "./action/GenericTimeout";
+import Timeout from "./action/Timeout";
+import KeepStateAndData from "./result/KeepStateAndData";
 
-const Log = logger('StateMachine')
+const Log = Logger('StateMachine')
 
 type HandlerOpts = {
     event: Event,
@@ -57,6 +63,11 @@ export type RouteHandler = {
 
 export type RouteHandlers = Array<RouteHandler>
 
+export type Timer = 'state' | 'event' | 'generic'
+export type Timers = {
+    [k in keyof Timer]?: NTimer
+}
+
 export default class StateMachine extends EventEmitter {
     initialState: State
     handlers: Handlers
@@ -65,6 +76,9 @@ export default class StateMachine extends EventEmitter {
     protected _state: State
     protected _data: Data
     protected _pending = new Pending()
+    private timers: Timers = {}
+    private events: Array<Event> = []
+    private processingEvent = false
 
     /**
      * Gets the current {Data} of this {StateMachine}
@@ -80,7 +94,9 @@ export default class StateMachine extends EventEmitter {
      */
     set data(value: Data) {
         Log.i('setData', value)
+        let old = this._data
         this._data = value;
+        this.emit('data', value, old)
     }
 
     /**
@@ -96,9 +112,15 @@ export default class StateMachine extends EventEmitter {
      * @param s
      */
     set state(s: State) {
-        Log.i('setState', s)
+        Log.i('state', s)
+        let old = this._state
         this._state = s
+        this.emit('state', s, old)
+        if (old !== s) {
+            this.emit('stateChanged', s, old)
+        }
     }
+
 
     /**
      * Starts the state machine
@@ -107,8 +129,14 @@ export default class StateMachine extends EventEmitter {
      */
     start(options: object) {
         Log.i('start')
+        let that = this
         this._initHandlers()
         this.state = this.initialState
+        this.on('stateTimeout', (a: Timeout) => that.addEvent(Events.stateTimeout(a.time, {time: a.time}), true))
+            .on('eventTimeout', (a: Timeout) => that.addEvent(Events.eventTimeout(a.time, {time: a.time}), true))
+            .on('genericTimeout', (a: Timeout) => that.addEvent(Events.genericTimeout(a.time, {time: a.time}), true))
+            .on('stateChanged', (s, old) => that.addEvent(Events.enter({old: old || ''}), true))
+
         this.emit('init', options)
     }
 
@@ -134,7 +162,7 @@ export default class StateMachine extends EventEmitter {
         const from = this._pending.create()
         Log.i(`call`, request, from)
 
-        this.handleEvent(Events.call(from, request))
+        this.addEvent(Events.call(from, request))
         return await this._pending.get(from)
     }
 
@@ -149,7 +177,7 @@ export default class StateMachine extends EventEmitter {
     cast(request: EventContext): void {
         Log.i(`cast`, request)
         try {
-            this.handleEvent(Events.cast(request))
+            this.addEvent(Events.cast(request))
         } catch (e) {
             // ignore error for cast
             Log.e(e)
@@ -174,7 +202,9 @@ export default class StateMachine extends EventEmitter {
      * @param data
      */
     handleDefaultEvent({event, args, current, data}: HandlerOpts): Result {
-        throw new Error(`no handler for ${event}: ${args}`)
+        Log.i('defaultHandler', event, args)
+        return new KeepStateAndData()
+        // throw new Error(`no handler for ${event}: ${args}`)
     }
 
     protected _initHandlers() {
@@ -214,20 +244,48 @@ export default class StateMachine extends EventEmitter {
      * @return {Actions}
      */
     protected handleEvent(event: Event) {
+        this.processingEvent = true
+        this.emit('event', event)
         const h = this.getRouteHandler(event)
         const args = {
             event,
-            args: h!.result || {},
+            args: h ? h.result : {},
             current: this.state,
             data: this.data
         }
 
-        Log.i('handleEvent', h.result)
+        Log.i('handleEvent', args)
 
         let res = h ? h.routeHandler.handler(args) : this.handleDefaultEvent(args);
         this.handleResult(res)
+        this.processingEvent = false
+        this.processEvents()
     }
 
+    /**
+     * Add event to the queue
+     * @param event
+     * @param front if true, adds to the front of the queue instead of the end
+     */
+    addEvent(event: Event, front = false) {
+        Log.i('addEvent', event, front)
+        if (front)
+            this.events.unshift(event)
+        else
+            this.events.push(event)
+        this.processEvents()
+    }
+
+    processEvents() {
+        setImmediate(this._processEvents.bind(this))
+    }
+
+    _processEvents() {
+        if (this.events.length === 0 || this.processingEvent)
+            return
+        Log.i('processEvents', this.events)
+        this.handleEvent(this.events.shift())
+    }
 
     /**
      *
@@ -247,7 +305,7 @@ export default class StateMachine extends EventEmitter {
             this.data = res.newData
         }
 
-        res.actions!.forEach(this.handleAction.bind(this))
+        res.actions.forEach(this.handleAction.bind(this))
     }
 
     /**
@@ -261,8 +319,30 @@ export default class StateMachine extends EventEmitter {
             this._pending.resolve(action.from, action.reply)
         }
 
-        if (action instanceof NextEvent) {
+        if (action instanceof StateTimeout) {
+            this.manageTimer('state', action)
         }
+        else if (action instanceof EventTimeout) {
+            this.manageTimer('event', action)
+        }
+        else if (action instanceof GenericTimeout) {
+            this.manageTimer('generic', action)
+        }
+    }
+
+    manageTimer(type: string, action: Timeout) {
+        Log.i('manageTimer', type, action)
+        let that = this
+
+        if (this.timers[type])
+            this.timers[type].cancel()
+
+        this.timers[type] = ntimer.auto(type, action.time)
+            .on('timer', () => {
+                Log.i(`timeout for ${type}`)
+                delete that.timers[type]
+                that.emit(`${type}Timeout`, action);
+            })
     }
 
 }

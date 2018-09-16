@@ -21,6 +21,9 @@
 
 import Timeout from "./Timeout";
 
+/**
+ * Generates a {GenericTimeoutEvent} after the specified timeout interval
+ */
 export default class GenericTimeout extends Timeout {
     type = 'genericTimeout'
 }

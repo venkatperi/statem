@@ -19,39 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as npmlog from 'npmlog'
-import {Logger} from "./Logger";
-import {levels} from "./levels";
+import logger from 'wtlog'
 
+export default tag => logger(tag)
 
-Object.entries(levels).forEach(([k, v]) => npmlog.addLevel(k, v.level, v.style, v.disp))
-
-// @ts-ignore
-npmlog.level = global._logLevel || 'info';
-// @ts-ignore
-npmlog.prefixStyle = {fg: 'grey'}
-
-
-export class NpmLogger extends Logger {
-    tag: string
-
-    debug(msg, ...args) {
-        npmlog['debug'](this.tag, ...args)
-    }
-
-    error(msg, ...args) {
-        npmlog.error(this.tag, msg, ...args)
-    }
-
-    info(msg, ...args) {
-        npmlog['info'](this.tag, msg, ...args)
-    }
-
-    warn(msg, ...args) {
-        npmlog['warn'](this.tag, msg, ...args)
-    }
-
-    verbose(msg, ...args) {
-        npmlog['verbose'](this.tag, msg, ...args)
-    }
-}

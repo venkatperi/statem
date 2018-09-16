@@ -3,6 +3,10 @@ import {Data, State} from "../types";
 import {ActionList} from "../action";
 import {Stateful} from "./Stateful";
 
+/**
+ * Represents a state transition, maybe to the same state.
+ * Updates the state machine's data
+ */
 export default class NextStateWithData extends ResultWithData implements Stateful {
     type = "nextState";
     nextState: State;

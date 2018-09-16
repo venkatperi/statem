@@ -21,6 +21,10 @@
 
 import Timeout from "./Timeout";
 
+/**
+ * Generates a {StateTimeoutEvent} unless the state changes within the specified
+ * timeout interval
+ */
 export default class StateTimeout extends Timeout {
     type = 'stateTimeout'
 }

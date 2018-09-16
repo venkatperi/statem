@@ -25,7 +25,7 @@ import Event from "./event";
 export default class Timeout extends Event {
     time: number
 
-    constructor(time: number, context: EventContext) {
+    constructor(time: number, context?: EventContext) {
         super(context)
         this.time = time
     }

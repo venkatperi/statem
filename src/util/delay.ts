@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import ColorConsoleLogger from "./ColorConsoleLogger";
-
-export default (tag) => new ColorConsoleLogger(tag)
+export default function delay(time: number): Promise<void> {
+    return new Promise(r => setTimeout(r, time))
+}
 

@@ -25,6 +25,10 @@ import Call from "./Call";
 import Cast from "./Cast";
 import Internal from "./Internal";
 import Info from "./Info";
+import StateTimeoutEvent from "./StateTimeoutEvent";
+import EventTimeoutEvent from "./EventTimeoutEvent";
+import GenericTimeoutEvent from "./GenericTimeoutEvent";
+import Enter from "./Enter";
 
 export default Event
 
@@ -35,15 +39,31 @@ export namespace Events {
         return new Call(from, context)
     }
 
-    export function cast(context: EventContext): Cast {
+    export function cast(context?: EventContext): Cast {
         return new Cast(context)
     }
 
-    export function internal(context: EventContext): Internal {
+    export function internal(context?: EventContext): Internal {
         return new Internal(context)
     }
 
-    export function info(context: EventContext): Info {
+    export function info(context?: EventContext): Info {
         return new Info(context)
+    }
+
+    export function enter(context?: EventContext): Enter {
+        return new Enter(context)
+    }
+
+    export function stateTimeout(time, context?: EventContext): StateTimeoutEvent {
+        return new StateTimeoutEvent(time, context)
+    }
+
+    export function eventTimeout(time, context?: EventContext): EventTimeoutEvent {
+        return new EventTimeoutEvent(time, context)
+    }
+
+    export function genericTimeout(time, context?: EventContext): GenericTimeoutEvent {
+        return new GenericTimeoutEvent(time, context)
     }
 }

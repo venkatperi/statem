@@ -19,25 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import Timeout from "./Timeout";
 
-/**
- * Returns a logging prefix with the given tag and level
- *
- * @param tag
- * @return {string}
- * @param prefixLen
- * @param fill
- */
-export function prefix(tag: string, prefixLen = 12, fill?: string): string {
-    return tag.length > prefixLen ?
-        `..${tag.substr(tag.length - prefixLen + 2)}` :
-        tag.padStart(prefixLen, fill);
+export default class EventTimeoutEvent extends Timeout {
+    type = 'eventTimeout'
 }
 
-export function pz2(num) {
-    return num.toString().padStart(2, '0')
-}
-
-export function pz3(num) {
-    return num.toString().padStart(3, '0')
-}

@@ -65,6 +65,6 @@ export function next(state: State): NextStateBuilder {
     return new NextStateBuilder(state)
 }
 
-export function stay(): KeepStateBuilder {
+export function keep(): KeepStateBuilder {
     return new KeepStateBuilder()
 }

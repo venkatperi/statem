@@ -21,8 +21,15 @@
 
 import Action from "./action";
 
+/**
+ * Postpones the current event and retries it when the state changes
+ */
 export default class Postpone extends Action {
     type = 'postpone'
+
+    /**
+     * If true, postpone the event
+     */
     postpone: boolean
 
     constructor(postpone: boolean) {

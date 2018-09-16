@@ -26,7 +26,7 @@ export default class Call extends Event {
     type = 'call'
     from: From
 
-    constructor(from: From, context: EventContext) {
+    constructor(from: From, context?: EventContext) {
         super(context)
         this.from = from
     }

@@ -19,19 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import ConsoleLogger from "./ConsoleLogger";
-import {Level, levels} from "./levels";
-import chalk from "chalk";
+import Timeout from "./timeout";
 
-export default class ColorConsoleLogger extends ConsoleLogger {
-
-    formatPrefix(level: Level) {
-        let s = levels[level].style
-        let c = chalk.keyword(s.fg)
-        if (s.bg)
-            c = c.bgKeyword(s.bg)
-        return c(super.formatPrefix(level))
-    }
-
+export default class StateTimeoutEvent extends Timeout {
+    type = 'stateTimeout'
 }
 

@@ -22,6 +22,7 @@
 import 'mocha'
 import Button from './fixtures/Button'
 import * as assert from "assert";
+import delay from "../src/util/delay";
 
 let button = null
 
@@ -62,6 +63,16 @@ describe('button', () => {
     it('count is still 1', async () => {
         const count = await button.getCount()
         assert.equal(count, 1)
+    })
+
+    it('flip to on and wait for timeout', async () => {
+        button.flip()
+        let s = await button.getState()
+        assert.equal(s, 'on')
+        await delay(500)
+
+        s = await button.getState()
+        assert.equal(s, 'off')
     })
 
 })

@@ -19,8 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Timeout from "./timeout";
+import Event from "./event";
 
-export default class StateTimeout extends Timeout {
-    type = 'stateTimeout'
+export default class Enter extends Event {
+    type = 'enter'
 }

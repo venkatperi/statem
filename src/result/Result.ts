@@ -22,14 +22,44 @@
 import Action, {ActionList} from "../action";
 import {Data} from "../types";
 
+/**
+ * This class encapsulates the result of a call to a state handler
+ */
 export default class Result {
+
+
+    /**
+     * The result type
+     */
     readonly type: string;
+
+    /**
+     * Optional state machine data
+     */
+    private _newData?: Data;
+
     hasData = false
-    newData?: Data;
+
+    /**
+     * The list of actions for this state
+     */
     actions: Array<Action>;
 
+    /**
+     * Creates a new result
+     * @param actions the actions
+     */
     constructor(...actions: ActionList) {
         this.actions = actions
+    }
+
+    get newData(): Data {
+        return this._newData;
+    }
+
+    set newData(value: Data) {
+        this.hasData = true
+        this._newData = value;
     }
 
 }

@@ -19,23 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export type Level = 'debug'
-    | 'verbose'
-    | 'info'
-    | 'warn'
-    | 'error'
+import Timeout from "./Timeout";
 
-export const levels: {
-    [k in Level]: {
-        level: number,
-        style: { fg: string, bg?: string },
-        disp: string
-    }
-} = {
-    debug: {level: 100, style: {fg: 'blue'}, disp: 'D'},
-    verbose: {level: 1000, style: {fg: 'grey'}, disp: 'V'},
-    info: {level: 2000, style: {fg: 'green'}, disp: 'I'},
-    warn: {level: 4000, style: {fg: 'black', bg: 'yellow'}, disp: 'W"'},
-    error: {level: 5000, style: {fg: 'red', bg: 'black'}, disp: 'E'},
+export default class GenericTimeoutEvent extends Timeout {
+    type = 'genericTimeout'
 }
-

@@ -21,6 +21,10 @@
 
 import Timeout from "./Timeout";
 
+/**
+ * Generates a {EventTimeoutEvent} unless some other event is delivered within
+ * the specified timeout interval
+ */
 export default class EventTimeout extends Timeout {
     type = 'eventTimeout'
 }

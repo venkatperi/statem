@@ -21,8 +21,7 @@
 
 
 import StateMachine from "../../src/StateMachine";
-import {next, stay} from "../../src/result";
-import {Actions} from "../../src/action";
+import {keep, next} from "../../src/result";
 
 export default class Button extends StateMachine {
     initialState = 'off'
@@ -33,14 +32,23 @@ export default class Button extends StateMachine {
         'cast#flip#off': ({data}) =>
             next('on').data(data + 1),
 
+        'enter#old/:old#on': () =>
+            keep().stateTimeout(200),
+
         'cast#flip#on': () =>
             next('off'),
 
         'call/:from#getCount#:state': ({args, data}) =>
-            stay().do(Actions.reply(args.from, data)),
+            keep().reply(args.from, data),
 
         'call/:from#getState#:state': ({args, current}) =>
-            stay().do(Actions.reply(args.from, current)),
+            keep().reply(args.from, current),
+
+        'stateTimeout##:state': () => {
+            console.log('STATE TIMEOUT')
+            return next('off')
+        }
+
     }
 
     flip() {

@@ -24,22 +24,22 @@ import {EventContext} from "../types";
 
 export default class Event implements Executable {
     readonly type: string
-    context: EventContext
+    context?: EventContext
 
-    constructor(context: EventContext) {
+    constructor(context?: EventContext) {
         this.context = context
     }
 
     protected get contextRoute(): string {
-        switch (typeof this.context) {
-            case 'object' :
-                return Object.entries(this.context)
-                    .map(([k, v]) => `${k}/${v}`)
-                    .join('/')
+        if (typeof this.context === 'object')
+            return Object.entries(this.context)
+                .map(([k, v]) => `${k}/${v}`)
+                .join('/')
 
-            case null:
+        switch (this.context) {
             case undefined:
-                return undefined
+            case null:
+                return ''
 
             default:
                 return this.context

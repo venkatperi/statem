@@ -23,10 +23,12 @@ import Action from './src/action/action'
 import Event from './src/event/event'
 import Result from './src/result/result'
 import StateMachine from './src/StateMachine'
+import {keep, next} from './src/result';
 
 export {
-  StateMachine,
-  Event,
-  Result,
-  Action,
+    StateMachine,
+    Event,
+    Result,
+    Action,
+    keep, next
 }

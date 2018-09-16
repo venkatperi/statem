@@ -1,19 +1,17 @@
 {
-  "name": "fsm",
+  "name": "statem",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel index.js src/*.js src/**/*.js -d dist/",
-    "flow": "flow",
-    "test": "mocha --register ts-node/register test/*.ts",
-    "doc": "mkdir -p doc && documentation build ./src/Service.js -f md -o doc/api.md",
+    "test": "mocha",
     "clean": "rm -rf dist",
     "preparew": "npm run clean && npm run build"
   },
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
   "devDependencies": {
+    "@types/mocha": "^5.2.5",
     "@types/node": "^10.9.4",
     "@types/npmlog": "^4.1.1",
     "@types/route-parser": "^0.1.1",
@@ -43,9 +41,11 @@
     "flow-to-typescript": "^1.0.0",
     "lodash": "^4.17.11",
     "npmlog": "^4.1.2",
+    "ntimer": "^0.5.3",
     "roarr": "^2.11.0",
     "route-parser": "0.0.5",
     "ulid": "^2.3.0",
-    "uniqid": "^5.0.3"
+    "uniqid": "^5.0.3",
+    "wtlog": "^1.0.0"
   }
 }

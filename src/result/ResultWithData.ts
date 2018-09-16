@@ -24,8 +24,6 @@ import {ActionList} from "../action";
 import Result from "./Result";
 
 export default class ResultWithData extends Result {
-    hasData = true
-
     constructor(newData: Data, ...actions: ActionList) {
         super(...actions)
         this.newData = newData

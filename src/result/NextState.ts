@@ -24,6 +24,9 @@ import {ActionList} from "../action";
 import Result from "./Result";
 import {Stateful} from "./Stateful";
 
+/**
+ * Represents a state transition, maybe to the same state. Keeps the current data
+ */
 export default class NextState extends Result implements Stateful {
     type = "nextState"
     nextState: State
