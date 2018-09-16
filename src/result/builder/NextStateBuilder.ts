@@ -19,8 +19,27 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from "./result";
+import {Data, State} from "../../types";
+import {ResultBuilder} from "./ResultBuilder";
+import {ActionList} from "../../action";
+import Result from "../Result";
+import NextState from "../NextState";
+import NextStateWithData from "../NextStateWithData";
 
-export default class KeepStateAndData extends Result {
-    type = 'keepStateAndData'
+export default class NextStateBuilder extends ResultBuilder {
+    _nextState: State
+    _newData: Data
+    _actions: ActionList = []
+
+    constructor(state: State) {
+        super()
+        this._nextState = state
+    }
+
+    get result(): Result {
+        if (this._hasNewData)
+            return new NextStateWithData(this._nextState, this._newData, ...this._actions)
+
+        return new NextState(this._nextState, ...this._actions)
+    }
 }

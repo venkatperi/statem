@@ -19,8 +19,16 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from "./result";
+import Result from "../Result";
+import KeepState from "../KeepState";
+import KeepStateAndData from "../KeepStateAndData";
+import {ResultBuilder} from "./ResultBuilder";
 
-export default class KeepStateAndData extends Result {
-    type = 'keepStateAndData'
+export default class KeepStateBuilder extends ResultBuilder {
+    get result(): Result {
+        if (this._hasNewData)
+            return new KeepState(this._newData, ...this._actions)
+
+        return new KeepStateAndData(...this._actions)
+    }
 }

@@ -19,14 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from "./Result";
-import {Data} from "../types";
-import {ActionList} from "../action";
+import ResultWithData from "./ResultWithData";
 
-export default class RepeatState extends Result {
+export default class RepeatState extends ResultWithData {
     type = 'repeatState'
-
-    constructor(newData?: Data, actions?: ActionList) {
-        super(newData, actions)
-    }
 }

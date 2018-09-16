@@ -19,8 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from "./result";
+import {State} from "../types";
 
-export default class KeepStateAndData extends Result {
-    type = 'keepStateAndData'
+export interface Stateful {
+    nextState: State;
 }

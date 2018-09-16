@@ -28,13 +28,23 @@ import Pending from "./util/Pending";
 import Event, {Events} from "./event";
 
 import logger from './log'
-import NextState from "./result/NextState";
 import Action from "./action/Action";
 import Reply from "./action/Reply";
+import NextEvent from "./action/NextEvent";
+import {ResultBuilder} from "./result/builder/ResultBuilder";
+import NextState from "./result/NextState";
+import NextStateWithData from "./result/NextStateWithData";
 
-const LOG = logger('StateMachine')
+const Log = logger('StateMachine')
 
-export type Handler = (event: Event, args: Object, state: State, data: Data) => Result
+type HandlerOpts = {
+    event: Event,
+    args: Object,
+    current: State,
+    data: Data
+}
+
+export type Handler = (HandlerOpts) => Result | ResultBuilder
 
 export type Handlers = {
     [K in string]: Handler
@@ -69,7 +79,7 @@ export default class StateMachine extends EventEmitter {
      * @param value the {Data}
      */
     set data(value: Data) {
-        LOG.i('setData', value)
+        Log.i('setData', value)
         this._data = value;
     }
 
@@ -86,7 +96,7 @@ export default class StateMachine extends EventEmitter {
      * @param s
      */
     set state(s: State) {
-        LOG.i('setState', s)
+        Log.i('setState', s)
         this._state = s
     }
 
@@ -96,7 +106,7 @@ export default class StateMachine extends EventEmitter {
      * @param options
      */
     start(options: object) {
-        LOG.i('start')
+        Log.i('start')
         this._initHandlers()
         this.state = this.initialState
         this.emit('init', options)
@@ -109,7 +119,7 @@ export default class StateMachine extends EventEmitter {
      * @param timeout
      */
     stop(reason?: string, timeout?: number) {
-        LOG.i(`stop: ${reason}`)
+        Log.i(`stop: ${reason}`)
         this.emit('terminate', reason)
     }
 
@@ -122,10 +132,9 @@ export default class StateMachine extends EventEmitter {
      */
     async call(request: EventContext, timeout: number = Infinity): Promise<any> {
         const from = this._pending.create()
-        LOG.i(`call`, request, from)
+        Log.i(`call`, request, from)
 
-        const result = this._handleEvent(Events.call(from, request))
-        this.handleResult(result)
+        this.handleEvent(Events.call(from, request))
         return await this._pending.get(from)
     }
 
@@ -136,16 +145,14 @@ export default class StateMachine extends EventEmitter {
      *
      * The appropriate state function will be called to handle the request.
      * @param request
-     * @return {Promise<void>}
      */
-    async cast(request: EventContext): Promise<void> {
-        LOG.i(`cast`, request)
+    cast(request: EventContext): void {
+        Log.i(`cast`, request)
         try {
-            const result = this._handleEvent(Events.cast(request))
-            this.handleResult(result)
+            this.handleEvent(Events.cast(request))
         } catch (e) {
-            console.log(e)
             // ignore error for cast
+            Log.e(e)
         }
     }
 
@@ -155,7 +162,7 @@ export default class StateMachine extends EventEmitter {
      * @param handler
      */
     addHandler(route: string, handler: Handler) {
-        LOG.v(`addHandler`, route, handler)
+        Log.v(`addHandler`, route, handler)
         this._routeHandlers.push({route: new Route(route), handler})
     }
 
@@ -163,10 +170,10 @@ export default class StateMachine extends EventEmitter {
      *
      * @param event
      * @param args
-     * @param state
+     * @param current
      * @param data
      */
-    handleEvent(event: Event, args: Object, state: State, data: Data): Result {
+    handleDefaultEvent({event, args, current, data}: HandlerOpts): Result {
         throw new Error(`no handler for ${event}: ${args}`)
     }
 
@@ -186,23 +193,13 @@ export default class StateMachine extends EventEmitter {
     }
 
     /**
-     * Handle the given event. Matches the event's route to the
+     *
      * @param e
-     * @return {Actions}
-     * @private
+     * @return {{routeHandler: RouteHandler; result: {[p: string]: string}}}
      */
-    protected _handleEvent(e: Event): Result {
-        let h = this.getRouteHandler(e)
-        if (h) {
-            LOG.i('_handleEvent', h.result)
-            return h.routeHandler.handler(e, h.result, this.state, this.data)
-        }
-        return this.handleEvent(e, {}, this.state, this.data)
-    }
-
     protected getRouteHandler(e: Event) {
         const route = this.makeRoute(e)
-        LOG.i('getRouteHandler', route)
+        Log.i('getRouteHandler', route)
         for (const routeHandler of this._routeHandlers) {
             let result = routeHandler.route.match(route)
             if (result) {
@@ -211,23 +208,60 @@ export default class StateMachine extends EventEmitter {
         }
     }
 
-    handleResult(res: Result) {
-        LOG.i(`handleResult`, res)
+    /**
+     * Handle the given event. Matches the event's route to the
+     * @param event
+     * @return {Actions}
+     */
+    protected handleEvent(event: Event) {
+        const h = this.getRouteHandler(event)
+        const args = {
+            event,
+            args: h!.result || {},
+            current: this.state,
+            data: this.data
+        }
 
-        if (res instanceof NextState) {
+        Log.i('handleEvent', h.result)
+
+        let res = h ? h.routeHandler.handler(args) : this.handleDefaultEvent(args);
+        this.handleResult(res)
+    }
+
+
+    /**
+     *
+     * @param res
+     */
+    protected handleResult(res: Result | ResultBuilder) {
+        if (res instanceof ResultBuilder)
+            res = res.result
+
+        Log.i(`handleResult`, res)
+
+        if (res instanceof NextState || res instanceof NextStateWithData) {
             this.state = res.nextState
         }
 
-        if (res.newData != null)
+        if (res.hasData) {
             this.data = res.newData
+        }
 
         res.actions!.forEach(this.handleAction.bind(this))
     }
 
-    handleAction(action: Action) {
-        LOG.i(`handleAction`, action)
+    /**
+     *
+     * @param action
+     */
+    protected handleAction(action: Action) {
+        Log.i(`handleAction`, action)
+
         if (action instanceof Reply) {
             this._pending.resolve(action.from, action.reply)
+        }
+
+        if (action instanceof NextEvent) {
         }
     }
 

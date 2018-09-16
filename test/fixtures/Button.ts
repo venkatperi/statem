@@ -20,9 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import {Action, Result} from "../..";
 import StateMachine from "../../src/StateMachine";
-import {Results} from "../../src/result";
+import {next, stay} from "../../src/result";
 import {Actions} from "../../src/action";
 
 export default class Button extends StateMachine {
@@ -31,17 +30,17 @@ export default class Button extends StateMachine {
     data = 0
 
     handlers = {
-        'cast#flip#off': (event, args, current, data) =>
-            Results.nextState('on', data + 1),
+        'cast#flip#off': ({data}) =>
+            next('on').data(data + 1),
 
-        'cast#flip#on': (event, args, current, data) =>
-            Results.nextState('off', data),
+        'cast#flip#on': () =>
+            next('off'),
 
-        'call/:from#getCount#:state': (event, args, current, data) =>
-            Results.keepStateAndData(Actions.reply(args.from, data)),
+        'call/:from#getCount#:state': ({args, data}) =>
+            stay().do(Actions.reply(args.from, data)),
 
-        'call/:from#getState#:state': (event, args, current) =>
-            Results.keepStateAndData(Actions.reply(args.from, current)),
+        'call/:from#getState#:state': ({args, current}) =>
+            stay().do(Actions.reply(args.from, current)),
     }
 
     flip() {

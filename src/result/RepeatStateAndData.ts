@@ -20,12 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Result from "./Result";
-import {ActionList} from "../action";
 
 export default class RepeatStateAndData extends Result {
     type = 'repeatStateAndData'
 
-    constructor(actions?: ActionList) {
-        super(null, actions)
-    }
 }

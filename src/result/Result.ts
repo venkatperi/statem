@@ -19,25 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {Data} from "../types";
 import Action, {ActionList} from "../action";
+import {Data} from "../types";
 
-export default class Result implements Executable {
+export default class Result {
     readonly type: string;
+    hasData = false
     newData?: Data;
-    actions?: Array<Action>;
+    actions: Array<Action>;
 
-    constructor(newData?: Data, actions?: ActionList) {
-        this.newData = newData
+    constructor(...actions: ActionList) {
         this.actions = actions
     }
 
-    exec(opts: object): void {
-        for (let a of (this.actions || [])) {
-            a.exec(opts)
-        }
-    }
-
-
 }
+

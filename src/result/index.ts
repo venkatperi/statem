@@ -21,12 +21,14 @@
 
 import Result from './Result'
 import {Data, State} from "../types";
-import NextState from "./NextState";
+import NextState from "./NextStateWithData";
 import RepeatState from "./RepeatState";
 import RepeatStateAndData from "./RepeatStateAndData";
 import KeepState from "./KeepState";
 import KeepStateAndData from "./KeepStateAndData";
 import Stop from "./Stop";
+import NextStateBuilder from "./builder/NextStateBuilder";
+import KeepStateBuilder from "./builder/KeepStateBuilder";
 
 export default Result
 
@@ -34,26 +36,35 @@ export type ResultList = Array<Result>
 
 export namespace Results {
     export function nextState(nextState: State, newData?: Data, ...actions): NextState {
-        return new NextState(nextState, newData, actions)
+        return new NextState(nextState, newData, ...actions)
     }
 
     export function repeatState(newData?: Data, ...actions) {
-        return new RepeatState(newData, actions)
+        return new RepeatState(newData, ...actions)
     }
 
     export function repeatStateAndData(...actions) {
-        return new RepeatStateAndData(actions)
+        return new RepeatStateAndData(...actions)
     }
 
     export function keepState(newData?: Data, ...actions) {
-        return new KeepState(newData, actions)
+        return new KeepState(newData, ...actions)
     }
 
     export function keepStateAndData(...actions) {
-        return new KeepStateAndData(actions)
+        return new KeepStateAndData(...actions)
     }
 
     export function stop(nextState: State, newData?: Data, ...actions) {
-        return new Stop(nextState, newData, actions)
+        return new Stop(nextState, newData, ...actions)
     }
+}
+
+
+export function next(state: State): NextStateBuilder {
+    return new NextStateBuilder(state)
+}
+
+export function stay(): KeepStateBuilder {
+    return new KeepStateBuilder()
 }

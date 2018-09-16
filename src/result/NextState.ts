@@ -19,19 +19,19 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Data, State} from "../types";
+import {State} from "../types";
 import {ActionList} from "../action";
 import Result from "./Result";
+import {Stateful} from "./Stateful";
 
-export default class NextState extends Result {
-    type = "nextState";
-    nextState: State;
+export default class NextState extends Result implements Stateful {
+    type = "nextState"
+    nextState: State
 
-    constructor(nextState: State, newData?: Data, actions?: ActionList) {
-        super(newData, actions);
+    constructor(nextState: State, ...actions: ActionList) {
+        super(...actions);
         this.nextState = nextState;
     }
-
 }
 
 

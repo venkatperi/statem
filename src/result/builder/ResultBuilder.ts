@@ -19,8 +19,27 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from "./result";
+import Result from "../Result";
+import {ActionList} from "../../action";
+import {Data} from "../../types";
 
-export default class KeepStateAndData extends Result {
-    type = 'keepStateAndData'
+
+export abstract class ResultBuilder {
+    _hasNewData = false
+    _newData?: Data
+    _actions: ActionList = []
+
+    abstract get result(): Result
+
+    data(newData: Data): ResultBuilder {
+        this._hasNewData = true
+        this._newData = newData
+        return this
+    }
+
+    do(...actions): ResultBuilder {
+        this._actions = actions
+        return this
+    }
 }
+
