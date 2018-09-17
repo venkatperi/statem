@@ -19,19 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {EventContext, From} from "../types";
 import Event from "./event";
 
-export default class Call extends Event {
-    type = 'call'
-    from: From
-
-    constructor(from: From, context?: EventContext) {
-        super(context)
-        this.from = from
-    }
-
-    get typeRoute(): string {
-        return `${this.type}/${this.from}`
-    }
+export default class EnterEvent extends Event {
+    type = 'enter'
 }

@@ -22,63 +22,62 @@
 
 import Route = require("route-parser");
 import EventEmitter = require('events');
-import ntimer = require('ntimer');
-import NTimer = ntimer.Timer;
-import {Data, EventContext, State} from "./types";
-import Result from "./result/result";
+import {Data, EventContext, Handler, HandlerOpts, Handlers, RouteHandlers, State} from "./types";
+import Result, {KeepStateAndData, NextState, NextStateWithData} from "./result";
 import Pending from "./util/Pending";
-import Event, {Events} from "./event";
-
+import Event, {
+    CallEvent,
+    CastEvent,
+    EnterEvent,
+    EventTimeoutEvent,
+    GenericTimeoutEvent,
+    StateTimeoutEvent
+} from "./event";
+import Action, {Reply, Timeout} from "./action";
+import ResultBuilder from "./result/builder";
 import Logger from './Logger'
-import Action from "./action/Action";
-import Reply from "./action/Reply";
-import {ResultBuilder} from "./result/builder/ResultBuilder";
-import NextState from "./result/NextState";
-import NextStateWithData from "./result/NextStateWithData";
-import StateTimeout from "./action/StateTimeout";
-import EventTimeout from "./action/EventTimeout";
-import GenericTimeout from "./action/GenericTimeout";
-import Timeout from "./action/Timeout";
-import KeepStateAndData from "./result/KeepStateAndData";
+import Timers from "./util/Timers";
+import {keepState} from "../index";
 
 const Log = Logger('StateMachine')
 
-type HandlerOpts = {
-    event: Event,
-    args: Object,
-    current: State,
-    data: Data
-}
-
-export type Handler = (HandlerOpts) => Result | ResultBuilder
-
-export type Handlers = {
-    [K in string]: Handler
-}
-
-export type RouteHandler = {
-    route: Route,
-    handler: Handler
-}
-
-export type RouteHandlers = Array<RouteHandler>
-
-export type Timer = 'state' | 'event' | 'generic'
-export type Timers = {
-    [k in keyof Timer]?: NTimer
+type SMOptions = {
+    initialState?: State,
+    handlers?: Handlers,
+    data?: Data,
 }
 
 export default class StateMachine extends EventEmitter {
     initialState: State
     handlers: Handlers
 
+    defaultHandlers = {
+        // Get the current state
+        'call/:from#getState#:state': ({args, current}) =>
+            keepState().reply(args.from, current),
+
+        // Get the current data
+        'call/:from#getData#:state': ({args, data}) =>
+            keepState().reply(args.from, data),
+    }
+
     protected _routeHandlers: RouteHandlers = []
     protected _state: State
     protected _data: Data
     protected _pending = new Pending()
-    private timers: Timers = {}
+    private timers = new Timers()
     private events: Array<Event> = []
     private processingEvent = false
+
+    constructor({initialState, handlers, data}: SMOptions = {}) {
+        super()
+        if (initialState)
+            this.initialState = initialState
+        if (handlers)
+            this.handlers = handlers
+        if (data)
+            this.data = data
+    }
 
     /**
      * Gets the current {Data} of this {StateMachine}
@@ -126,18 +125,24 @@ export default class StateMachine extends EventEmitter {
      * Starts the state machine
      *
      * @param options
+     * @return {this}
      */
-    start(options: object) {
+    start(options: object = {}) {
         Log.i('start')
         let that = this
+        this.on('stateTimeout', (a: Timeout) =>
+            that.addEvent(new StateTimeoutEvent(a.time, {time: a.time}), true))
+            .on('eventTimeout', (a: Timeout) =>
+                that.addEvent(new EventTimeoutEvent(a.time, {time: a.time}), true))
+            .on('genericTimeout', (a: Timeout) =>
+                that.addEvent(new GenericTimeoutEvent(a.time, {time: a.time}), true))
+            .on('state', (s, old) =>
+                that.addEvent(new EnterEvent({old: old || this.initialState}), true))
+
         this._initHandlers()
         this.state = this.initialState
-        this.on('stateTimeout', (a: Timeout) => that.addEvent(Events.stateTimeout(a.time, {time: a.time}), true))
-            .on('eventTimeout', (a: Timeout) => that.addEvent(Events.eventTimeout(a.time, {time: a.time}), true))
-            .on('genericTimeout', (a: Timeout) => that.addEvent(Events.genericTimeout(a.time, {time: a.time}), true))
-            .on('stateChanged', (s, old) => that.addEvent(Events.enter({old: old || ''}), true))
-
         this.emit('init', options)
+        return this
     }
 
     /**
@@ -162,7 +167,7 @@ export default class StateMachine extends EventEmitter {
         const from = this._pending.create()
         Log.i(`call`, request, from)
 
-        this.addEvent(Events.call(from, request))
+        this.addEvent(new CallEvent(from, request))
         return await this._pending.get(from)
     }
 
@@ -177,7 +182,7 @@ export default class StateMachine extends EventEmitter {
     cast(request: EventContext): void {
         Log.i(`cast`, request)
         try {
-            this.addEvent(Events.cast(request))
+            this.addEvent(new CastEvent(request))
         } catch (e) {
             // ignore error for cast
             Log.e(e)
@@ -188,10 +193,12 @@ export default class StateMachine extends EventEmitter {
      *
      * @param route
      * @param handler
+     * @return {this}
      */
-    addHandler(route: string, handler: Handler) {
+    addHandler(route: string, handler: Handler): StateMachine {
         Log.v(`addHandler`, route, handler)
         this._routeHandlers.push({route: new Route(route), handler})
+        return this
     }
 
     /**
@@ -208,7 +215,8 @@ export default class StateMachine extends EventEmitter {
     }
 
     protected _initHandlers() {
-        for (let [route, handler] of Object.entries(this.handlers)) {
+        let h = Object.assign({}, this.handlers, this.defaultHandlers)
+        for (let [route, handler] of Object.entries(h)) {
             this.addHandler(route, handler)
         }
     }
@@ -241,7 +249,6 @@ export default class StateMachine extends EventEmitter {
     /**
      * Handle the given event. Matches the event's route to the
      * @param event
-     * @return {Actions}
      */
     protected handleEvent(event: Event) {
         this.processingEvent = true
@@ -256,7 +263,10 @@ export default class StateMachine extends EventEmitter {
 
         Log.i('handleEvent', args)
 
-        let res = h ? h.routeHandler.handler(args) : this.handleDefaultEvent(args);
+        let res = h ?
+            h.routeHandler.handler(args) :
+            this.handleDefaultEvent(args);
+
         this.handleResult(res)
         this.processingEvent = false
         this.processEvents()
@@ -318,31 +328,28 @@ export default class StateMachine extends EventEmitter {
         if (action instanceof Reply) {
             this._pending.resolve(action.from, action.reply)
         }
-
-        if (action instanceof StateTimeout) {
-            this.manageTimer('state', action)
-        }
-        else if (action instanceof EventTimeout) {
-            this.manageTimer('event', action)
-        }
-        else if (action instanceof GenericTimeout) {
-            this.manageTimer('generic', action)
+        else if (action instanceof Timeout) {
+            this.manageTimer(action)
         }
     }
 
-    manageTimer(type: string, action: Timeout) {
-        Log.i('manageTimer', type, action)
+    manageTimer(action: Timeout) {
+        Log.i('manageTimer', action.type, action)
         let that = this
 
-        if (this.timers[type])
-            this.timers[type].cancel()
+        this.timers.cancel(action.type)
 
-        this.timers[type] = ntimer.auto(type, action.time)
-            .on('timer', () => {
-                Log.i(`timeout for ${type}`)
-                delete that.timers[type]
-                that.emit(`${type}Timeout`, action);
-            })
+        this.timers.create(action.time, action.type, action)
+        this.timers.on(action.type, () =>
+            that.emit(action.type, action))
+    }
+
+    async getState(): Promise<State> {
+        return await this.call('getState')
+    }
+
+    async getData() {
+        return await this.call('getData')
     }
 
 }

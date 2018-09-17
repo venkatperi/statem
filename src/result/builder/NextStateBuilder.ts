@@ -20,11 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import {Data, State} from "../../types";
-import {ResultBuilder} from "./ResultBuilder";
+import ResultBuilder from "./ResultBuilder";
 import {ActionList} from "../../action";
-import Result from "../Result";
-import NextState from "../NextState";
-import NextStateWithData from "../NextStateWithData";
+import Result, {NextState, NextStateWithData} from "..";
 
 export default class NextStateBuilder extends ResultBuilder {
     _nextState: State

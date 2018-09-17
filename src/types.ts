@@ -20,6 +20,14 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import Event from "./event";
+import Result from "./result/Result";
+import ResultBuilder from "./result/builder";
+import Route = require("route-parser");
+
+import ntimer = require('ntimer');
+import NTimer = ntimer.Timer;
+
 export type State = string
 
 export type Data = any;
@@ -27,6 +35,32 @@ export type Data = any;
 export type EventContext = any;
 
 export type From = string;
+
+
+export type HandlerOpts = {
+    event: Event,
+    args: Object,
+    current: State,
+    data: Data
+}
+
+export type Handler = (HandlerOpts) => Result | ResultBuilder
+
+export type Handlers = {
+    [K in string]: Handler
+}
+
+export type RouteHandler = {
+    route: Route,
+    handler: Handler
+}
+
+export type RouteHandlers = Array<RouteHandler>
+
+export type Timer = 'state' | 'event' | 'generic'
+export type Timers = {
+    [k in keyof Timer]?: NTimer
+}
 
 
 

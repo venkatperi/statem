@@ -19,8 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import {EventContext} from "../types";
 import Event from "./event";
 
-export default class Enter extends Event {
-    type = 'enter'
+export default class TimeoutEvent extends Event {
+    time: number
+
+    constructor(time: number, context?: EventContext) {
+        super(context)
+        this.time = time
+    }
 }

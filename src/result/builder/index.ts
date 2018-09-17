@@ -19,23 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from './Event'
-import StateTimeoutEvent from "./StateTimeoutEvent";
-import EventTimeoutEvent from "./EventTimeoutEvent";
-import GenericTimeoutEvent from "./GenericTimeoutEvent";
-import CallEvent from './CallEvent';
-import CastEvent from './CastEvent';
-import InternalEvent from './InternalEvent';
-import EnterEvent from './EnterEvent';
+import ResultBuilder from './ResultBuilder'
+import {Data, State} from "../../types";
+import NextStateBuilder from "./NextStateBuilder";
+import KeepStateBuilder from "./KeepStateBuilder";
 
-export default Event
+export default ResultBuilder
+export {KeepStateBuilder, NextStateBuilder}
 
-export {
-    CallEvent,
-    CastEvent,
-    InternalEvent,
-    EnterEvent,
-    StateTimeoutEvent,
-    EventTimeoutEvent,
-    GenericTimeoutEvent,
+export function nextState(state: State): NextStateBuilder {
+    return new NextStateBuilder(state)
+}
+
+export function keepState(): KeepStateBuilder {
+    return new KeepStateBuilder()
 }

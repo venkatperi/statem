@@ -19,23 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from './Event'
-import StateTimeoutEvent from "./StateTimeoutEvent";
-import EventTimeoutEvent from "./EventTimeoutEvent";
-import GenericTimeoutEvent from "./GenericTimeoutEvent";
-import CallEvent from './CallEvent';
-import CastEvent from './CastEvent';
-import InternalEvent from './InternalEvent';
-import EnterEvent from './EnterEvent';
+import Event from "./event";
 
-export default Event
-
-export {
-    CallEvent,
-    CastEvent,
-    InternalEvent,
-    EnterEvent,
-    StateTimeoutEvent,
-    EventTimeoutEvent,
-    GenericTimeoutEvent,
+export default class CastEvent extends Event {
+    type = 'cast'
 }

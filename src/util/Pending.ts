@@ -20,14 +20,14 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Deferred from './Deferred'
-import uniqid = require('uniqid');
+import {uniqId} from "./uniqId";
 
 export default class Pending {
     private pending: { [K in string]: Deferred<any> } = {}
 
     create(): string {
         const defer = new Deferred()
-        const id: string = uniqid()
+        const id: string = uniqId()
         this.pending[id] = defer
         return id
     }

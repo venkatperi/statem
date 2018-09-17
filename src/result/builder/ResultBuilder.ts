@@ -20,18 +20,14 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Result from "../Result";
-import {ActionList} from "../../action";
+import {ActionList, EventTimeout, GenericTimeout, Reply, StateTimeout} from "../../action";
 import {Data, From} from "../../types";
-import StateTimeout from "../../action/StateTimeout";
-import EventTimeout from "../../action/EventTimeout";
-import GenericTimeout from "../../action/GenericTimeout";
-import Reply from "../../action/Reply";
 
 
 /**
  * Fluent builder for {Result}s
  */
-export abstract class ResultBuilder {
+export default abstract class ResultBuilder {
     _hasNewData = false
     _newData?: Data
     _actions: ActionList = []
@@ -63,16 +59,33 @@ export abstract class ResultBuilder {
         return this
     }
 
+    /**
+     *
+     * @param time
+     * @return {ResultBuilder}
+     */
     stateTimeout(time: number): ResultBuilder {
         return this.action(new StateTimeout(time))
     }
 
+    /**
+     *
+     * @param time
+     * @return {ResultBuilder}
+     */
     eventTimeout(time: number): ResultBuilder {
         return this.action(new EventTimeout(time))
     }
 
-    timeout(time: number): ResultBuilder {
-        return this.action(new GenericTimeout(time))
+    /**
+     * Adds a {GenericTimeout} action with the given timeout
+     * and optional name
+     * @param time - the timeout in ms
+     * @param name - optional name
+     * @return {ResultBuilder} this
+     */
+    timeout(time: number, name?: string): ResultBuilder {
+        return this.action(new GenericTimeout(time, name))
     }
 
     /**

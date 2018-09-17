@@ -19,18 +19,20 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Action from './src/action/action'
-import Event from './src/event/event'
-import Result from './src/result/result'
+import Action from './src/action'
+import Event from './src/event'
+import Result from './src/result'
 import StateMachine from './src/StateMachine'
-import {keep, next} from './src/result';
 import {State} from './src/types';
+import {keepState, nextState} from './src/result/builder';
+
+export default StateMachine
 
 export {
-    StateMachine,
     Event,
     Result,
     Action,
     State,
-    keep, next
+    keepState,
+    nextState
 }

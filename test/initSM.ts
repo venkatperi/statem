@@ -19,23 +19,38 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from './Event'
-import StateTimeoutEvent from "./StateTimeoutEvent";
-import EventTimeoutEvent from "./EventTimeoutEvent";
-import GenericTimeoutEvent from "./GenericTimeoutEvent";
-import CallEvent from './CallEvent';
-import CastEvent from './CastEvent';
-import InternalEvent from './InternalEvent';
-import EnterEvent from './EnterEvent';
+import 'mocha'
+import {expect} from 'chai'
+import StateMachine, {keepState, State} from "..";
+import Deferred from "../src/util/Deferred";
 
-export default Event
 
-export {
-    CallEvent,
-    CastEvent,
-    InternalEvent,
-    EnterEvent,
-    StateTimeoutEvent,
-    EventTimeoutEvent,
-    GenericTimeoutEvent,
-}
+let sm
+describe('init SM', () => {
+
+    let enterInitial = new Deferred<State>()
+
+    beforeEach(() => {
+        sm = new StateMachine({
+            initialState: "ONE",
+            data: 123,
+            handlers: {
+                'enter#old/:old#ONE': ({args}) => {
+                    enterInitial.resolve(args.old)
+                    return keepState()
+                }
+            }
+        }).start()
+    })
+
+    it("has initial state", async () =>
+        expect(await sm.getData()).to.eq(123))
+
+    it("has initial data", async () =>
+        expect(await sm.getData()).to.eq(123))
+
+    it("fires ENTER event for initial state", async () => {
+        expect(await enterInitial.promise).to.eq("ONE")
+    })
+})
+

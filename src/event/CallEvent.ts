@@ -19,14 +19,19 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {EventContext} from "../types";
+import {EventContext, From} from "../types";
 import Event from "./event";
 
-export default class Timeout extends Event {
-    time: number
+export default class CallEvent extends Event {
+    type = 'call'
+    from: From
 
-    constructor(time: number, context?: EventContext) {
+    constructor(from: From, context?: EventContext) {
         super(context)
-        this.time = time
+        this.from = from
+    }
+
+    get typeRoute(): string {
+        return `${this.type}/${this.from}`
     }
 }

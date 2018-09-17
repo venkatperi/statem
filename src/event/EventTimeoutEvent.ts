@@ -19,9 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Timeout from "./Timeout";
 
-export default class EventTimeoutEvent extends Timeout {
+import TimeoutEvent from "./TimeoutEvent";
+
+export default class EventTimeoutEvent extends TimeoutEvent {
     type = 'eventTimeout'
 }
 

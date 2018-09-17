@@ -21,8 +21,8 @@
 
 import 'mocha'
 import {expect} from 'chai'
-import HotelSafe from "./fixtures/HotelSafe";
 import delay from "../src/util/delay";
+import HotelSafe from "../examples/HotelSafe/HotelSafe";
 
 let safe
 let code = [1, 2, 3, 4]
@@ -31,6 +31,7 @@ describe('hotel safe', () => {
 
     beforeEach(() => {
         safe = new HotelSafe()
+        safe.codeTimeout = safe.msgDisplay = 200 // for test sanity
         safe.start()
     })
 

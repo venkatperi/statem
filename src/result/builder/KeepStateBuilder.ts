@@ -20,9 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Result from "../Result";
-import KeepState from "../KeepState";
-import KeepStateAndData from "../KeepStateAndData";
-import {ResultBuilder} from "./ResultBuilder";
+import ResultBuilder from "./ResultBuilder";
+import {KeepState, KeepStateAndData} from "../";
 
 export default class KeepStateBuilder extends ResultBuilder {
     get result(): Result {

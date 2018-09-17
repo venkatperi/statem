@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha",
     "clean": "rm -rf dist",
+    "build": "tsc",
     "preparew": "npm run clean && npm run build"
   },
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
@@ -46,6 +47,7 @@
     "path-parser": "^4.2.0",
     "roarr": "^2.11.0",
     "route-parser": "0.0.5",
+    "stablepriorityqueue": "^0.1.0",
     "ulid": "^2.3.0",
     "uniqid": "^5.0.3",
     "wtlog": "^1.0.0"

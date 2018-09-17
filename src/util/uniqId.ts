@@ -19,8 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
+import uniqid = require('uniqid');
 
-export default class Cast extends Event {
-    type = 'cast'
+export function uniqId(): string {
+    return uniqid()
 }
+

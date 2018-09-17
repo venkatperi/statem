@@ -19,8 +19,16 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
-
-export default class Info extends Event {
-    type = 'info'
+/**
+ * For a fixed sized array, adds item to the end of
+ * an array and drops elements from the front, if needed
+ *
+ * @param item {T}- to be added to the end of the array
+ * @param arr {T[]} - the array
+ * @param size {number} - Max size of the array.
+ * @return {T[]} The updated array
+ */
+export default function pushFixed<T>(item: T, arr: Array<T>, size: number): Array<T> {
+    return arr.slice(Math.max(0, arr.length - size + 1)).concat(item)
 }
+

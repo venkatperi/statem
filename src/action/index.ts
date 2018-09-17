@@ -21,8 +21,6 @@
 
 
 import Action from './Action'
-import Event from "../event/Event";
-import {EventContext, From} from "../types";
 import NextEvent from "./NextEvent";
 import Reply from "./Reply";
 import Postpone from "./Postpone";
@@ -30,37 +28,19 @@ import Hibernate from "./Hibernate";
 import StateTimeout from "./StateTimeout";
 import EventTimeout from "./EventTimeout";
 import GenericTimeout from "./GenericTimeout";
+import Timeout from './Timeout';
 
 export default Action
 
 export type ActionList = Array<Action>
 
-export namespace Actions {
-    export function nextEvent(event: Event, context: EventContext) {
-        return new NextEvent(event, context)
-    }
-
-    export function reply(from: From, reply: any): Reply {
-        return new Reply(from, reply)
-    }
-
-    export function postpone(postpone: boolean): Postpone {
-        return new Postpone(postpone)
-    }
-
-    export function hibernate(hibernate: boolean): Hibernate {
-        return new Hibernate(hibernate)
-    }
-
-    export function stateTimeout(time: number): StateTimeout {
-        return new StateTimeout(time)
-    }
-
-    export function eventTimeout(time: number): EventTimeout {
-        return new EventTimeout(time)
-    }
-
-    export function genericTimeout(time: number): GenericTimeout {
-        return new GenericTimeout(time)
-    }
+export {
+    Timeout,
+    NextEvent,
+    Reply,
+    Postpone,
+    Hibernate,
+    StateTimeout,
+    EventTimeout,
+    GenericTimeout
 }

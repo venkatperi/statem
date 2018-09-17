@@ -26,4 +26,10 @@ import Timeout from "./Timeout";
  */
 export default class GenericTimeout extends Timeout {
     type = 'genericTimeout'
+    name?: string
+
+    constructor(time: number, name?: string) {
+        super(time)
+        this.name = name
+    }
 }

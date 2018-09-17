@@ -20,13 +20,12 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import {keep, next, State, StateMachine} from "../.."
+import StateMachine, {keepState, nextState, State} from "../.."
 import arrayEqual from "../../src/util/arrayEqual";
+import pushFixed from "../../src/util/pushFixed";
 
-let clear = {code: [], input: []}
-
-function pushFixed<T>(item: T, arr: Array<T>, size: number): Array<T> {
-    return arr.slice(Math.max(0, arr.length - size + 1)).concat(item)
+function clear() {
+    return Object.assign({}, {code: [], input: []})
 }
 
 export default class HotelSafe extends StateMachine {
@@ -34,42 +33,42 @@ export default class HotelSafe extends StateMachine {
 
     codeSize = 4
 
-    codeTimeout = 200
+    codeTimeout = 5000
 
-    msgDisplay = 200
-
-    data = {code: [], input: []}
+    msgDisplay = 5000
 
     handlers = {
 
         // Clear data when safe enters OPEN
         'enter#old/:old#open': () =>
-            keep(Object.assign({}, clear)),
+            keepState().data(clear()),
 
         // User pressed RESET -- go to LOCKING
         'cast#reset#open': () =>
-            next('locking'),
+            nextState('locking'),
 
         // Timeout from LOCKING if inactive
         'enter#old/:old#locking': () =>
-            keep().eventTimeout(this.codeTimeout),
+            keepState().eventTimeout(this.codeTimeout),
 
         // Track the last {codeSize} digits.
         'cast#button/:digit#locking': ({args, data}) => {
-            data.code = pushFixed(Number(args.digit), data.code, this.codeSize)
-            return keep(data)
+            data.code = pushFixed(
+                Number(args.digit),
+                data.code, this.codeSize)
+            return keepState().data(data).eventTimeout(this.codeTimeout)
         },
 
         // Back to OPEN if inactive timer fires
         'eventTimeout#time/:time#locking': () =>
-            next('open'),
+            nextState('open'),
 
         // User pressed LOCK. CLose safe if code is long enough
         // else ignore
         'cast#lock#locking': ({data}) =>
             data.code.length === this.codeSize ?
-                next('closed') :
-                keep(),
+                nextState('closed') :
+                keepState(),
 
         // User entered digit(s).
         // Keep state if code is not long enough
@@ -79,23 +78,23 @@ export default class HotelSafe extends StateMachine {
             data.input.push(Number(args.digit))
 
             return data.input.length < data.code.length ?
-                keep(data) :
+                keepState().data(data) :
                 arrayEqual(data.code, data.input) ?
-                    next('open') :
-                    next('incorrect').timeout(this.msgDisplay)
+                    nextState('open') :
+                    nextState('incorrect').timeout(this.msgDisplay)
         },
 
         // go back to CLOSED after showing message
         'genericTimeout#time/:time#incorrect': () =>
-            next('closed'),
+            nextState('closed'),
 
         // Get the current state
         'call/:from#getState#:state': ({args, current}) =>
-            keep().reply(args.from, current),
+            keepState().reply(args.from, current),
 
         // Get the current data
         'call/:from#getData#:state': ({args, data}) =>
-            keep().reply(args.from, data),
+            keepState().reply(args.from, data),
     }
 
     reset() {
