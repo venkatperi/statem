@@ -65,6 +65,8 @@ export function next(state: State): NextStateBuilder {
     return new NextStateBuilder(state)
 }
 
-export function keep(): KeepStateBuilder {
-    return new KeepStateBuilder()
+export function keep(data?: Data): KeepStateBuilder {
+    let b = new KeepStateBuilder()
+    return data ? b.data(data) : b;
 }
+

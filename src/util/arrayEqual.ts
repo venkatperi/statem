@@ -19,18 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Action from './src/action/action'
-import Event from './src/event/event'
-import Result from './src/result/result'
-import StateMachine from './src/StateMachine'
-import {keep, next} from './src/result';
-import {State} from './src/types';
+export default function arrayEqual(arr1, arr2): boolean {
+    const l1 = arr1.length
+    if (l1 !== arr2.length) return false
 
-export {
-    StateMachine,
-    Event,
-    Result,
-    Action,
-    State,
-    keep, next
+    for (let i = 0; i < l1; i++)
+        if (arr1[i] !== arr2[i])
+            return false
+    return true
 }
+

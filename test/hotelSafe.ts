@@ -56,6 +56,8 @@ describe('hotel safe', () => {
             beforeEach(() => {
                 for (let digit of code)
                     safe.button(digit)
+                for (let digit of code)
+                    safe.button(digit)
             })
 
             it('stores new code', async () => {

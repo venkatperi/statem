@@ -19,27 +19,51 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as assert from 'assert';
-import Route from 'route-parser'
+import 'mocha'
+import RouteParser from "../src/route/RouteParser";
+import {assert, expect} from 'chai'
 
-describe( 'route', () => {
-  it( 'state as arg', () => {
-    const route = new Route( 'cast#someArg#:state' )
-    const args = route.match( 'cast#someArg#test' )
-    assert.equal( args.state, 'test' )
-  } )
+let parser
 
-  it( 'event as arg', () => {
-    const route = new Route( ':event#someArg#:state' )
-    const args = route.match( 'cast#someArg#test' )
-    assert.equal( args.event, 'cast' )
-    assert.equal( args.state, 'test' )
-  } )
+let simple = {
+    route: 'event#context#state',
+    test: 'event#context#state',
+}
 
-  it( 'event params', () => {
-    const route = new Route( 'call/:from#someArg#state' )
-    const args = route.match( 'call/abc#someArg#state' )
-    assert.equal( args.from, 'abc' )
-  } )
+let splats = {
+    route: '*#*#*',
+    test: 'event#context#state',
+}
 
-} )
+describe('route parser', () => {
+
+    describe('simple test', () => {
+        beforeEach(() => {
+            parser = new RouteParser(simple.route)
+        })
+
+        it('creates parsers', () => {
+            assert.isNotNull(parser.parsers.event)
+            assert.isNotNull(parser.parsers.context)
+            assert.isNotNull(parser.parsers.state)
+        })
+
+        it('parses route', () => {
+            let res = parser.parse(simple.test)
+            assert(res.matches)
+        })
+    })
+
+    describe('all splats', () => {
+        beforeEach(() => {
+            parser = new RouteParser(splats.route)
+        })
+
+        it('parses', () => {
+            let res = parser.parse(splats.test)
+            console.log(res)
+            assert(res.matches)
+        })
+    })
+})
+

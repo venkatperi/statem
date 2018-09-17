@@ -19,18 +19,45 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Action from './src/action/action'
-import Event from './src/event/event'
-import Result from './src/result/result'
-import StateMachine from './src/StateMachine'
-import {keep, next} from './src/result';
-import {State} from './src/types';
+import Route = require("route-parser");
+import RouteResult from "./RouteResult";
+import {Parsers} from "./types";
+import Logger from "../Logger";
 
-export {
-    StateMachine,
-    Event,
-    Result,
-    Action,
-    State,
-    keep, next
+
+const Log = Logger('RouteParser')
+
+export default class RouteParser {
+    route: string
+    parsers: Parsers
+
+    constructor(route: string) {
+        this.route = route
+        this.init()
+    }
+
+    /**
+     * Creates the underlying parsers
+     */
+    protected init() {
+        let [event, context, state] = this.route.split('#')
+        Log.i('init', event, context, state)
+        this.parsers = {
+            event: new Route(`/${event}`),
+            context: new Route(`/${context}`),
+            state: new Route(`/${state}`)
+        }
+        Log.i('init', this.parsers)
+    }
+
+    parse(route: string): RouteResult {
+        let [event, context, state] = route.split('#')
+        Log.i('parse', event, context, state)
+        return new RouteResult({
+            event: this.parsers.event.match(`${event}`),
+            context: this.parsers.context.match(`/${context}`),
+            state: this.parsers.state.match(`/${state}`),
+        })
+    }
 }
+
