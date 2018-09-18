@@ -21,26 +21,24 @@
 
 
 import Action from './Action'
-import NextEvent from "./NextEvent";
-import Reply from "./Reply";
-import Postpone from "./Postpone";
-import Hibernate from "./Hibernate";
-import StateTimeout from "./StateTimeout";
-import EventTimeout from "./EventTimeout";
-import GenericTimeout from "./GenericTimeout";
-import Timeout from './Timeout';
+import NextEventAction from "./NextEventAction";
+import ReplyAction from "./ReplyAction";
+import PostponeAction from "./PostponeAction";
+import StateTimeoutAction from "./StateTimeoutAction";
+import EventTimeoutAction from "./EventTimeoutAction";
+import GenericTimeoutAction from "./GenericTimeoutAction";
+import TimeoutAction from './TimeoutAction';
 
 export default Action
 
 export type ActionList = Array<Action>
 
 export {
-    Timeout,
-    NextEvent,
-    Reply,
-    Postpone,
-    Hibernate,
-    StateTimeout,
-    EventTimeout,
-    GenericTimeout
+    TimeoutAction,
+    NextEventAction,
+    ReplyAction,
+    PostponeAction,
+    StateTimeoutAction,
+    EventTimeoutAction,
+    GenericTimeoutAction,
 }

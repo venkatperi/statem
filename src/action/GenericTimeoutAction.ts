@@ -19,51 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import 'mocha'
-import RouteParser from "../src/route/RouteParser";
-import {assert, expect} from 'chai'
 
-let parser
+import TimeoutAction from "./TimeoutAction";
 
-let simple = {
-    route: 'event#context#state',
-    test: 'event#context#state',
+/**
+ * Generates a {GenericTimeoutEvent} after the specified timeout interval
+ */
+export default class GenericTimeoutAction extends TimeoutAction {
+    type = 'genericTimeout'
+    name?: string
+
+    constructor(time: number, name?: string) {
+        super(time)
+        this.name = name
+    }
 }
-
-let splats = {
-    route: '*#*#*',
-    test: 'event#context#state',
-}
-
-describe('route parser', () => {
-
-    describe('simple test', () => {
-        beforeEach(() => {
-            parser = new RouteParser(simple.route)
-        })
-
-        it('creates parsers', () => {
-            assert.isNotNull(parser.parsers.event)
-            assert.isNotNull(parser.parsers.context)
-            assert.isNotNull(parser.parsers.state)
-        })
-
-        it('parses route', () => {
-            let res = parser.parse(simple.test)
-            assert(res.matches)
-        })
-    })
-
-    describe('all splats', () => {
-        beforeEach(() => {
-            parser = new RouteParser(splats.route)
-        })
-
-        it('parses', () => {
-            let res = parser.parse(splats.test)
-            console.log(res)
-            assert(res.matches)
-        })
-    })
-})
-

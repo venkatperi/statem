@@ -25,12 +25,11 @@ import Result from "./result/Result";
 import ResultBuilder from "./result/builder";
 import Route = require("route-parser");
 
-import ntimer = require('ntimer');
-import NTimer = ntimer.Timer;
-
 export type State = string
 
 export type Data = any;
+
+export type EventType = string
 
 export type EventContext = any;
 
@@ -41,26 +40,26 @@ export type HandlerOpts = {
     event: Event,
     args: Object,
     current: State,
-    data: Data
+    data: Data,
+    route: string
 }
 
 export type Handler = (HandlerOpts) => Result | ResultBuilder
 
-export type Handlers = {
-    [K in string]: Handler
-}
+export type Handlers = [string, Handler][]
 
 export type RouteHandler = {
     route: Route,
     handler: Handler
 }
 
-export type RouteHandlers = Array<RouteHandler>
+export type RouteHandlers = RouteHandler[]
 
-export type Timer = 'state' | 'event' | 'generic'
-export type Timers = {
-    [k in keyof Timer]?: NTimer
+export enum Priority {
+    Highest = 1000,
+    High = 2000,
+    Normal = 3000,
+    Low = 4000,
+    Lowest = 5000,
 }
-
-
 

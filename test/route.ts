@@ -20,7 +20,6 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import 'mocha'
-import * as assert from 'assert';
 // import Route = require("route-parser");
 import Route from 'path-parser'
 

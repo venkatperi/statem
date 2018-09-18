@@ -27,6 +27,7 @@ import CallEvent from './CallEvent';
 import CastEvent from './CastEvent';
 import InternalEvent from './InternalEvent';
 import EnterEvent from './EnterEvent';
+import NextEventAction from "../action/NextEventAction";
 
 export default Event
 
@@ -38,4 +39,11 @@ export {
     StateTimeoutEvent,
     EventTimeoutEvent,
     GenericTimeoutEvent,
+}
+
+export function makeNextEvent(action: NextEventAction) {
+    switch (action.eventType) {
+        case 'internal':
+            return new InternalEvent(action.context)
+    }
 }

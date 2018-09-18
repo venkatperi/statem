@@ -20,8 +20,10 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Result from "../Result";
-import {ActionList, EventTimeout, GenericTimeout, Reply, StateTimeout} from "../../action";
-import {Data, From} from "../../types";
+import {ActionList, EventTimeoutAction, GenericTimeoutAction, ReplyAction, StateTimeoutAction} from "../../action";
+import {Data, EventContext, EventType, From} from "../../types";
+import PostponeAction from "../../action/PostponeAction";
+import NextEventAction from "../../action/NextEventAction";
 
 
 /**
@@ -42,7 +44,7 @@ export default abstract class ResultBuilder {
      * @param newData {Data}
      * @return {this} for chaining
      */
-    data(newData: Data): ResultBuilder {
+    withData(newData: Data): ResultBuilder {
         this._hasNewData = true
         this._newData = newData
         return this
@@ -65,7 +67,7 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder}
      */
     stateTimeout(time: number): ResultBuilder {
-        return this.action(new StateTimeout(time))
+        return this.action(new StateTimeoutAction(time))
     }
 
     /**
@@ -74,7 +76,7 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder}
      */
     eventTimeout(time: number): ResultBuilder {
-        return this.action(new EventTimeout(time))
+        return this.action(new EventTimeoutAction(time))
     }
 
     /**
@@ -85,7 +87,7 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder} this
      */
     timeout(time: number, name?: string): ResultBuilder {
-        return this.action(new GenericTimeout(time, name))
+        return this.action(new GenericTimeoutAction(time, name))
     }
 
     /**
@@ -96,7 +98,37 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder}
      */
     reply(from: From, msg: any): ResultBuilder {
-        return this.action(new Reply(from, msg))
+        return this.action(new ReplyAction(from, msg))
     }
+
+    /**
+     * Adds a postpone action
+     *
+     * @return {ResultBuilder}
+     */
+    postpone(): ResultBuilder {
+        return this.action(new PostponeAction())
+    }
+
+    /**
+     * Adds a next-event action
+     *
+     * @param type the next event's type
+     * @param context optional event context
+     * @return {ResultBuilder}
+     */
+    nextEvent(type: EventType, context?: EventContext): ResultBuilder {
+        return this.action(new NextEventAction(type, context))
+    }
+
+    /**
+     *
+     * @param context
+     * @return {ResultBuilder}
+     */
+    internalEvent(context?: EventContext): ResultBuilder {
+        return this.action(new NextEventAction('internal', context))
+    }
+
 }
 

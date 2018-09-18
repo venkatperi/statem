@@ -41,7 +41,7 @@ export default class HotelSafe extends StateMachine {
 
         // Clear data when safe enters OPEN
         'enter#old/:old#open': () =>
-            keepState().data(clear()),
+            keepState().withData(clear()),
 
         // User pressed RESET -- go to LOCKING
         'cast#reset#open': () =>
@@ -56,7 +56,7 @@ export default class HotelSafe extends StateMachine {
             data.code = pushFixed(
                 Number(args.digit),
                 data.code, this.codeSize)
-            return keepState().data(data).eventTimeout(this.codeTimeout)
+            return keepState().withData(data).eventTimeout(this.codeTimeout)
         },
 
         // Back to OPEN if inactive timer fires
@@ -78,7 +78,7 @@ export default class HotelSafe extends StateMachine {
             data.input.push(Number(args.digit))
 
             return data.input.length < data.code.length ?
-                keepState().data(data) :
+                keepState().withData(data) :
                 arrayEqual(data.code, data.input) ?
                     nextState('open') :
                     nextState('incorrect').timeout(this.msgDisplay)

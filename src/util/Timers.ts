@@ -21,35 +21,32 @@
 import ntimer = require('ntimer');
 import NTimer = ntimer.Timer;
 import {uniqId} from "./uniqId";
-import {EventEmitter} from "events";
 
 
-export default class Timers extends EventEmitter {
-    timers: {
-        [k in string]: NTimer
-    } = {}
+export default class Timers {
+    timers: { [k in string]: NTimer } = {}
 
     /**
      * Creates a auto starting timer with the given timeout and returns its
      * name. If a name is not supplied, a random name is generated.
      *
+     * If a timer with the name exists, it is cancelled and a
+     * new timer is installed
+     *
      * @param timeout, in milliseconds
      * @param name, optional, the timer's name
      *
-     * @return {string} the timer's name
+     * @return {string} timer
+     * @param opts
      */
-    create(timeout: number, name?: string, opts?): string {
-        name = uniqId() || name
-        if (this.timers[name])
-            throw new Error(`Timer with name exists: ${name}`)
-        let t = this.timers[name] = new NTimer({name, timeout, auto: true})
+    create(timeout: number, name?: string, opts?): NTimer {
         let that = this
-        t.on('timer', () => {
-            that.cancel(name)
-            that.emit(name, opts)
-        })
-        this.emit('addTimer', name)
-        return name
+
+        name = name || uniqId()
+        this.cancel(name)
+        let t = this.timers[name] = new NTimer({name, timeout, auto: true})
+        t.on('timer', () => that.cancel(name))
+        return t
     }
 
     /**
@@ -66,7 +63,6 @@ export default class Timers extends EventEmitter {
 
         this.timers[name].cancel()
         delete this.timers[name]
-        this.emit('removeTimer', name)
         return true
     }
 }

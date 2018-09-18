@@ -37,10 +37,10 @@ export default class BinaryStateMachine extends StateMachine {
     handlers = {
         // initialize data in initial state
         'enter#old/:old#ONE': () =>
-            keepState().data(1),
+            keepState().withData(1),
 
         'cast#next#ONE': ({data}) =>
-            nextState('TWO').data(data + 1),
+            nextState('TWO').withData(data + 1),
 
         'cast#next#TWO': () =>
             nextState('ONE'),

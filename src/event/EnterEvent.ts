@@ -23,4 +23,5 @@ import Event from "./event";
 
 export default class EnterEvent extends Event {
     type = 'enter'
+    priority = 90
 }

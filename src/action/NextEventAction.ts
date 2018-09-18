@@ -19,45 +19,17 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Route = require("route-parser");
-import RouteResult from "./RouteResult";
-import {Parsers} from "./types";
-import Logger from "../Logger";
+import Action from "./action";
+import {EventContext, EventType} from "../types";
 
+export default class NextEventAction extends Action {
+    type = 'nextEvent'
+    eventType: EventType
+    context?: EventContext
 
-const Log = Logger('RouteParser')
-
-export default class RouteParser {
-    route: string
-    parsers: Parsers
-
-    constructor(route: string) {
-        this.route = route
-        this.init()
-    }
-
-    /**
-     * Creates the underlying parsers
-     */
-    protected init() {
-        let [event, context, state] = this.route.split('#')
-        Log.i('init', event, context, state)
-        this.parsers = {
-            event: new Route(`/${event}`),
-            context: new Route(`/${context}`),
-            state: new Route(`/${state}`)
-        }
-        Log.i('init', this.parsers)
-    }
-
-    parse(route: string): RouteResult {
-        let [event, context, state] = route.split('#')
-        Log.i('parse', event, context, state)
-        return new RouteResult({
-            event: this.parsers.event.match(`${event}`),
-            context: this.parsers.context.match(`/${context}`),
-            state: this.parsers.state.match(`/${state}`),
-        })
+    constructor(eventType: EventType, context?: EventContext) {
+        super()
+        this.eventType = eventType
+        this.context = context
     }
 }
-

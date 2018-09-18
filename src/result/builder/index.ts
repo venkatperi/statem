@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import ResultBuilder from './ResultBuilder'
-import {Data, State} from "../../types";
+import {State} from "../../types";
 import NextStateBuilder from "./NextStateBuilder";
 import KeepStateBuilder from "./KeepStateBuilder";
 

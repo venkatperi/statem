@@ -19,12 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Timeout from "./Timeout";
+import TimeoutAction from "./TimeoutAction";
 
 /**
  * Generates a {StateTimeoutEvent} unless the state changes within the specified
  * timeout interval
  */
-export default class StateTimeout extends Timeout {
+export default class StateTimeoutAction extends TimeoutAction {
     type = 'stateTimeout'
 }

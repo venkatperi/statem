@@ -19,18 +19,17 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import {From} from "../types";
 import Action from "./action";
-import Event from "../event/event";
-import {EventContext} from "../types";
 
-export default class NextEvent extends Action {
-    type = 'nextEvent'
-    event: Event;
-    context: EventContext;
+export default class ReplyAction extends Action {
+    type = 'reply'
+    from: From
+    reply: any
 
-    constructor(event: Event, context: EventContext) {
+    constructor(from: From, reply: any) {
         super()
-        this.event = event
-        this.context = context
+        this.from = from
+        this.reply = reply
     }
 }

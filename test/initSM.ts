@@ -21,36 +21,68 @@
 
 import 'mocha'
 import {expect} from 'chai'
-import StateMachine, {keepState, State} from "..";
+import StateMachine, {keepState} from "..";
 import Deferred from "../src/util/Deferred";
+import {nextState} from "../index";
 
-
-let sm
 describe('init SM', () => {
-
-    let enterInitial = new Deferred<State>()
+    let entered
+    let events
+    let sm
+    let states = ['ONE', 'TWO']
 
     beforeEach(() => {
+        entered = {}
+        events = {}
+        for (let s of states) {
+            entered[s] = new Deferred()
+            events[s] = new Deferred()
+        }
         sm = new StateMachine({
             initialState: "ONE",
             data: 123,
-            handlers: {
-                'enter#old/:old#ONE': ({args}) => {
-                    enterInitial.resolve(args.old)
+            handlers: [
+                ['enter#old/:old#:state', ({args}) => {
+                    entered[args.state].resolve(args.old)
                     return keepState()
-                }
-            }
-        }).start()
+                }],
+
+                ['cast#next#ONE', () => nextState('TWO')],
+
+                ['cast#next#TWO', () => nextState('ONE')],
+
+                // catch-all
+                [':event#*context#:state', ({route, args}) => {
+                    console.log(route, args)
+                    return keepState()
+                }]
+            ]
+        })
+            .on('state', (cur, old) => events[cur].resolve(old))
+            .start()
     })
 
-    it("has initial state", async () =>
-        expect(await sm.getData()).to.eq(123))
+    it("initial state is set", async () =>
+        expect(await sm.getState()).to.eq('ONE'))
 
     it("has initial data", async () =>
         expect(await sm.getData()).to.eq(123))
 
-    it("fires ENTER event for initial state", async () => {
-        expect(await enterInitial.promise).to.eq("ONE")
+    it("fires ENTER event & old state == initial", async () =>
+        expect(await entered.ONE.promise).to.eq("ONE"))
+
+    it("fires node event with state name", async () =>
+        expect(await events.ONE.promise).to.eq("ONE"))
+
+    describe('on NEXT', () => {
+        beforeEach(() => {
+            sm.cast('next')
+        })
+        it("fires ENTER event & old state is ONE", async () =>
+            expect(await entered.TWO.promise).to.eq("ONE"))
+
+        it("has new state", async () =>
+            expect(await sm.getState()).to.eq('TWO'))
     })
 })
 

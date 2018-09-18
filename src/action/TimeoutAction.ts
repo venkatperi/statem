@@ -19,17 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {From} from "../types";
 import Action from "./action";
 
-export default class Reply extends Action {
-    type = 'reply'
-    from: From
-    reply: any
+export default class TimeoutAction extends Action {
+    time: number
 
-    constructor(from: From, reply: any) {
+    constructor(time: number) {
         super()
-        this.from = from
-        this.reply = reply
+        this.time = time
     }
 }

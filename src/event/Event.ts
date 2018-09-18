@@ -19,13 +19,30 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
-import {EventContext} from "../types";
+import {EventContext, EventType, Priority} from "../types";
 
-export default class Event implements Executable {
-    readonly type: string
+export default class Event {
+
+    /**
+     * The event's type
+     */
+    readonly type: EventType
+
+    /**
+     * Event arg/context
+     */
     context?: EventContext
 
+    /**
+     * Event's priority when enqueued
+     * @type {Priority}
+     */
+    priority: Priority = Priority.Normal
+
+    /**
+     * COnstructor
+     * @param context
+     */
     constructor(context?: EventContext) {
         this.context = context
     }
@@ -53,9 +70,4 @@ export default class Event implements Executable {
     get route(): string {
         return `${this.typeRoute}#${this.contextRoute}`
     }
-
-    exec(opts: object): void {
-    }
-
-
 }

@@ -21,11 +21,10 @@
 
 import Action from "./action";
 
-export default class Timeout extends Action {
-    time: number
+/**
+ * Postpones the current event and retries it when the state changes
+ */
+export default class PostponeAction extends Action {
+    type = 'postpone'
 
-    constructor(time: number) {
-        super()
-        this.time = time
-    }
 }

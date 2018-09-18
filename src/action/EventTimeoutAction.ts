@@ -19,16 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Result} from "./types";
 
-export default class RouteResult {
-    result: Result
+import TimeoutAction from "./TimeoutAction";
 
-    constructor(result: Result) {
-        this.result = result
-    }
-
-    get matches(): boolean {
-        return !!this.result.event && !!this.result.context && !!this.result.state
-    }
+/**
+ * Generates a {EventTimeoutEvent} unless some other event is delivered within
+ * the specified timeout interval
+ */
+export default class EventTimeoutAction extends TimeoutAction {
+    type = 'eventTimeout'
 }
