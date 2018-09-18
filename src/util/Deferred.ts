@@ -19,7 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export default class Deferred<T> {
+export default class Deferred<T> implements Promise<T> {
     /**
      *  A method to resolve the associated Promise with the value passed.
      * If the promise is already settled it does nothing.
@@ -59,6 +59,16 @@ export default class Deferred<T> {
         }).catch(() => {
             that.completed = true
         })
+    }
+
+    readonly [Symbol.toStringTag]: "Promise";
+
+    catch<TResult = never>(onrejected?: ((reason: any) => (PromiseLike<TResult> | TResult)) | null | undefined): Promise<T | TResult> {
+        return this.promise.catch(onrejected)
+    }
+
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | null | undefined, onrejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | null | undefined): Promise<TResult1 | TResult2> {
+        return this.promise.then(onfulfilled, onrejected)
     }
 }
 

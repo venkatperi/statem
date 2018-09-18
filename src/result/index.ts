@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Result from './Result'
-import NextState from "./NextStateWithData";
+import NextState from "./NextState";
 import NextStateWithData from "./NextStateWithData";
 import RepeatState from "./RepeatState";
 import RepeatStateAndData from "./RepeatStateAndData";

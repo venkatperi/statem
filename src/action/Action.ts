@@ -19,11 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Executable} from "../Executable";
+import {ActionType} from "../types";
 
-export default class Action implements Executable {
-    readonly type: string
-
-    exec(opts: object): void {
-    }
+export default class Action {
+    readonly type: ActionType
 }

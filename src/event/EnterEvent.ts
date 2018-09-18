@@ -20,8 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Event from "./event";
+import {Priority} from "../types";
 
 export default class EnterEvent extends Event {
     type = 'enter'
-    priority = 90
+    priority = Priority.High
 }

@@ -57,7 +57,7 @@ export default abstract class ResultBuilder {
      * @return {this} for chaining
      */
     action(...actions: ActionList): ResultBuilder {
-        this._actions = this._actions.concat(actions)
+        this._actions.push(...actions)
         return this
     }
 

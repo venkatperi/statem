@@ -23,7 +23,17 @@
 import Route = require("route-parser");
 import EventEmitter = require('events');
 import StablePriorityQueue = require('stablepriorityqueue');
-import {Data, EventContext, Handler, HandlerOpts, Handlers, Priority, RouteHandlers, State} from "./types";
+import {
+    Data,
+    EventContext,
+    Handler,
+    HandlerOpts,
+    HandlerResult,
+    Handlers,
+    Priority,
+    RouteHandlers,
+    State
+} from "./types";
 import Result, {KeepStateAndData, NextState, NextStateWithData} from "./result";
 import Pending from "./util/Pending";
 import Event, {
@@ -74,7 +84,6 @@ export default class StateMachine extends EventEmitter {
     protected _data: Data
     protected _pending = new Pending()
     private timers = new Timers()
-    // private events: Array<Event> = []
     private processingEvent = false
     private events = new StablePriorityQueue((a, b) => a.priority - b.priority)
 
@@ -145,7 +154,7 @@ export default class StateMachine extends EventEmitter {
             .on('stateChanged', () => timers.cancel('stateTimeout'))
             .on('event', () => timers.cancel('eventTimeout'))
 
-        this._initHandlers()
+        this.initHandlers()
         this.state = this.initialState
         this.emit('init', options)
         return this
@@ -203,7 +212,12 @@ export default class StateMachine extends EventEmitter {
      */
     addHandler(route: string, handler: Handler): StateMachine {
         Log.v(`addHandler`, route, handler)
-        this._routeHandlers.push({route: new Route(route), handler})
+        try {
+            this._routeHandlers.push({route: new Route(route), handler})
+        } catch (e) {
+            Log.e(e, route || 'No route!')
+            throw e
+        }
         return this
     }
 
@@ -220,10 +234,11 @@ export default class StateMachine extends EventEmitter {
         // throw new Error(`no handler for ${event}: ${args}`)
     }
 
-    protected _initHandlers() {
+    protected initHandlers() {
+        let that = this
         this.handlers = this.handlers || []
-        let h = new Map(this.defaultHandlers.concat(this.handlers))
-        h.forEach((handler, route) => this.addHandler(route, handler))
+        let h = this.defaultHandlers.concat(this.handlers)
+        h.forEach(([route, handler]) => that.addHandler(route, handler))
     }
 
     /**
@@ -263,7 +278,7 @@ export default class StateMachine extends EventEmitter {
             args: h ? h.result : {},
             current: this.state,
             data: this.data,
-            route: h.route
+            route: h ? h.route : ''
         }
 
         Log.i('handleEvent', args)
@@ -292,10 +307,10 @@ export default class StateMachine extends EventEmitter {
     }
 
     processEvents() {
-        setImmediate(this._processEvents.bind(this))
+        setImmediate(this.doProcessEvents.bind(this))
     }
 
-    _processEvents() {
+    doProcessEvents() {
         if (this.events.length === 0 || this.processingEvent)
             return
         Log.i('processEvents', this.events)
@@ -307,7 +322,9 @@ export default class StateMachine extends EventEmitter {
      *
      * @param res
      */
-    protected handleResult(res: Result | ResultBuilder) {
+    protected handleResult(res: HandlerResult) {
+        if (!res)
+            res = keepState()
         if (res instanceof ResultBuilder)
             res = res.result
 
@@ -374,11 +391,16 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     setStateTimeout(time: number): StateMachine {
+        Log.i('setStateTimeout', time)
         let that = this
         this.timers
             .create(time, 'stateTimeout')
             .on('timer', () => that.addEvent(new StateTimeoutEvent({time})))
         return this
+    }
+
+    get hasStateTimer(): boolean {
+        return !!this.timers.get('stateTimeout')
     }
 
     /**
@@ -392,6 +414,7 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     setEventTimeout(time: number) {
+        Log.i('setEventTimeout', time)
         let that = this
         this.timers
             .create(time, 'eventTimeout')

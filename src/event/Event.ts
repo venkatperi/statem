@@ -22,7 +22,6 @@
 import {EventContext, EventType, Priority} from "../types";
 
 export default class Event {
-
     /**
      * The event's type
      */
@@ -40,7 +39,7 @@ export default class Event {
     priority: Priority = Priority.Normal
 
     /**
-     * COnstructor
+     * Constructor
      * @param context
      */
     constructor(context?: EventContext) {

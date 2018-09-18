@@ -21,44 +21,77 @@
 
 import 'mocha'
 import {expect} from 'chai'
-import StateMachine, {keepState} from "..";
+import StateMachine, {internalEvent, stateTimeout} from "..";
 import Deferred from "../src/util/Deferred";
 import {nextState} from "../index";
 
-describe('init SM', () => {
+describe('State Machine', () => {
     let entered
     let events
     let sm
     let states = ['ONE', 'TWO']
+    let catchAll
+    let internal
+    let stateDefer
 
     beforeEach(() => {
         entered = {}
         events = {}
+        catchAll = new Deferred()
+        internal = new Deferred()
+        stateDefer = new Deferred()
+
         for (let s of states) {
             entered[s] = new Deferred()
             events[s] = new Deferred()
         }
+
         sm = new StateMachine({
             initialState: "ONE",
             data: 123,
             handlers: [
-                ['enter#old/:old#:state', ({args}) => {
-                    entered[args.state].resolve(args.old)
-                    return keepState()
-                }],
+                /**
+                 * Trap all state enter events
+                 */
+                ['enter#old/:old#:state', ({args}) =>
+                    entered[args.state].resolve(args.old)],
 
+                /**
+                 * (state: ONE, event: (cast, next)) --> (state: TWO)
+                 */
                 ['cast#next#ONE', () => nextState('TWO')],
 
+                /**
+                 * (state: TWO, event: (cast, next)) --> (state: ONE)
+                 */
                 ['cast#next#TWO', () => nextState('ONE')],
 
-                // catch-all
-                [':event#*context#:state', ({route, args}) => {
-                    console.log(route, args)
-                    return keepState()
-                }]
+                /**
+                 * (state: any, event: (cast, sendInternal)) --> adds internal event
+                 */
+                ['cast#sendInternal#:state', () => internalEvent('INTERNAL-EVENT')],
+
+                /**
+                 * Trap internal event
+                 */
+                ['internal#*context#:state', ({args}) => internal.resolve(args.context)],
+
+                /**
+                 * (state: any, event: (cast, {stateTimeout: time})) --> starts state timeout
+                 */
+                ['cast#stateTimeout/:time#:state', ({args}) => stateTimeout(args.time)],
+
+                /**
+                 * Trap state timeout event
+                 */
+                ["stateTimeout#*context#:state", ({args}) => stateDefer.resolve(args.context)],
+
+                /**
+                 * Catch-all route
+                 */
+                [':event#*context#:state', ({args}) => catchAll.resolve(args)]
             ]
-        })
-            .on('state', (cur, old) => events[cur].resolve(old))
+        }).on('state', (cur, old) => events[cur].resolve(old))
             .start()
     })
 
@@ -69,17 +102,32 @@ describe('init SM', () => {
         expect(await sm.getData()).to.eq(123))
 
     it("fires ENTER event & old state == initial", async () =>
-        expect(await entered.ONE.promise).to.eq("ONE"))
+        expect(await entered.ONE).to.eq("ONE"))
 
     it("fires node event with state name", async () =>
-        expect(await events.ONE.promise).to.eq("ONE"))
+        expect(await events.ONE).to.eq("ONE"))
+
+    it("catch-all rule traps unhandled routes", async () => {
+        sm.cast('CATCH-ALL')
+    })
+
+    it("internal event", async () => {
+        sm.cast('sendInternal')
+        let args = await internal
+        expect(args).to.eq('INTERNAL-EVENT')
+    })
+
+    it("state timeout", async () => {
+        sm.cast({stateTimeout: 100})
+        await stateDefer
+    })
 
     describe('on NEXT', () => {
         beforeEach(() => {
             sm.cast('next')
         })
         it("fires ENTER event & old state is ONE", async () =>
-            expect(await entered.TWO.promise).to.eq("ONE"))
+            expect(await entered.TWO).to.eq("ONE"))
 
         it("has new state", async () =>
             expect(await sm.getState()).to.eq('TWO'))

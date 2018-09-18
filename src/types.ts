@@ -31,10 +31,15 @@ export type Data = any;
 
 export type EventType = string
 
+export type ActionType = string
+
+export type ResultType = string
+
 export type EventContext = any;
 
 export type From = string;
 
+export type Timeout = number;
 
 export type HandlerOpts = {
     event: Event,
@@ -44,9 +49,11 @@ export type HandlerOpts = {
     route: string
 }
 
-export type Handler = (HandlerOpts) => Result | ResultBuilder
+export type HandlerResult = Result | ResultBuilder | void
 
-export type Handlers = [string, Handler][]
+export type Handler = (HandlerOpts) => HandlerResult
+
+export type Handlers = Array<[string, Handler]>
 
 export type RouteHandler = {
     route: Route,

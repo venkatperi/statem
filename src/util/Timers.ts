@@ -65,5 +65,9 @@ export default class Timers {
         delete this.timers[name]
         return true
     }
+
+    get(name: string): NTimer {
+        return this.timers[name]
+    }
 }
 

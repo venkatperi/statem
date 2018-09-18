@@ -20,18 +20,16 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Action, {ActionList} from "../action";
-import {Data} from "../types";
+import {Data, ResultType} from "../types";
 
 /**
  * This class encapsulates the result of a call to a state handler
  */
 export default class Result {
-
-
     /**
      * The result type
      */
-    readonly type: string;
+    readonly type: ResultType;
 
     /**
      * Optional state machine data
