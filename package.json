@@ -12,6 +12,7 @@
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.9.4",
     "@types/route-parser": "^0.1.1",
@@ -23,6 +24,7 @@
     "typescript": "^3.0.3"
   },
   "dependencies": {
+    "lodash": "^4.17.11",
     "ntimer": "^0.5.3",
     "route-parser": "0.0.5",
     "stablepriorityqueue": "^0.1.0",

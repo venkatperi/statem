@@ -28,4 +28,8 @@ export default class TimeoutAction extends Action {
         super()
         this.time = time
     }
+
+    toString(): string {
+        return `${super.toString()}, time=${this.time}`
+    }
 }

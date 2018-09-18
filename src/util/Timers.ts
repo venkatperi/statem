@@ -21,7 +21,9 @@
 import ntimer = require('ntimer');
 import NTimer = ntimer.Timer;
 import {uniqId} from "./uniqId";
+import Logger from "../Logger";
 
+const Log = Logger('Timers')
 
 export default class Timers {
     timers: { [k in string]: NTimer } = {}
@@ -43,6 +45,8 @@ export default class Timers {
         let that = this
 
         name = name || uniqId()
+        Log.i('create', timeout, name, opts)
+
         this.cancel(name)
         let t = this.timers[name] = new NTimer({name, timeout, auto: true})
         t.on('timer', () => that.cancel(name))
@@ -61,6 +65,7 @@ export default class Timers {
             return false
         }
 
+        Log.i('cancel', name)
         this.timers[name].cancel()
         delete this.timers[name]
         return true

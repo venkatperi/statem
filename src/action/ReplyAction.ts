@@ -32,4 +32,22 @@ export default class ReplyAction extends Action {
         this.from = from
         this.reply = reply
     }
+
+    get replyString(): string {
+        if (typeof this.reply === 'object')
+            return JSON.stringify(this.reply)
+
+        switch (this.reply) {
+            case undefined:
+            case null:
+                return ''
+
+            default:
+                return String(this.reply)
+        }
+    }
+
+    toString(): string {
+        return `${super.toString()}, from=${this.from}, reply=${this.replyString}`
+    }
 }

@@ -25,4 +25,5 @@ import {Priority} from "../types";
 export default class EnterEvent extends Event {
     type = 'enter'
     priority = Priority.High
+
 }

@@ -20,7 +20,12 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import {ActionType} from "../types";
+import _ = require("lodash");
 
 export default class Action {
     readonly type: ActionType
+
+    toString(): string {
+        return `${_.upperFirst(this.type)}`
+    }
 }

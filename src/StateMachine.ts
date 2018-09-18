@@ -87,6 +87,14 @@ export default class StateMachine extends EventEmitter {
     private processingEvent = false
     private events = new StablePriorityQueue((a, b) => a.priority - b.priority)
 
+    log = {
+        v: this.logger('v'),
+        i: this.logger('i'),
+        d: this.logger('d'),
+        w: this.logger('w'),
+        e: this.logger('e'),
+    }
+
     constructor({initialState, handlers, data}: SMOptions = {}) {
         super()
         if (initialState)
@@ -95,6 +103,12 @@ export default class StateMachine extends EventEmitter {
             this.handlers = handlers
         if (data)
             this.data = data
+    }
+
+    logger(level) {
+        return (tag2, ...args) => {
+            Log[level](`${tag2}/${this.state}: `, ...args)
+        }
     }
 
     /**
@@ -110,7 +124,7 @@ export default class StateMachine extends EventEmitter {
      * @param value the {Data}
      */
     set data(value: Data) {
-        Log.i('setData', value)
+        this.log.i('setData', value)
         let old = this._data
         this._data = value;
         this.emit('data', value, old)
@@ -129,7 +143,7 @@ export default class StateMachine extends EventEmitter {
      * @param s
      */
     set state(s: State) {
-        Log.i('state', s)
+        this.log.i('setState', s)
         let old = this._state || this.initialState
         this._state = s
         this.emit('state', s, old)
@@ -146,7 +160,7 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     start(options: object = {}) {
-        Log.i('start', options)
+        this.log.i('start', options)
 
         let that = this
         let timers = this.timers
@@ -167,7 +181,7 @@ export default class StateMachine extends EventEmitter {
      * @param timeout
      */
     stop(reason?: string, timeout?: number) {
-        Log.i(`stop: ${reason}`)
+        this.log.i(`stop: ${reason}`)
         this.emit('terminate', reason)
     }
 
@@ -180,7 +194,7 @@ export default class StateMachine extends EventEmitter {
      */
     async call(request: EventContext, timeout: number = Infinity): Promise<any> {
         const from = this._pending.create()
-        Log.i(`call`, request, from)
+        this.log.v(`call`, request, from)
 
         this.addEvent(new CallEvent(from, request))
         return await this._pending.get(from)
@@ -195,7 +209,7 @@ export default class StateMachine extends EventEmitter {
      * @param request
      */
     cast(request: EventContext): void {
-        Log.i(`cast`, request)
+        this.log.v(`cast`, request)
         try {
             this.addEvent(new CastEvent(request))
         } catch (e) {
@@ -211,7 +225,8 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     addHandler(route: string, handler: Handler): StateMachine {
-        Log.v(`addHandler`, route, handler)
+        this.log.v(`addHandler`, route, handler)
+
         try {
             this._routeHandlers.push({route: new Route(route), handler})
         } catch (e) {
@@ -229,9 +244,8 @@ export default class StateMachine extends EventEmitter {
      * @param data
      */
     handleDefaultEvent({event, args, current, data}: HandlerOpts): Result {
-        Log.i('defaultHandler', event, args)
+        this.log.i('defaultHandler', event.toString(), args)
         return new KeepStateAndData()
-        // throw new Error(`no handler for ${event}: ${args}`)
     }
 
     protected initHandlers() {
@@ -257,7 +271,7 @@ export default class StateMachine extends EventEmitter {
      */
     protected getRouteHandler(e: Event) {
         const route = this.makeRoute(e)
-        Log.i('getRouteHandler', route)
+        this.log.i('getRouteHandler', route)
         for (const routeHandler of this._routeHandlers) {
             let result = routeHandler.route.match(route)
             if (result) {
@@ -281,7 +295,7 @@ export default class StateMachine extends EventEmitter {
             route: h ? h.route : ''
         }
 
-        Log.i('handleEvent', args)
+        this.log.i('handleEvent', event.toString(), {args: args.args, route: args.route})
 
         let res = h ?
             h.routeHandler.handler(args) :
@@ -299,7 +313,8 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     addEvent(event: Event) {
-        Log.i('addEvent', event)
+        this.log.i('addEvent', event.toString())
+
         this.emit('event', event)
         this.events.add(event)
         this.processEvents()
@@ -313,7 +328,7 @@ export default class StateMachine extends EventEmitter {
     doProcessEvents() {
         if (this.events.length === 0 || this.processingEvent)
             return
-        Log.i('processEvents', this.events)
+        this.log.v('processEvents', this.events)
         if (!this.events.isEmpty())
             this.handleEvent(this.events.poll())
     }
@@ -328,7 +343,7 @@ export default class StateMachine extends EventEmitter {
         if (res instanceof ResultBuilder)
             res = res.result
 
-        Log.i(`handleResult`, res)
+        this.log.i(`handleResult`, res.toString())
 
         if (res instanceof NextState || res instanceof NextStateWithData) {
             this.state = res.nextState
@@ -346,7 +361,7 @@ export default class StateMachine extends EventEmitter {
      * @param action
      */
     protected handleAction(action: Action) {
-        Log.i(`handleAction`, action)
+        this.log.i(`handleAction`, action.toString())
 
         if (action instanceof ReplyAction) {
             this._pending.resolve(action.from, action.reply)
@@ -391,7 +406,8 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     setStateTimeout(time: number): StateMachine {
-        Log.i('setStateTimeout', time)
+        this.log.i('setStateTimeout', time)
+
         let that = this
         this.timers
             .create(time, 'stateTimeout')
@@ -401,6 +417,10 @@ export default class StateMachine extends EventEmitter {
 
     get hasStateTimer(): boolean {
         return !!this.timers.get('stateTimeout')
+    }
+
+    get hasEventTimer(): boolean {
+        return !!this.timers.get('eventTimeout')
     }
 
     /**
@@ -414,7 +434,8 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     setEventTimeout(time: number) {
-        Log.i('setEventTimeout', time)
+        this.log.i('setEventTimeout', time)
+
         let that = this
         this.timers
             .create(time, 'eventTimeout')
@@ -430,6 +451,8 @@ export default class StateMachine extends EventEmitter {
      * @return {this}
      */
     setGenericTimeout(time: number, name = 'DEFAULT') {
+        this.log.i('setEventTimeout', name, time)
+
         let that = this
         this.timers
             .create(time, name)

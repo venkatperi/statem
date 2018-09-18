@@ -21,6 +21,7 @@
 
 import Action from "./action";
 import {EventContext, EventType} from "../types";
+import _ = require('lodash');
 
 export default class NextEventAction extends Action {
     type = 'nextEvent'
@@ -31,5 +32,23 @@ export default class NextEventAction extends Action {
         super()
         this.eventType = eventType
         this.context = context
+    }
+
+    get contextString(): string {
+        if (typeof this.context === 'object')
+            return JSON.stringify(this.context)
+
+        switch (this.context) {
+            case undefined:
+            case null:
+                return ''
+
+            default:
+                return String(this.context)
+        }
+    }
+
+    toString(): string {
+        return `${super.toString()}, event=${_.upperFirst(this.eventType)}, context=${this.contextString}`
     }
 }

@@ -34,4 +34,8 @@ export default class CallEvent extends Event {
     get typeRoute(): string {
         return `${this.type}/${this.from}`
     }
+
+    toString(): string {
+        return `${super.toString()}, from=${this.from}`
+    }
 }

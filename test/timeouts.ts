@@ -41,36 +41,53 @@ describe('timeouts', () => {
             initialState: "ONE",
             handlers: [
                 /**
-                 * (state: ONE, event: (cast, next)) --> (state: TWO)
-                 * Starts a stateTimeout
+                 * (cast:st, ONE) --> (TWO, stateTimeout)
                  */
-                ['cast#next#ONE', () => nextState('TWO').stateTimeout(200)],
+                ['cast#st#ONE', () => nextState('TWO').stateTimeout(200)],
 
                 /**
-                 * traps stateTimeout event in state TWO.
+                 * (cast:st, ONE) --> (THREE, eventTimeout)
                  */
-                ['stateTimeout#*_#TWO', () => {
-                    timeouts.state.resolve();
-                    // return nextState('TWO_STATE_TIMEOUT')
-                }],
+                ['cast#et#ONE', () => nextState('THREE').eventTimeout(200)],
 
                 /**
-                 * (state: TWO, event: (cast, next)) --> (state: ONE)
+                 * (cast:next, TWO) --> ONE
                  */
                 ['cast#next#TWO', () => nextState('ONE')],
+
+                /**
+                 * (cast:next, THREE) --> ONE
+                 */
+                ['cast#next#THREE', () => nextState('ONE')],
+
+                /**
+                 * (cast:nop, THREE) --> THREE
+                 */
+                ['cast#nop#THREE', () => nextState('THREE')],
+
+                /**
+                 * (stateTimeout, TWO) --> FOUR
+                 */
+                ['stateTimeout#*_#TWO', () => nextState('FOUR')],
+                ['enter#*_#FOUR', () => timeouts.state.resolve()],
+
+                /**
+                 * (eventTimeout, THREE) --> FIVE
+                 */
+                ['eventTimeout#*_#THREE', () => nextState('FIVE')],
+                ['enter#*_#FIVE', () => timeouts.event.resolve()],
 
             ]
         }).start()
     })
 
     describe('setting a state timeout', () => {
-
-        // from ONE, fire 'next'. Goes to "TWO" and sets stateTimeout
-        beforeEach(() => sm.cast('next'))
+        // from ONE, fire 'st'. Goes to "TWO" and sets stateTimeout
+        beforeEach(() => sm.cast('st'))
 
         it("fires if no state transition occurs", async () => {
             await timeouts.state
-            expect(await sm.getState()).to.eq('TWO')
+            expect(await sm.getState()).to.eq('FOUR')
         })
 
         it("cancels state timeout timer if state transition occurs before it fires", async () => {
@@ -81,7 +98,28 @@ describe('timeouts', () => {
             expect(sm.hasStateTimer).to.be.false
             expect(await sm.getState()).to.eq('ONE')
         })
-
     })
+
+    describe('setting an event timeout', () => {
+        // from ONE, fire 'et'. Goes to "THREE" and sets eventTimeout
+        beforeEach(() => sm.cast('et'))
+
+        it("fires if no new event is seen", async () => {
+            expect(await sm.getState()).to.eq('THREE')
+            expect(timeouts.event.completed).to.be.false
+            await timeouts.event
+            expect(await sm.getState()).to.eq('FIVE')
+        })
+
+        it("cancels timer if an event is received before it fires", async () => {
+            await delay(100)    //ensure state transition within timeout
+            sm.cast('nop')
+            await delay(500)    //wait for a long time
+            expect(timeouts.event.completed).to.be.false
+            expect(sm.hasEventTimer).to.be.false
+            expect(await sm.getState()).to.eq('THREE')
+        })
+    })
+
 })
 

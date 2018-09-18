@@ -20,6 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import {EventContext, EventType, Priority} from "../types";
+import * as _ from 'lodash'
 
 export default class Event {
     /**
@@ -68,5 +69,24 @@ export default class Event {
 
     get route(): string {
         return `${this.typeRoute}#${this.contextRoute}`
+    }
+
+    get contextString(): string {
+        if (typeof this.context === 'object')
+            return JSON.stringify(this.context)
+
+        switch (this.context) {
+            case undefined:
+            case null:
+                return ''
+
+            default:
+                return String(this.context)
+        }
+    }
+
+
+    toString(): string {
+        return `${_.upperFirst(this.type)}/${this.priority} {${this.contextString}}`
     }
 }

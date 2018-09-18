@@ -21,6 +21,7 @@
 
 import Action, {ActionList} from "../action";
 import {Data, ResultType} from "../types";
+import _ = require('lodash')
 
 /**
  * This class encapsulates the result of a call to a state handler
@@ -60,5 +61,16 @@ export default class Result {
         this._newData = value;
     }
 
+    get actionsString(): string {
+        return this.actions.map(x => x.toString()).join(', ')
+    }
+
+    get dataString(): string {
+        return this.hasData ? this.newData : ''
+    }
+
+    toString(): string {
+        return `${_.upperFirst(this.type)}Result ${this.dataString}${this.actionsString}`
+    }
 }
 
