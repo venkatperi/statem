@@ -19,6 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+type Resolver<T> = (value?: T | PromiseLike<T>) => void
+
+type Rejector = (reason?: any) => void
+
+type FulfillmentHandler<T, R = T> = ((value: T) => (PromiseLike<R> | R))
+
+type RejectionHandler<R = never> = (reason: any) => (PromiseLike<R> | R)
+
 export default class Deferred<T> implements Promise<T> {
     /**
      *  A method to resolve the associated Promise with the value passed.
@@ -28,7 +36,7 @@ export default class Deferred<T> implements Promise<T> {
      * If the value is a Promise then the associated promise assumes the state
      * of Promise passed as value.
      */
-    resolve: (value?: T) => void
+    resolve: Resolver<T>
 
     /**
      *  A method to reject the associated Promise with the value passed.
@@ -38,7 +46,7 @@ export default class Deferred<T> implements Promise<T> {
      * Generally its an Error object. If however a Promise is passed, then the Promise
      * itself will be the reason for rejection no matter the state of the Promise.
      */
-    reject: (any?) => void
+    reject: Rejector
 
     /**
      * The {Promise<T>>} underlying this Deferred<T>
@@ -46,6 +54,30 @@ export default class Deferred<T> implements Promise<T> {
     promise: Promise<T>
 
     completed: boolean = false
+
+    /**
+     * Return a Deferred in already resolved state
+     *
+     * @param value
+     * @return {Deferred<T>}
+     */
+    static resolved<T>(value?: T | PromiseLike<T>) {
+        let d = new Deferred<T>()
+        d.resolve(value)
+        return d
+    }
+
+    /**
+     * Returns a Deferred in already rejected state
+     *
+     * @return {Deferred<T>}
+     * @param reason
+     */
+    static rejected<T>(reason?: any) {
+        let d = new Deferred<T>()
+        d.reject(reason)
+        return d
+    }
 
     constructor() {
         let that = this
@@ -63,12 +95,14 @@ export default class Deferred<T> implements Promise<T> {
 
     readonly [Symbol.toStringTag]: "Promise";
 
-    catch<TResult = never>(onrejected?: ((reason: any) => (PromiseLike<TResult> | TResult)) | null | undefined): Promise<T | TResult> {
-        return this.promise.catch(onrejected)
+    catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
+        return this.promise.catch(onRejected)
     }
 
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | null | undefined, onrejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | null | undefined): Promise<TResult1 | TResult2> {
-        return this.promise.then(onfulfilled, onrejected)
+    then<R1 = T, R2 = never>(
+        onFulfilled?: FulfillmentHandler<T, R1> | null | undefined,
+        onRejected?: RejectionHandler<R2> | null | undefined): Promise<R1 | R2> {
+        return this.promise.then(onFulfilled, onRejected)
     }
 }
 

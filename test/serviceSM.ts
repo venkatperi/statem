@@ -63,6 +63,26 @@ function stateIs(s: State) {
         expect(await sm.getState()).to.eq(s))
 }
 
+function startFails() {
+    it("can't call start() now", async () => await throws(sm.start))
+}
+
+let failure = new Error("failure reason")
+
+function hasFailureReason() {
+    it("has failure reason", () => {
+        expect(sm.errors.length).is.eq(1)
+        expect(sm.errors[0].message).is.eq(failure.message)
+    })
+}
+
+function hasTimeoutFailure() {
+    it("has timeout reason", () => {
+        expect(sm.errors.length).is.eq(1)
+        expect(sm.errors[0].message.indexOf('Timeout') >= 0).to.be.true
+    })
+}
+
 describe('service', () => {
     beforeEach(() => sm = new TestService())
 
@@ -70,21 +90,17 @@ describe('service', () => {
         beforeEach(async () => await sm.start())
 
         stateIs('starting')
-
-        it("can't call start() again", async () => await throws(sm.start))
+        startFails()
 
         describe("failed start", () => {
             beforeEach(async () => {
-                sm.started.reject(new Error('reason 1'))
+                sm.started.reject(failure)
                 await delay(10)
             })
 
             stateIs('failed')
-
-            it("has failure reason", () => {
-                expect(sm.errors.length).is.eq(1)
-                expect(sm.errors[0].message).is.eq('reason 1')
-            })
+            startFails()
+            hasFailureReason()
         })
 
         describe("stop before fully started", () => {
@@ -94,6 +110,7 @@ describe('service', () => {
             })
 
             stateIs('cancelling')
+            startFails()
 
             describe("successful cancel", () => {
                 beforeEach(async () => {
@@ -102,21 +119,25 @@ describe('service', () => {
                 })
 
                 stateIs('terminated')
+                startFails()
             })
 
             describe("failed cancel", () => {
                 beforeEach(async () => {
-                    sm.cancelled.reject()
+                    sm.cancelled.reject(failure)
                     await delay(10)
                 })
 
                 stateIs('failed')
+                startFails()
+                hasFailureReason()
             })
 
             describe("timeout during cancel", () => {
                 beforeEach(async () => await delay(600))
-
                 stateIs('failed')
+                startFails()
+                hasTimeoutFailure()
             })
         })
 
@@ -124,6 +145,8 @@ describe('service', () => {
             beforeEach(async () => await delay(600))
 
             stateIs('failed')
+            startFails()
+            hasTimeoutFailure()
         })
 
         describe("successful start", () => {
@@ -133,11 +156,13 @@ describe('service', () => {
             })
 
             stateIs('running')
+            startFails()
 
             describe("stop running service", () => {
                 beforeEach(() => sm.stop())
 
                 stateIs('stopping')
+                startFails()
 
                 describe("successful stop", () => {
                     beforeEach(async () => {
@@ -146,21 +171,26 @@ describe('service', () => {
                     })
 
                     stateIs('terminated')
+                    startFails()
                 })
 
                 describe("failed stop", () => {
                     beforeEach(async () => {
-                        sm.stopped.reject();
+                        sm.stopped.reject(failure);
                         await delay(10)
                     })
 
                     stateIs('failed')
+                    startFails()
+                    hasFailureReason()
                 })
 
                 describe("timeout during stopping", () => {
                     beforeEach(async () => await delay(600))
 
                     stateIs('failed')
+                    startFails()
+                    hasTimeoutFailure()
                 })
             })
         })

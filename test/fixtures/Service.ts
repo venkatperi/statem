@@ -53,23 +53,25 @@ export default class Service extends StateMachine {
         ['enter#*_#starting', () => this.onStarting()],
         ['cast#done#starting', 'running'],
         ['cast#stop#starting', () => this.doNext('cancelling')],
-        ['cast#error#starting', ({event}) => this.onError(event)],
 
         ['enter#*_#running', () => this.running.resolve()],
-        ['cast#stop#running', () => this.doNext('stopping')],
+        ['cast#stop#running', () => {
+            this.running = Deferred.rejected(new Error("Service can't enter running state"))
+            return this.doNext('stopping');
+        }],
 
         ['enter#*_#stopping', () => this.onStopping()],
         ['cast#done#stopping', 'terminated'],
-        ['cast#error#stopping', ({event}) => this.onError(event)],
 
         ['enter#*_#cancelling', () => this.onCancelling()],
         ['cast#done#cancelling', 'terminated'],
-        ['cast#error#cancelling', ({event}) => this.onError(event)],
 
         ['enter#*_#terminated', () => this.terminated.resolve()],
         ['enter#*_#failed', () => this.terminated.reject(this.errors)],
 
-        ['stateTimeout#*_#:state', ({current}) => {
+        ['cast#error#*_', ({event}) => this.onError(event)],
+
+        ['stateTimeout#*_#*_', ({current}) => {
             this.errors.push(new Error(`Timeout waiting for state change in state: ${current}`))
             return nextState('failed')
         }],
@@ -114,10 +116,6 @@ export default class Service extends StateMachine {
      * @return {Promise<void>}
      */
     async awaitRunning() {
-        if (this.running.completed) {
-            if (this.state === 'running') return
-            throw new Error(`awaitRunning() called from illegal state ${this.state}`)
-        }
         await this.running
     }
 
