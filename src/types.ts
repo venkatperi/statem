@@ -35,11 +35,15 @@ export type ActionType = string
 
 export type ResultType = string
 
-export type EventContext = any;
+export type Primitive = number | string | boolean | null | undefined
+
+export type EventContext = { [k in string]: Primitive } | Primitive
+
+export type EventExtra = any;
 
 export type From = string;
 
-export type Timeout = number;
+export type Timeout = number | string;
 
 export type HandlerOpts = {
     event: Event,
@@ -51,7 +55,11 @@ export type HandlerOpts = {
 
 export type HandlerResult = Result | ResultBuilder | void
 
-export type Handler = (HandlerOpts) => HandlerResult
+export type HandlerFn = (HandlerOpts) => HandlerResult
+
+export type StateWithTimeout = [State, Timeout]
+
+export type Handler = HandlerFn | State | StateWithTimeout
 
 export type Handlers = Array<[string, Handler]>
 

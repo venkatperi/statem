@@ -22,6 +22,7 @@ import ntimer = require('ntimer');
 import NTimer = ntimer.Timer;
 import {uniqId} from "./uniqId";
 import Logger from "../Logger";
+import {Timeout} from "../types";
 
 const Log = Logger('Timers')
 
@@ -35,13 +36,13 @@ export default class Timers {
      * If a timer with the name exists, it is cancelled and a
      * new timer is installed
      *
-     * @param timeout, in milliseconds
+     * @param timeout
      * @param name, optional, the timer's name
      *
-     * @return {string} timer
+     * @return {any} timer
      * @param opts
      */
-    create(timeout: number, name?: string, opts?): NTimer {
+    create(timeout: Timeout, name?: string, opts?): NTimer {
         let that = this
 
         name = name || uniqId()

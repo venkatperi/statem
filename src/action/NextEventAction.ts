@@ -20,18 +20,20 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Action from "./action";
-import {EventContext, EventType} from "../types";
+import {EventContext, EventExtra, EventType} from "../types";
 import _ = require('lodash');
 
 export default class NextEventAction extends Action {
     type = 'nextEvent'
-    eventType: EventType
-    context?: EventContext
 
-    constructor(eventType: EventType, context?: EventContext) {
+    /**
+     * Creates a next event action
+     * @param eventType
+     * @param context
+     * @param extra
+     */
+    constructor(public eventType: EventType, public context?: EventContext, public extra?: EventExtra) {
         super()
-        this.eventType = eventType
-        this.context = context
     }
 
     get contextString(): string {

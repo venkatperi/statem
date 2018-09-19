@@ -78,7 +78,7 @@ describe('timeouts', () => {
                 ['enter#*_#FIVE', () => timeouts.event.resolve()],
 
             ]
-        }).start()
+        }).startSM()
     })
 
     describe('setting a state timeout', () => {

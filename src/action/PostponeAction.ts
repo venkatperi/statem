@@ -26,5 +26,4 @@ import Action from "./action";
  */
 export default class PostponeAction extends Action {
     type = 'postpone'
-
 }

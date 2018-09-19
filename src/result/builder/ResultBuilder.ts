@@ -21,7 +21,7 @@
 
 import Result from "../Result";
 import {ActionList, EventTimeoutAction, GenericTimeoutAction, ReplyAction, StateTimeoutAction} from "../../action";
-import {Data, EventContext, EventType, From} from "../../types";
+import {Data, EventContext, EventType, From, Timeout} from "../../types";
 import PostponeAction from "../../action/PostponeAction";
 import NextEventAction from "../../action/NextEventAction";
 
@@ -66,7 +66,7 @@ export default abstract class ResultBuilder {
      * @param time
      * @return {ResultBuilder}
      */
-    stateTimeout(time: number): ResultBuilder {
+    stateTimeout(time: Timeout): ResultBuilder {
         return this.action(new StateTimeoutAction(time))
     }
 

@@ -24,13 +24,14 @@ import Action from "./action";
 
 export default class ReplyAction extends Action {
     type = 'reply'
-    from: From
-    reply: any
 
-    constructor(from: From, reply: any) {
+    /**
+     * Creates a Reply action
+     * @param from
+     * @param reply
+     */
+    constructor(public from: From, public reply: any) {
         super()
-        this.from = from
-        this.reply = reply
     }
 
     get replyString(): string {

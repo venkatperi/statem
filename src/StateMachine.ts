@@ -26,14 +26,17 @@ import StablePriorityQueue = require('stablepriorityqueue');
 import {
     Data,
     EventContext,
+    EventExtra,
     Handler,
     HandlerOpts,
     HandlerResult,
     Handlers,
     Priority,
     RouteHandlers,
-    State
+    State,
+    Timeout
 } from "./types";
+
 import Result, {KeepStateAndData, NextState, NextStateWithData} from "./result";
 import Pending from "./util/Pending";
 import Event, {
@@ -55,7 +58,7 @@ import Action, {
 import ResultBuilder from "./result/builder";
 import Logger from './Logger'
 import Timers from "./util/Timers";
-import {keepState} from "../index";
+import {keepState, nextState} from "..";
 
 const Log = Logger('StateMachine')
 
@@ -159,7 +162,7 @@ export default class StateMachine extends EventEmitter {
      * @param options
      * @return {this}
      */
-    start(options: object = {}) {
+    startSM(options: object = {}) {
         this.log.i('start', options)
 
         let that = this
@@ -180,7 +183,7 @@ export default class StateMachine extends EventEmitter {
      * @param reason
      * @param timeout
      */
-    stop(reason?: string, timeout?: number) {
+    stopSM(reason?: string, timeout?: number) {
         this.log.i(`stop: ${reason}`)
         this.emit('terminate', reason)
     }
@@ -194,7 +197,7 @@ export default class StateMachine extends EventEmitter {
      */
     async call(request: EventContext, timeout: number = Infinity): Promise<any> {
         const from = this._pending.create()
-        this.log.v(`call`, request, from)
+        this.log.i(`call`, request, from)
 
         this.addEvent(new CallEvent(from, request))
         return await this._pending.get(from)
@@ -207,11 +210,12 @@ export default class StateMachine extends EventEmitter {
      *
      * The appropriate state function will be called to handle the request.
      * @param request
+     * @param extra
      */
-    cast(request: EventContext): void {
+    cast(request: EventContext, extra?: EventExtra): void {
         this.log.v(`cast`, request)
         try {
-            this.addEvent(new CastEvent(request))
+            this.addEvent(new CastEvent(request, extra))
         } catch (e) {
             // ignore error for cast
             Log.e(e)
@@ -295,15 +299,30 @@ export default class StateMachine extends EventEmitter {
             route: h ? h.route : ''
         }
 
-        this.log.i('handleEvent', event.toString(), {args: args.args, route: args.route})
+        this.log.i('handleEvent', event.toString(),
+            {args: args.args, route: args.route})
 
-        let res = h ?
-            h.routeHandler.handler(args) :
-            this.handleDefaultEvent(args);
-
-        this.handleResult(res)
+        let result = this.getHandlerResult(h, args);
+        this.handleResult(result)
         this.processingEvent = false
         this.processEvents()
+    }
+
+    private getHandlerResult(h, args) {
+        if (!h) {
+            return this.handleDefaultEvent(args);
+        }
+
+        let handler = h.routeHandler.handler
+        if (typeof handler === 'string') {
+            return nextState(handler)
+        }
+
+        if (Array.isArray(handler)) {
+            return nextState(handler[0]).eventTimeout(handler[1]);
+        }
+
+        return handler(args);
     }
 
     /**
@@ -405,7 +424,7 @@ export default class StateMachine extends EventEmitter {
      * @param time the timeout in ms
      * @return {this}
      */
-    setStateTimeout(time: number): StateMachine {
+    setStateTimeout(time: Timeout): StateMachine {
         this.log.i('setStateTimeout', time)
 
         let that = this
@@ -416,11 +435,15 @@ export default class StateMachine extends EventEmitter {
     }
 
     get hasStateTimer(): boolean {
-        return !!this.timers.get('stateTimeout')
+        return this.hasTimer('stateTimeout')
     }
 
     get hasEventTimer(): boolean {
-        return !!this.timers.get('eventTimeout')
+        return this.hasTimer('eventTimeout')
+    }
+
+    hasTimer(name: string): boolean {
+        return !!this.timers.get(name)
     }
 
     /**
@@ -430,16 +453,17 @@ export default class StateMachine extends EventEmitter {
      * is cancelled. You get either an event or a time-out,
      * but not both.
      *
-     * @param time the timeout in ms
+     * @param time the timeout
      * @return {this}
      */
-    setEventTimeout(time: number) {
+    setEventTimeout(time: Timeout) {
         this.log.i('setEventTimeout', time)
 
         let that = this
         this.timers
             .create(time, 'eventTimeout')
-            .on('timer', () => that.addEvent(new EventTimeoutEvent({time})))
+            .on('timer', () =>
+                that.addEvent(new EventTimeoutEvent({time})))
         return this
     }
 
@@ -450,20 +474,42 @@ export default class StateMachine extends EventEmitter {
      * @param name optional name. Defaults to "DEFAULT"
      * @return {this}
      */
-    setGenericTimeout(time: number, name = 'DEFAULT') {
+    setGenericTimeout(time: Timeout, name = 'DEFAULT') {
         this.log.i('setEventTimeout', name, time)
 
         let that = this
         this.timers
             .create(time, name)
-            .on('timer', () => that.addEvent(new GenericTimeoutEvent({name, time})))
+            .on('timer', () =>
+                that.addEvent(new GenericTimeoutEvent({name, time})))
         return this
     }
 
+    /**
+     * Cancels the named timer
+     *
+     * @param name
+     * @return {this}
+     */
+    cancelTimer(name: string): StateMachine {
+        this.timers.cancel(name)
+        return this
+    }
+
+    /**
+     * Returns the current state after any already enqueued events are processed
+     *
+     * @return {Promise<any>}
+     */
     async getState(): Promise<State> {
         return await this.call('getState')
     }
 
+    /**
+     * Returns the current data after any already enqueued events are processed
+     *
+     * @return {Promise<any>}
+     */
     async getData() {
         return await this.call('getData')
     }

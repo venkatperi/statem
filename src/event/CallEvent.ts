@@ -19,16 +19,20 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {EventContext, From} from "../types";
+import {EventContext, EventExtra, From} from "../types";
 import Event from "./event";
 
 export default class CallEvent extends Event {
     type = 'call'
-    from: From
 
-    constructor(from: From, context?: EventContext) {
-        super(context)
-        this.from = from
+    /**
+     *
+     * @param from
+     * @param context
+     * @param extra
+     */
+    constructor(public from: From, context?: EventContext, extra?: EventExtra) {
+        super(context, extra)
     }
 
     get typeRoute(): string {

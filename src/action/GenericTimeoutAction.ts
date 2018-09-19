@@ -27,10 +27,13 @@ import TimeoutAction from "./TimeoutAction";
  */
 export default class GenericTimeoutAction extends TimeoutAction {
     type = 'genericTimeout'
-    name?: string
 
-    constructor(time: number, name?: string) {
+    /**
+     * Creates a generic timeout action
+     * @param time
+     * @param name
+     */
+    constructor(time: number, public name?: string) {
         super(time)
-        this.name = name
     }
 }

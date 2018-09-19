@@ -20,13 +20,15 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Action from "./action";
+import {Timeout} from "../types";
 
 export default class TimeoutAction extends Action {
-    time: number
-
-    constructor(time: number) {
+    /**
+     * Creates a new TimeoutAction
+     * @param time the timeout in ms
+     */
+    constructor(public time: Timeout) {
         super()
-        this.time = time
     }
 
     toString(): string {

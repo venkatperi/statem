@@ -23,7 +23,6 @@ import 'mocha'
 import {expect} from 'chai'
 import StateMachine, {internalEvent, stateTimeout} from "..";
 import Deferred from "../src/util/Deferred";
-import {nextState} from "../index";
 
 describe('State Machine', () => {
     let entered
@@ -59,12 +58,12 @@ describe('State Machine', () => {
                 /**
                  * (state: ONE, event: (cast, next)) --> (state: TWO)
                  */
-                ['cast#next#ONE', () => nextState('TWO')],
+                ['cast#next#ONE', 'TWO'],
 
                 /**
                  * (state: TWO, event: (cast, next)) --> (state: ONE)
                  */
-                ['cast#next#TWO', () => nextState('ONE')],
+                ['cast#next#TWO', 'ONE'],
 
                 /**
                  * (state: any, event: (cast, sendInternal)) --> adds internal event
@@ -92,7 +91,7 @@ describe('State Machine', () => {
                 [':event#*context#:state', ({args}) => catchAll.resolve(args)]
             ]
         }).on('state', (cur, old) => events[cur].resolve(old))
-            .start()
+            .startSM()
     })
 
     it("initial state is set", async () =>
