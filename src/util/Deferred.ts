@@ -38,7 +38,7 @@ export default class Deferred<T> implements Promise<T> {
      * Generally its an Error object. If however a Promise is passed, then the Promise
      * itself will be the reason for rejection no matter the state of the Promise.
      */
-    reject: (any) => void
+    reject: (any?) => void
 
     /**
      * The {Promise<T>>} underlying this Deferred<T>

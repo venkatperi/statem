@@ -336,7 +336,7 @@ export default class StateMachine extends EventEmitter {
 
         this.emit('event', event)
         this.events.add(event)
-        this.processEvents()
+        this.doProcessEvents()
         return this
     }
 

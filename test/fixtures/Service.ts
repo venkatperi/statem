@@ -63,7 +63,7 @@ export default class Service extends StateMachine {
         ['cast#error#stopping', ({event}) => this.onError(event)],
 
         ['enter#*_#cancelling', () => this.onCancelling()],
-        ['cast#done#cancelling', 'failed'],
+        ['cast#done#cancelling', 'terminated'],
         ['cast#error#cancelling', ({event}) => this.onError(event)],
 
         ['enter#*_#terminated', () => this.terminated.resolve()],
@@ -75,6 +75,11 @@ export default class Service extends StateMachine {
         }],
     ]
 
+    constructor() {
+        super()
+        this.startSM()
+    }
+
     /**
      * Returns true if this service is running.
      * @return {boolean}
@@ -85,9 +90,10 @@ export default class Service extends StateMachine {
 
     /**
      * Initiates service startup and returns immediately.
+     * @return {Promise<void>}
      */
-    start() {
-        if (this.state !== 'new')
+    async start() {
+        if (await this.getState() !== 'new')
             throw new Error('Service is not in state new')
         this.cast('start')
     }
@@ -212,7 +218,7 @@ export default class Service extends StateMachine {
      * @return {ResultBuilder}
      */
     private doNext(next: State) {
-        let res = nextState('starting')
+        let res = nextState(next)
         return !this.timeout ? res : res.stateTimeout(this.timeout);
     }
 
