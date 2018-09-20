@@ -19,7 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import StateMachine, {Event, Handlers, nextState, State, Timeout} from '../..';
+import StateMachine, {Handlers, keepState, nextState, State, Timeout} from '../..';
 import Deferred from "../../src/util/Deferred";
 
 export default class Service extends StateMachine {
@@ -40,43 +40,43 @@ export default class Service extends StateMachine {
      * List of errors
      * @type {Error[]}
      */
-    errors = []
 
-    private running = new Deferred()
-
-    private terminated = new Deferred()
+    data = {
+        running: new Deferred(),
+        terminated: new Deferred(),
+        errors: []
+    }
 
     handlers: Handlers = [
         ['cast#start#new', () => this.doNext('starting')],
-        ['cast#stop#new', 'terminated'],
+
+        [['cast#stop#new',
+            'cast#done#stopping',
+            'cast#done#cancelling'], 'terminated'],
+
+        ['cast#done#starting', 'running'],
+
+        ['cast#stop#starting', () => this.doNext('cancelling')],
+        ['cast#stop#running', () => this.doNext('stopping')],
 
         ['enter#*_#starting', () => this.onStarting()],
-        ['cast#done#starting', 'running'],
-        ['cast#stop#starting', () => this.doNext('cancelling')],
-
-        ['enter#*_#running', () => this.running.resolve()],
-        ['cast#stop#running', () => {
-            this.running = Deferred.rejected(new Error("Service can't enter running state"))
-            return this.doNext('stopping');
-        }],
-
+        ['enter#*_#running', ({data}) => data.running.resolve()],
         ['enter#*_#stopping', () => this.onStopping()],
-        ['cast#done#stopping', 'terminated'],
-
         ['enter#*_#cancelling', () => this.onCancelling()],
-        ['cast#done#cancelling', 'terminated'],
+        ['enter#*_#terminated', ({data}) => data.terminated.resolve()],
+        ['enter#*_#failed', ({data}) => data.terminated.reject(data.errors)],
 
-        ['enter#*_#terminated', () => this.terminated.resolve()],
-        ['enter#*_#failed', () => this.terminated.reject(this.errors)],
+        ['cast#error#*_', ({event}) => nextState('failed').data({
+            errors: {$push: [event.extra.reason]}
+        })],
 
-        ['cast#error#*_', ({event}) => this.onError(event)],
-
-        ['stateTimeout#*_#*_', ({current}) => {
-            this.errors.push(new Error(`Timeout waiting for state change in state: ${current}`))
-            return nextState('failed')
-        }],
+        ['stateTimeout#*_#*_', ({current}) => keepState().nextEvent('cast', 'error',
+            {reason: new Error(`Timeout waiting for state change in state: ${current}`)})],
     ]
 
+    /**
+     * Constructor
+     */
     constructor() {
         super()
         this.startSM()
@@ -86,8 +86,8 @@ export default class Service extends StateMachine {
      * Returns true if this service is running.
      * @return {boolean}
      */
-    get isRunning(): boolean {
-        return this.state === 'running'
+    async isRunning() {
+        return await this.getState() === 'running'
     }
 
     /**
@@ -116,7 +116,12 @@ export default class Service extends StateMachine {
      * @return {Promise<void>}
      */
     async awaitRunning() {
-        await this.running
+        let state = await this.getState()
+        if (['cancelling', 'stopping', 'terminated', 'failed'].indexOf(state) >= 0) {
+            throw new Error(`Can't enter 'running' from state: ${state}`)
+        }
+        let data = await this.getData()
+        await data.running
     }
 
     /**
@@ -126,7 +131,8 @@ export default class Service extends StateMachine {
      * @return {Promise<void>}
      */
     async awaitTerminated() {
-        await this.terminated
+        let data = await this.getData()
+        await data.terminated
     }
 
     /**
@@ -171,17 +177,6 @@ export default class Service extends StateMachine {
     }
 
     /**
-     * Add the event's error to the list of errors
-     *
-     * @param event
-     */
-    private addEventError(event: Event) {
-        if (event.extra && event.extra.reason) {
-            this.errors.push(event.extra.reason)
-        }
-    }
-
-    /**
      * Dispatch result (cast -- done or error)
      * @param p
      */
@@ -189,23 +184,14 @@ export default class Service extends StateMachine {
         p.then(() => this.done()).catch((e) => this.error(e))
     }
 
-    /**
-     *
-     */
     private onStarting() {
         this.dispatch(this.doStart())
     }
 
-    /**
-     *
-     */
     private onStopping() {
         this.dispatch(this.doStop())
     }
 
-    /**
-     *
-     */
     private onCancelling() {
         this.dispatch(this.doCancel())
     }
@@ -220,14 +206,4 @@ export default class Service extends StateMachine {
         return !this.timeout ? res : res.stateTimeout(this.timeout);
     }
 
-    /**
-     * Stores the event's error (if any) and transitions to 'failed' state
-     *
-     * @param event
-     * @return {ResultBuilder}
-     */
-    private onError(event: Event) {
-        this.addEventError(event)
-        return nextState('failed')
-    }
 }

@@ -19,11 +19,32 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
-import {Priority} from "../types";
+import 'mocha'
+import {ToggleButton} from "./fixtures/Buttons";
+import {State} from "../index";
+import {expect} from "chai";
 
-export default class CastEvent extends Event {
-    type = 'cast'
 
-    priority = Priority.Low
+let sm
+
+function stateIs(s: State) {
+    it(`in state "${s}"`, async () =>
+        expect(await sm.getState()).to.eq(s))
 }
+
+
+describe('toggle button', () => {
+    beforeEach(() => sm = new ToggleButton().startSM())
+
+    stateIs('off')
+    describe('flip the toggle', () => {
+        beforeEach(() => sm.flip())
+        stateIs('on')
+        describe('flip the toggle', () => {
+            beforeEach(() => sm.flip())
+            stateIs('off')
+        })
+    })
+})
+
+

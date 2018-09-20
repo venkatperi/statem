@@ -22,11 +22,18 @@
 import Result from "../Result";
 import ResultBuilder from "./ResultBuilder";
 import {KeepState, KeepStateAndData} from "../";
+import {Data} from "../../types";
 
 export default class KeepStateBuilder extends ResultBuilder {
-    get result(): Result {
-        if (this._hasNewData)
-            return new KeepState(this._newData, ...this._actions)
+    /**
+     *
+     * @param data
+     */
+    getResult(data?: Data): Result {
+        if (this._updates.length > 0) {
+            data = this.applyUpdates(data)
+            return new KeepState(data, ...this._actions)
+        }
 
         return new KeepStateAndData(...this._actions)
     }

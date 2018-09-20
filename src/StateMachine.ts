@@ -48,6 +48,7 @@ import Event, {
     makeNextEvent,
     StateTimeoutEvent
 } from "./event";
+
 import Action, {
     EventTimeoutAction,
     GenericTimeoutAction,
@@ -68,7 +69,9 @@ type SMOptions = {
     data?: Data,
 }
 
-export default class StateMachine extends EventEmitter {
+export interface StateMachine{}
+
+export class StateMachine extends EventEmitter {
     initialState: State
     handlers: Handlers
 
@@ -228,11 +231,15 @@ export default class StateMachine extends EventEmitter {
      * @param handler
      * @return {this}
      */
-    addHandler(route: string, handler: Handler): StateMachine {
+    addHandler(route: string | string[], handler: Handler): StateMachine {
         this.log.v(`addHandler`, route, handler)
 
+        if (typeof route === 'string')
+            route = [route]
+
         try {
-            this._routeHandlers.push({route: new Route(route), handler})
+            let routes = route.map(r => new Route(r))
+            this._routeHandlers.push({routes, handler})
         } catch (e) {
             Log.e(e, route || 'No route!')
             throw e
@@ -274,12 +281,15 @@ export default class StateMachine extends EventEmitter {
      * @return {{routeHandler: RouteHandler; result: {[p: string]: string}}}
      */
     protected getRouteHandler(e: Event) {
-        const route = this.makeRoute(e)
-        this.log.i('getRouteHandler', route)
+        const eventRoute = this.makeRoute(e)
+        this.log.i('getRouteHandler', eventRoute)
+
         for (const routeHandler of this._routeHandlers) {
-            let result = routeHandler.route.match(route)
-            if (result) {
-                return {routeHandler, result, route}
+            for (let route of routeHandler.routes) {
+                let result = route.match(eventRoute)
+                if (result) {
+                    return {routeHandler, result, route: eventRoute}
+                }
             }
         }
     }
@@ -360,7 +370,7 @@ export default class StateMachine extends EventEmitter {
         if (!res)
             res = keepState()
         if (res instanceof ResultBuilder)
-            res = res.result
+            res = res.getResult(this.data)
 
         this.log.i(`handleResult`, res.toString())
 

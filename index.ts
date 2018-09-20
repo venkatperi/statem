@@ -22,7 +22,7 @@
 import Action from './src/action'
 import Event from './src/event'
 import Result from './src/result'
-import StateMachine from './src/StateMachine'
+import {StateMachine} from './src/StateMachine'
 import {Handlers, State, Timeout} from './src/types';
 import {internalEvent, keepState, nextState, stateTimeout} from './src/result/builder';
 

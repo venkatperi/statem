@@ -19,11 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
-import {Priority} from "../types";
+import 'mocha'
+import {expect} from 'chai'
+import update from "immutability-helper";
 
-export default class CastEvent extends Event {
-    type = 'cast'
 
-    priority = Priority.Low
-}
+describe('immutable', () => {
+    it('scalar data', () => {
+        let x = undefined
+        let y = update(x, {$set: 9})
+        expect(x).to.eq(undefined)
+        expect(y).to.eq(9)
+    })
+})
+
+

@@ -20,47 +20,19 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine from "../../src/StateMachine";
-import {keep, next} from "../../src/result";
+import Deferred from "../../src/util/Deferred";
+import {expect} from "chai";
+import StateMachine, {State} from "../..";
 
-export default class Button extends StateMachine {
-    initialState = 'off'
-
-    data = 0
-
-    handlers = {
-        'cast#flip#off': ({data}) =>
-            next('on').data(data + 1),
-
-        'enter#old/:old#on': () =>
-            keep().stateTimeout(200),
-
-        'cast#flip#on': () =>
-            next('off'),
-
-        'call/:from#getCount#:state': ({args, data}) =>
-            keep().reply(args.from, data),
-
-        'call/:from#getState#:state': ({args, current}) =>
-            keep().reply(args.from, current),
-
-        'stateTimeout##:state': () => {
-            console.log('STATE TIMEOUT')
-            return next('off')
-        }
-
+export async function throws(f) {
+    let x = new Deferred()
+    try {
+        await f()
+        x.reject('Should throw')
+    } catch (e) {
+        x.resolve()
     }
-
-    flip() {
-        this.cast('flip')
-    }
-
-    async getCount() {
-        return await this.call('getCount')
-    }
-
-    async getState() {
-        return await this.call('getState')
-    }
-
+    await x
 }
+
+

@@ -45,5 +45,7 @@ export function makeNextEvent(action: NextEventAction) {
     switch (action.eventType) {
         case 'internal':
             return new InternalEvent(action.context)
+        case 'cast':
+            return new CastEvent(action.context, action.extra)
     }
 }

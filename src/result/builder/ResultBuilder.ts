@@ -21,9 +21,10 @@
 
 import Result from "../Result";
 import {ActionList, EventTimeoutAction, GenericTimeoutAction, ReplyAction, StateTimeoutAction} from "../../action";
-import {Data, EventContext, EventType, From, Timeout} from "../../types";
+import {Data, EventContext, EventExtra, EventType, From, Timeout} from "../../types";
 import PostponeAction from "../../action/PostponeAction";
 import NextEventAction from "../../action/NextEventAction";
+import update, {CustomCommands, Spec} from 'immutability-helper';
 
 
 /**
@@ -31,24 +32,26 @@ import NextEventAction from "../../action/NextEventAction";
  */
 export default abstract class ResultBuilder {
     _hasNewData = false
-    _newData?: Data
+    _data?: Data
     _actions: ActionList = []
+    _updates = []
 
     /**
      * Builds the result
+     * @param data
      */
-    abstract get result(): Result
+    abstract getResult(data?: Data): Result
 
     /**
      * Use the given data for the result
-     * @param newData {Data}
      * @return {this} for chaining
+     * @param data
      */
-    withData(newData: Data): ResultBuilder {
-        this._hasNewData = true
-        this._newData = newData
-        return this
-    }
+    // withData(data: Data): ResultBuilder {
+    //     this._hasNewData = true
+    //     this._data = data
+    //     return this
+    // }
 
     /**
      * Adds the given actions to the result
@@ -116,9 +119,10 @@ export default abstract class ResultBuilder {
      * @param type the next event's type
      * @param context optional event context
      * @return {ResultBuilder}
+     * @param extra
      */
-    nextEvent(type: EventType, context?: EventContext): ResultBuilder {
-        return this.action(new NextEventAction(type, context))
+    nextEvent(type: EventType, context?: EventContext, extra?: EventExtra): ResultBuilder {
+        return this.action(new NextEventAction(type, context, extra))
     }
 
     /**
@@ -128,6 +132,28 @@ export default abstract class ResultBuilder {
      */
     internalEvent(context?: EventContext): ResultBuilder {
         return this.action(new NextEventAction('internal', context))
+    }
+
+    /**
+     * Set data mutation specs
+     * @param spec
+     * @return {this}
+     */
+    data<T, C extends CustomCommands<object> = never>(spec: Spec<T, C>,): ResultBuilder {
+        this._updates.push(spec)
+        return this
+    }
+
+    /**
+     * Apply updates to the given data
+     * @param data
+     * @return {Data}
+     */
+    protected applyUpdates(data: Data) {
+        for (let u of this._updates) {
+            data = update(data, u)
+        }
+        return data
     }
 
 }

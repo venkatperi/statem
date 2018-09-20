@@ -26,7 +26,7 @@ import Result, {NextState, NextStateWithData} from "..";
 
 export default class NextStateBuilder extends ResultBuilder {
     _nextState: State
-    _newData: Data
+    _data: Data
     _actions: ActionList = []
 
     constructor(state: State) {
@@ -34,9 +34,16 @@ export default class NextStateBuilder extends ResultBuilder {
         this._nextState = state
     }
 
-    get result(): Result {
-        if (this._hasNewData)
-            return new NextStateWithData(this._nextState, this._newData, ...this._actions)
+    /**
+     *
+     * @param data
+     * @return {any}
+     */
+    getResult(data?: Data): Result {
+        if (this._updates.length > 0) {
+            data = this.applyUpdates(data)
+            return new NextStateWithData(this._nextState, data, ...this._actions)
+        }
 
         return new NextState(this._nextState, ...this._actions)
     }

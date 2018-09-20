@@ -19,13 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-type Resolver<T> = (value?: T | PromiseLike<T>) => void
+export type Resolver<T> = (value?: T | PromiseLike<T>) => void
 
-type Rejector = (reason?: any) => void
+export type Rejector = (reason?: any) => void
 
-type FulfillmentHandler<T, R = T> = ((value: T) => (PromiseLike<R> | R))
+export type FulfillmentHandler<T, R = T> = ((value: T) => (PromiseLike<R> | R))
 
-type RejectionHandler<R = never> = (reason: any) => (PromiseLike<R> | R)
+export type RejectionHandler<R = never> = (reason: any) => (PromiseLike<R> | R)
 
 export default class Deferred<T> implements Promise<T> {
     /**
@@ -79,6 +79,9 @@ export default class Deferred<T> implements Promise<T> {
         return d
     }
 
+    /**
+     * Creates a new Deferred object
+     */
     constructor() {
         let that = this
         this.promise = new Promise(function (resolve, reject) {
@@ -93,12 +96,26 @@ export default class Deferred<T> implements Promise<T> {
         })
     }
 
+    /**
+     * Implementation from Promise<T>
+     */
     readonly [Symbol.toStringTag]: "Promise";
 
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @returns {Promise<T | R>} Promise for the completion of the callback.
+     * @param onRejected handles rejection
+     */
     catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
         return this.promise.catch(onRejected)
     }
 
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @returns {Promise<R1 | R2>} Promise for the completion of which ever callback is executed.
+     * @param onFulfilled handles fulfillment
+     * @param onRejected handles rejection
+     */
     then<R1 = T, R2 = never>(
         onFulfilled?: FulfillmentHandler<T, R1> | null | undefined,
         onRejected?: RejectionHandler<R2> | null | undefined): Promise<R1 | R2> {

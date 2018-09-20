@@ -19,11 +19,38 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
-import {Priority} from "../types";
 
-export default class CastEvent extends Event {
-    type = 'cast'
+import StateMachine, {Handlers, nextState} from "../.."
 
-    priority = Priority.Low
+export class ToggleButton extends StateMachine {
+    initialState = 'off'
+
+    handlers: Handlers = [
+        ['cast#flip#off', 'on'],
+        ['cast#flip#on', 'off']
+    ]
+
+    flip() {
+        this.cast('flip')
+    }
+}
+
+export class ToggleButtonWithCount extends StateMachine {
+    initialState = 'off'
+
+    data = {
+        count: 0
+    }
+
+    handlers: Handlers = [
+        ['cast#flip#off', ({data}) => nextState('on')
+            .data({count: {$set: data.count + 1}})],
+
+        ['cast#flip#on', 'off']
+    ]
+
+
+    flip() {
+        this.cast('flip')
+    }
 }

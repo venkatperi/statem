@@ -70,17 +70,28 @@ function startFails() {
 let failure = new Error("failure reason")
 
 function hasFailureReason() {
-    it("has failure reason", () => {
-        expect(sm.errors.length).is.eq(1)
-        expect(sm.errors[0].message).is.eq(failure.message)
+    it("has failure reason", async () => {
+        let data = await sm.getData()
+        expect(data.errors.length).is.eq(1)
+        expect(data.errors[0].message).is.eq(failure.message)
     })
 }
 
 function hasTimeoutFailure() {
-    it("has timeout reason", () => {
-        expect(sm.errors.length).is.eq(1)
-        expect(sm.errors[0].message.indexOf('Timeout') >= 0).to.be.true
+    it("has timeout reason", async () => {
+        let data = await sm.getData()
+        expect(data.errors.length).is.eq(1)
+        expect(data.errors[0].message.indexOf('Timeout') >= 0).to.be.true
     })
+}
+
+function awaitRunningResolves() {
+    it('awaitRunning resolves', async () => await sm.awaitRunning())
+}
+
+function awaitRunningRejects() {
+    it('awaitRunning rejects', async () =>
+        throws(async () => await sm.awaitRunning()))
 }
 
 describe('service', () => {
@@ -147,6 +158,7 @@ describe('service', () => {
             stateIs('failed')
             startFails()
             hasTimeoutFailure()
+            awaitRunningRejects()
         })
 
         describe("successful start", () => {
@@ -157,6 +169,7 @@ describe('service', () => {
 
             stateIs('running')
             startFails()
+            awaitRunningResolves()
 
             describe("stop running service", () => {
                 beforeEach(() => sm.stop())

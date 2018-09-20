@@ -61,10 +61,10 @@ export type StateWithTimeout = [State, Timeout]
 
 export type Handler = HandlerFn | State | StateWithTimeout
 
-export type Handlers = Array<[string, Handler]>
+export type Handlers = [string | string[], Handler][]
 
 export type RouteHandler = {
-    route: Route,
+    routes: Route[],
     handler: Handler
 }
 

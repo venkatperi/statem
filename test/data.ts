@@ -19,11 +19,36 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from "./event";
-import {Priority} from "../types";
+import 'mocha'
+import {expect} from 'chai'
+import StateMachine from "..";
+import {nextState} from "../index";
 
-export default class CastEvent extends Event {
-    type = 'cast'
+let sm
 
-    priority = Priority.Low
-}
+describe('SM data', () => {
+    beforeEach(() => {
+        sm = new StateMachine({
+            initialState: "ONE",
+            handlers: [
+                ['cast#next#ONE', () =>
+                    nextState('TWO').data({$set: 'ONE'})],
+
+                ['cast#next#TWO', () => nextState('ONE')],
+
+            ]
+        }).startSM()
+    })
+
+    it("no initial data", async () => {
+        expect(await sm.getData()).to.eq(undefined)
+    })
+
+    it("Updates data via action", async () => {
+        sm.cast('next')
+        expect(await sm.getData()).to.eq('ONE')
+    })
+
+})
+
+
