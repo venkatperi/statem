@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import 'mocha'
-import {ToggleButton} from "./fixtures/Buttons";
+import {ToggleButton, ToggleButtonWithCount} from "./fixtures/Buttons";
 import {State} from "../index";
 import {expect} from "chai";
 
@@ -30,6 +30,12 @@ let sm
 function stateIs(s: State) {
     it(`in state "${s}"`, async () =>
         expect(await sm.getState()).to.eq(s))
+}
+
+
+function countIs(count: number) {
+    it(`count is ${count}"`, async () =>
+        expect(await sm.getData()).to.eql({count}))
 }
 
 
@@ -43,6 +49,29 @@ describe('toggle button', () => {
         describe('flip the toggle', () => {
             beforeEach(() => sm.flip())
             stateIs('off')
+        })
+    })
+})
+
+
+describe('toggle button with count', () => {
+    beforeEach(() => sm = new ToggleButtonWithCount().startSM())
+
+    stateIs('off')
+    countIs(0)
+    describe('flip the toggle', () => {
+        beforeEach(() => sm.flip())
+        stateIs('on')
+        countIs(1)
+        describe('flip the toggle', () => {
+            beforeEach(() => sm.flip())
+            stateIs('off')
+            countIs(1)
+            describe('flip the toggle', () => {
+                beforeEach(() => sm.flip())
+                stateIs('on')
+                countIs(2)
+            })
         })
     })
 })
