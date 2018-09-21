@@ -24,14 +24,22 @@ import {expect} from 'chai'
 import delay from "../src/util/delay";
 import HotelSafe from "../examples/HotelSafe";
 import {State} from "../src/types";
+import bdd = Mocha.interfaces.bdd;
 
 let safe
 let code = [1, 2, 3, 4]
+let badCode = [0, 2, 3, 4]
 
 
-export function stateIs(s: State) {
+function stateIs(s: State) {
     it(`in state "${s}"`, async () =>
         expect(await safe.getState()).to.eq(s))
+}
+
+function sendCode(code: number[]) {
+    for (let d of code) {
+        safe.button(d)
+    }
 }
 
 describe('hotel safe', () => {
@@ -56,10 +64,8 @@ describe('hotel safe', () => {
 
         describe('enter code', () => {
             beforeEach(() => {
-                for (let digit of code)
-                    safe.button(digit - 1) // these will get pushed out
-                for (let digit of code)
-                    safe.button(digit)
+                sendCode(badCode)
+                sendCode(code)
             })
 
             it('stores new code', async () => {
@@ -75,18 +81,16 @@ describe('hotel safe', () => {
             describe('locked safe', () => {
                 beforeEach(async () => {
                     safe.lock()
-                    await delay(200)
+                    // await delay(200)
                 })
 
                 it('correct code opens safe', async () => {
-                    for (let digit of code)
-                        safe.button(digit)
+                    sendCode(code)
                     stateIs('open')
                 })
 
                 it('wrong code sends it to INCORRECT, then CLOSED', async () => {
-                    for (let digit of code)
-                        safe.button(digit + 1)
+                    sendCode(badCode)
                     expect(await safe.getState()).to.eq('incorrect')
                     stateIs('incorrect')
                     await delay(500)
