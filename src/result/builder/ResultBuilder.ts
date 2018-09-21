@@ -34,7 +34,7 @@ export default abstract class ResultBuilder {
     _hasNewData = false
     _data?: Data
     _actions: ActionList = []
-    _updates = []
+    _updates: Spec<Data>[] = []
 
     /**
      * Builds the result
@@ -78,7 +78,7 @@ export default abstract class ResultBuilder {
      * @param time
      * @return {ResultBuilder}
      */
-    eventTimeout(time: number): ResultBuilder {
+    eventTimeout(time: Timeout): ResultBuilder {
         return this.action(new EventTimeoutAction(time))
     }
 

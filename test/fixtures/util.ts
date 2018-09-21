@@ -21,8 +21,9 @@
 
 
 import Deferred from "../../src/util/Deferred";
-import {expect} from "chai";
-import StateMachine, {State} from "../..";
+import {assert, expect} from "chai";
+import {State} from "../..";
+import {Data} from "../../src/types";
 
 export async function throws(f) {
     let x = new Deferred()
@@ -34,5 +35,8 @@ export async function throws(f) {
     }
     await x
 }
+
+
+
 
 

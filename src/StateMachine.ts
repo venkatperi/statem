@@ -31,9 +31,13 @@ import {
     HandlerOpts,
     HandlerResult,
     Handlers,
+    isComplexState,
+    MatchedHandler,
     Priority,
     RouteHandlers,
     State,
+    stateEquals,
+    stateName,
     Timeout
 } from "./types";
 
@@ -73,7 +77,19 @@ export interface StateMachine {
 }
 
 export class StateMachine extends EventEmitter {
+    /**
+     *
+     */
     initialState: State
+
+    /**
+     *
+     */
+    initialData: Data
+
+    /**
+     *
+     */
     handlers: Handlers
 
     defaultHandlers: Handlers = [
@@ -92,7 +108,7 @@ export class StateMachine extends EventEmitter {
     protected _pending = new Pending()
     private timers = new Timers()
     private processingEvent = false
-    private events = new StablePriorityQueue((a, b) => a.priority - b.priority)
+    private events = new StablePriorityQueue<Event>((a, b) => a.priority - b.priority)
 
     log = {
         v: this.logger('v'),
@@ -112,50 +128,9 @@ export class StateMachine extends EventEmitter {
             this.data = data
     }
 
-    logger(level) {
-        return (tag2, ...args) => {
+    logger(level: string) {
+        return (tag2: string, ...args: any[]) => {
             Log[level](`${tag2}/${this.state}: `, ...args)
-        }
-    }
-
-    /**
-     * Gets the current {Data} of this {StateMachine}
-     * @return {Data} the current data
-     */
-    get data(): Data {
-        return this._data;
-    }
-
-    /**
-     * Sets the current {Data}
-     * @param value the {Data}
-     */
-    set data(value: Data) {
-        this.log.i('setData', value)
-        let old = this._data
-        this._data = value;
-        this.emit('data', value, old)
-    }
-
-    /**
-     *  Gets the current state
-     * @return {State}
-     */
-    get state(): State {
-        return this._state
-    }
-
-    /**
-     * Sets the current state
-     * @param s
-     */
-    set state(s: State) {
-        this.log.i('setState', s)
-        let old = this._state || this.initialState
-        this._state = s
-        this.emit('state', s, old)
-        if (old !== s) {
-            this.emit('stateChanged', s, old)
         }
     }
 
@@ -169,6 +144,9 @@ export class StateMachine extends EventEmitter {
     startSM(options: object = {}) {
         this.log.i('start', options)
 
+        // set data before setting state to handle initial state
+        // entry event
+        this.data = this.initialData
         let that = this
         let timers = this.timers
         this.on('state', (s, old) => that.addEvent(new EnterEvent({old})))
@@ -260,6 +238,55 @@ export class StateMachine extends EventEmitter {
         return new KeepStateAndData()
     }
 
+    /**
+     * Gets the current {Data} of this {StateMachine}
+     * @return {Data} the current data
+     */
+    private get data(): Data {
+        return this._data;
+    }
+
+    /**
+     * Sets the current {Data}
+     * @param value the {Data}
+     */
+    private set data(value: Data) {
+        this.log.i('setData', value)
+        let old = this._data
+        this._data = value;
+        this.emit('data', value, old)
+    }
+
+    /**
+     *  Gets the current state
+     * @return {State}
+     */
+    private get state(): State {
+        return this._state
+    }
+
+    /**
+     * Sets the current state
+     * @param s
+     */
+    private set state(s: State) {
+        this.log.i('setState', s)
+        let old = this._state || this.initialState
+        let oldName = stateName(old)
+        this._state = s
+        let currentName = stateName(s)
+
+        this.emit('state', s, old)
+
+        if ((isComplexState(s) || isComplexState(old)) && oldName === currentName)
+            this.emit('complexStateChanged', s, old)
+
+        if (!stateEquals(s, old)) {
+            this.emit('stateChanged', s, old)
+        }
+
+    }
+
     protected initHandlers() {
         let that = this
         this.handlers = this.handlers || []
@@ -279,9 +306,9 @@ export class StateMachine extends EventEmitter {
     /**
      *
      * @param e
-     * @return {{routeHandler: RouteHandler; result: {[p: string]: string}}}
+     * @return {MatchedHandler|undefined}
      */
-    protected getRouteHandler(e: Event) {
+    protected getRouteHandler(e: Event): MatchedHandler | undefined {
         const eventRoute = this.makeRoute(e)
         this.log.i('getRouteHandler', eventRoute)
 
@@ -319,21 +346,21 @@ export class StateMachine extends EventEmitter {
         this.processEvents()
     }
 
-    private getHandlerResult(h, args) {
+    private getHandlerResult(h: MatchedHandler | undefined, args: { event: Event; args: { [x: string]: string; }; current: State; data: any; route: string; }) {
         if (!h) {
             return this.handleDefaultEvent(args);
         }
 
-        let handler = h.routeHandler.handler
-        if (typeof handler === 'string') {
-            return nextState(handler)
+        let handler: Handler = h.routeHandler.handler
+        if (typeof handler === 'function') {
+            return handler(args);
         }
 
         if (Array.isArray(handler)) {
             return nextState(handler[0]).eventTimeout(handler[1]);
         }
 
-        return handler(args);
+        return nextState(handler)
     }
 
     /**
@@ -356,11 +383,13 @@ export class StateMachine extends EventEmitter {
     }
 
     doProcessEvents() {
-        if (this.events.length === 0 || this.processingEvent)
+        if (this.events.isEmpty() || this.processingEvent)
             return
         this.log.v('processEvents', this.events)
-        if (!this.events.isEmpty())
-            this.handleEvent(this.events.poll())
+
+        let e = this.events.poll()
+        if (e)
+            this.handleEvent(e)
     }
 
     /**
@@ -420,8 +449,11 @@ export class StateMachine extends EventEmitter {
      */
     addNextEvent(action: NextEventAction): StateMachine {
         let event = makeNextEvent(action)
-        event.priority = Priority.Highest
-        return this.addEvent(event)
+        if (event) {
+            event.priority = Priority.Highest
+            return this.addEvent(event)
+        }
+        return this
     }
 
     /**
@@ -525,12 +557,5 @@ export class StateMachine extends EventEmitter {
         return await this.call('getData')
     }
 
-    toGraph() {
-        for (const routeHandler of this._routeHandlers) {
-            for (let route of routeHandler.routes) {
-                let [event, context, current] = route[0].split('#')
-                console.log(`${current} on ${event}(${context} --> `)
-            }
-        }
-    }
+
 }

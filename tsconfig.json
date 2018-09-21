@@ -3,6 +3,8 @@
     "module": "commonjs",
     "target": "es5",
     "sourceMap": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "outDir": "dist",
     "types": [
       "node"
@@ -15,7 +17,8 @@
     "src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test"
   ],
   "compileOnSave": true
 }

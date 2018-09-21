@@ -21,7 +21,7 @@
 
 import 'mocha'
 import {PushButton, PushButtonCountdownTimer, ToggleButton, ToggleButtonWithCount} from "../examples/Buttons";
-import {State} from "../index";
+import {State} from "..";
 import {expect} from "chai";
 import delay from "../src/util/delay";
 

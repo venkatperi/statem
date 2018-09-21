@@ -21,6 +21,7 @@
 
 import StateMachine, {Handlers, keepState, nextState, State, Timeout} from '../..';
 import Deferred from "../../src/util/Deferred";
+import {stateName} from "../../src/types";
 
 export default class Service extends StateMachine {
     /**
@@ -41,7 +42,7 @@ export default class Service extends StateMachine {
      * @type {Error[]}
      */
 
-    data = {
+    initialData = {
         running: new Deferred(),
         terminated: new Deferred(),
         errors: []
@@ -117,7 +118,8 @@ export default class Service extends StateMachine {
      */
     async awaitRunning() {
         let state = await this.getState()
-        if (['cancelling', 'stopping', 'terminated', 'failed'].indexOf(state) >= 0) {
+        if (['cancelling', 'stopping', 'terminated', 'failed']
+            .indexOf(stateName(state)) >= 0) {
             throw new Error(`Can't enter 'running' from state: ${state}`)
         }
         let data = await this.getData()

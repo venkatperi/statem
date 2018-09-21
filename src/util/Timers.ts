@@ -18,16 +18,16 @@
 //  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
-import ntimer = require('ntimer');
-import NTimer = ntimer.Timer;
+
 import {uniqId} from "./uniqId";
 import Logger from "../Logger";
 import {Timeout} from "../types";
+import {Timer} from "ntimer";
 
 const Log = Logger('Timers')
 
 export default class Timers {
-    timers: { [k in string]: NTimer } = {}
+    timers: { [k in string]: Timer } = {}
 
     /**
      * Creates a auto starting timer with the given timeout and returns its
@@ -37,19 +37,20 @@ export default class Timers {
      * new timer is installed
      *
      * @param timeout
-     * @param name, optional, the timer's name
      *
-     * @return {any} timer
+     * @return {module:ntimer.Timer} timer
      * @param opts
+     * @param n
      */
-    create(timeout: Timeout, name?: string, opts?): NTimer {
+    create(timeout: Timeout, n?: string, opts?: any): Timer {
         let that = this
 
-        name = name || uniqId()
+        let name = n || uniqId()
+
         Log.i('create', timeout, name, opts)
 
         this.cancel(name)
-        let t = this.timers[name] = new NTimer({name, timeout, auto: true})
+        let t = this.timers[name] = new Timer({name, timeout, auto: true})
         t.on('timer', () => that.cancel(name))
         return t
     }
@@ -72,7 +73,7 @@ export default class Timers {
         return true
     }
 
-    get(name: string): NTimer {
+    get(name: string): Timer {
         return this.timers[name]
     }
 }

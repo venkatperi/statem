@@ -38,7 +38,7 @@ export class ToggleButton extends StateMachine {
 export class ToggleButtonWithCount extends StateMachine {
     initialState = 'off'
 
-    data = {
+    initialData = {
         count: 0
     }
 
@@ -46,7 +46,6 @@ export class ToggleButtonWithCount extends StateMachine {
         ['cast#flip#off', ({data}) => nextState('on').data({count: {$set: data.count + 1}})],
         ['cast#flip#on', 'off']
     ]
-
 
     flip() {
         this.cast('flip')
@@ -82,7 +81,7 @@ export class PushButtonCountdownTimer extends StateMachine {
 
     constructor(timeout: Timeout) {
         super()
-        this.data = {timeout}
+        this.initialData = {timeout}
     }
 
     push() {

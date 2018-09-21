@@ -19,8 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// @ts-ignore
-import logger from 'wtlog'
+export function dataToString(c: any) {
+    if (typeof c === 'object')
+        return JSON.stringify(c)
 
-export default (tag: string) => logger(tag)
+    if (c === undefined || c === null) {
+        return ''
+    }
+
+    return String(c)
+}
 

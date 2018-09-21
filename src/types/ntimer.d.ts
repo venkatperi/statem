@@ -19,8 +19,21 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// @ts-ignore
-import logger from 'wtlog'
+declare module 'stablepriorityqueue' {
+    class StablePriorityQueue<T> {
+        constructor(comparator: (a: T, b: T) => number)
 
-export default (tag: string) => logger(tag)
+        add(item: T): void
 
+        poll(): T | undefined
+
+        peek(): T | undefined
+
+        trim(): void
+
+        isEmpty(): boolean
+
+    }
+
+    export = StablePriorityQueue
+}

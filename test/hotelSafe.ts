@@ -22,17 +22,22 @@
 import 'mocha'
 import {expect} from 'chai'
 import delay from "../src/util/delay";
-import HotelSafe from "../examples/HotelSafe/HotelSafe";
+import HotelSafe from "../examples/HotelSafe";
+import {State} from "../src/types";
 
 let safe
 let code = [1, 2, 3, 4]
 
+
+export function stateIs(s: State) {
+    it(`in state "${s}"`, async () =>
+        expect(await safe.getState()).to.eq(s))
+}
+
 describe('hotel safe', () => {
 
     beforeEach(() => {
-        safe = new HotelSafe()
-        safe.codeTimeout = safe.msgDisplay = 200 // for test sanity
-        safe.start()
+        safe = new HotelSafe(200).startSM()
     })
 
     it('initial code is empty', async () => {
@@ -41,22 +46,18 @@ describe('hotel safe', () => {
     })
 
     it('initial state is OPEN', async () => {
-        expect(await safe.getState()).to.eq('open')
+        stateIs('open')
     })
 
     describe('locking the safe', () => {
-        beforeEach(() => {
-            safe.reset()
-        })
+        beforeEach(() => safe.reset())
 
-        it('press RESET to enter the new code', async () => {
-            expect(await safe.getState()).to.eq('locking')
-        })
+        stateIs('locking')
 
         describe('enter code', () => {
             beforeEach(() => {
                 for (let digit of code)
-                    safe.button(digit)
+                    safe.button(digit - 1) // these will get pushed out
                 for (let digit of code)
                     safe.button(digit)
             })
@@ -68,7 +69,7 @@ describe('hotel safe', () => {
 
             it('press LOCK to lock the safe', async () => {
                 safe.lock()
-                expect(await safe.getState()).to.eq('closed')
+                stateIs('closed')
             })
 
             describe('locked safe', () => {
@@ -80,15 +81,16 @@ describe('hotel safe', () => {
                 it('correct code opens safe', async () => {
                     for (let digit of code)
                         safe.button(digit)
-                    expect(await safe.getState()).to.eq('open')
+                    stateIs('open')
                 })
 
                 it('wrong code sends it to INCORRECT, then CLOSED', async () => {
                     for (let digit of code)
                         safe.button(digit + 1)
                     expect(await safe.getState()).to.eq('incorrect')
+                    stateIs('incorrect')
                     await delay(500)
-                    expect(await safe.getState()).to.eq('closed')
+                    stateIs('closed')
                 })
             })
         })
@@ -97,7 +99,7 @@ describe('hotel safe', () => {
             safe.button(1)
             safe.button(2)
             await delay(500)
-            expect(await safe.getState()).to.eq('open')
+            stateIs('open')
             let data = await safe.getData()
             expect(data.code.length).to.eq(0)
         })

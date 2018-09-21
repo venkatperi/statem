@@ -19,7 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export default function arrayEqual(arr1, arr2): boolean {
+export function arrayEqual<T>(arr1: T[], arr2: T[]): boolean {
     const l1 = arr1.length
     if (l1 !== arr2.length) return false
 
@@ -29,3 +29,15 @@ export default function arrayEqual(arr1, arr2): boolean {
     return true
 }
 
+export function objEqual(a: { [k in any]: any }, b: { [k in any]: any }): boolean {
+    const aKeys = Object.keys(a)
+    const bKeys = Object.keys(b)
+    if (aKeys.length !== bKeys.length) return false
+
+    for (let k of aKeys) {
+        if (a[k] !== b[k])
+            return false
+    }
+
+    return true
+}

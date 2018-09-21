@@ -20,47 +20,35 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import {StateMachine} from '../../';
+type Timeout = string | number
+type TimerOpts = {
+    name: string,
+    timeout: Timeout,
+    auto?: boolean,
+    repeat?: number
+}
 
-export default class Lock extends StateMachine {
+declare module 'ntimer' {
+    import EventEmitter = require('events');
 
-  handlers = {
-    'cast#button/:digit#locked': ( event, args, state ) => {
-      console.log( args )
-    },
-  }
+    namespace ntimer {
 
-  initialState = { name: 'locked' }
+        class Timer extends EventEmitter {
+            constructor(opts: TimerOpts)
 
+            start(): Timer
 
-  /**
-   def button(lock, digit),
-   do: GenStateMachine.cast(lock, {:button, digit})
+            cancel(): Timer
+        }
 
-   def code_length(lock),
-   do: GenStateMachine.call(lock, :code_length)
+        function auto(name: string, timeout: Timeout): Timer
 
-   def lock(lock),
-   do: GenStateMachine.call(lock, :lock)
+        function repeat(name: string, timeout: Timeout, repeat: number): Timer
 
-   def status(lock),
-   do: GenStateMachine.call(lock, :status)
-   */
+        function autoRepeat(name: string, timeout: Timeout, repeat: number): Timer
+    }
 
-  button( digit ) {
-    this.cast( { button: digit } )
-  }
+    function ntimer(name: string, timeout: Timeout): ntimer.Timer
 
-  get codeLength(): number {
-    this.call( 'codeLength' )
-  }
-
-  lock() {
-    this.call( 'lock' )
-  }
-
-  get status() {
-    this.call( 'status' )
-  }
-
+    export = ntimer
 }

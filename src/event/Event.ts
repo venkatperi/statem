@@ -21,6 +21,7 @@
 
 import {EventContext, EventExtra, EventType, Priority} from "../types";
 import * as _ from 'lodash'
+import {dataToString} from "../util/StringHelper";
 
 export default class Event {
     /**
@@ -48,14 +49,15 @@ export default class Event {
      */
     protected get contextRoute(): string {
         let c = this.context
-        if (typeof c === 'object')
-            return Object.entries(c)
-                .map(([k, v]) => `${k}/${v}`)
-                .join('/')
 
         if (c === undefined || c === null) {
             return ''
         }
+
+        if (typeof c === 'object')
+            return Object.entries(c)
+                .map(([k, v]) => `${k}/${v}`)
+                .join('/')
 
         return String(this.context)
     }
@@ -82,16 +84,8 @@ export default class Event {
      * @return {string}
      */
     get contextString(): string {
-        let c = this.context
-        if (typeof c === 'object')
-            return JSON.stringify(c)
-
-        if (c === undefined || c === null) {
-            return ''
-        }
-        return String(c)
+        return dataToString(this.context)
     }
-
 
     /**
      * Convert to displayable string
