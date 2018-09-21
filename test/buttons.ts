@@ -20,9 +20,10 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import 'mocha'
-import {ToggleButton, ToggleButtonWithCount} from "./fixtures/Buttons";
+import {PushButton, PushButtonCountdownTimer, ToggleButton, ToggleButtonWithCount} from "../examples/Buttons";
 import {State} from "../index";
 import {expect} from "chai";
+import delay from "../src/util/delay";
 
 
 let sm
@@ -39,41 +40,97 @@ function countIs(count: number) {
 }
 
 
-describe('toggle button', () => {
-    beforeEach(() => sm = new ToggleButton().startSM())
+describe('buttons', () => {
+    describe('toggle button', () => {
+        beforeEach(() => sm = new ToggleButton().startSM())
 
-    stateIs('off')
-    describe('flip the toggle', () => {
-        beforeEach(() => sm.flip())
-        stateIs('on')
+        stateIs('off')
         describe('flip the toggle', () => {
             beforeEach(() => sm.flip())
-            stateIs('off')
-        })
-    })
-})
-
-
-describe('toggle button with count', () => {
-    beforeEach(() => sm = new ToggleButtonWithCount().startSM())
-
-    stateIs('off')
-    countIs(0)
-    describe('flip the toggle', () => {
-        beforeEach(() => sm.flip())
-        stateIs('on')
-        countIs(1)
-        describe('flip the toggle', () => {
-            beforeEach(() => sm.flip())
-            stateIs('off')
-            countIs(1)
+            stateIs('on')
             describe('flip the toggle', () => {
                 beforeEach(() => sm.flip())
-                stateIs('on')
-                countIs(2)
+                stateIs('off')
             })
         })
     })
+
+
+    describe('toggle button with count', () => {
+        beforeEach(() => sm = new ToggleButtonWithCount().startSM())
+
+        stateIs('off')
+        countIs(0)
+        describe('flip the toggle', () => {
+            beforeEach(() => sm.flip())
+            stateIs('on')
+            countIs(1)
+            describe('flip the toggle', () => {
+                beforeEach(() => sm.flip())
+                stateIs('off')
+                countIs(1)
+                describe('flip the toggle', () => {
+                    beforeEach(() => sm.flip())
+                    stateIs('on')
+                    countIs(2)
+                })
+            })
+        })
+    })
+
+
+    describe('push button', () => {
+        beforeEach(() => sm = new PushButton().startSM())
+
+        stateIs('off')
+        let cycle = (max, count = 0) => {
+            describe('push', () => {
+                beforeEach(() => sm.push())
+                stateIs('on')
+                describe('send push again before release is NOP', () => {
+                    beforeEach(() => sm.push())
+                    stateIs('on')
+                })
+                describe('release', () => {
+                    beforeEach(() => sm.release())
+                    stateIs('off')
+                    describe('send release again before push is NOP', () => {
+                        beforeEach(() => sm.release())
+                        stateIs('off')
+                    })
+                    if (count < max - 1)
+                        cycle(max, count + 1)
+                })
+            })
+        }
+        cycle(2)
+    })
+
+
+    describe('push button countdown timer', () => {
+        beforeEach(() => sm = new PushButtonCountdownTimer("200ms").startSM())
+
+        stateIs('off')
+        let cycle = (max, count = 0) => {
+            describe('push', () => {
+                beforeEach(() => sm.push())
+                stateIs('on')
+                describe('before timeout', () => {
+                    beforeEach(async () => await delay(100))
+                    stateIs('on')
+                    describe('after timeout', () => {
+                        beforeEach(async () => await delay(150))
+                        stateIs('off')
+                        if (count < max - 1)
+                            cycle(max, count + 1)
+                    })
+                })
+            })
+        }
+        cycle(2)
+    })
 })
+
+
 
 

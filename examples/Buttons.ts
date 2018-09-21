@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine, {Handlers, nextState} from "../.."
+import StateMachine, {Handlers, nextState, Timeout} from "../index"
 
 export class ToggleButton extends StateMachine {
     initialState = 'off'
@@ -43,9 +43,7 @@ export class ToggleButtonWithCount extends StateMachine {
     }
 
     handlers: Handlers = [
-        ['cast#flip#off', ({data}) => nextState('on')
-            .data({count: {$set: data.count + 1}})],
-
+        ['cast#flip#off', ({data}) => nextState('on').data({count: {$set: data.count + 1}})],
         ['cast#flip#on', 'off']
     ]
 
@@ -54,3 +52,41 @@ export class ToggleButtonWithCount extends StateMachine {
         this.cast('flip')
     }
 }
+
+
+export class PushButton extends StateMachine {
+    initialState = 'off'
+
+    handlers: Handlers = [
+        ['cast#push#off', 'on'],
+        ['cast#release#on', 'off']
+    ]
+
+    push() {
+        this.cast('push')
+    }
+
+    release() {
+        this.cast('release')
+    }
+}
+
+
+export class PushButtonCountdownTimer extends StateMachine {
+    initialState = 'off'
+
+    handlers: Handlers = [
+        ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
+        ['genericTimeout#*_#on', 'off']
+    ]
+
+    constructor(timeout: Timeout) {
+        super()
+        this.data = {timeout}
+    }
+
+    push() {
+        this.cast('push')
+    }
+}
+

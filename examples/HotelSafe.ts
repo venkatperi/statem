@@ -20,10 +20,10 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine, {keepState, nextState, State} from "../.."
-import arrayEqual from "../../src/util/arrayEqual";
-import pushFixed from "../../src/util/pushFixed";
-import {Handlers} from "../../src/types";
+import StateMachine, {keepState, nextState, State} from "../index"
+import arrayEqual from "../src/util/arrayEqual";
+import pushFixed from "../src/util/pushFixed";
+import {Handlers} from "../src/types";
 
 function clear() {
     return Object.assign({}, {code: [], input: []})

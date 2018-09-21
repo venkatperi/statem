@@ -64,7 +64,7 @@ export type Handler = HandlerFn | State | StateWithTimeout
 export type Handlers = [string | string[], Handler][]
 
 export type RouteHandler = {
-    routes: Route[],
+    routes: [string, Route][],
     handler: Handler
 }
 

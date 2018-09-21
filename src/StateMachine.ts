@@ -69,7 +69,8 @@ type SMOptions = {
     data?: Data,
 }
 
-export interface StateMachine{}
+export interface StateMachine {
+}
 
 export class StateMachine extends EventEmitter {
     initialState: State
@@ -227,21 +228,21 @@ export class StateMachine extends EventEmitter {
 
     /**
      *
-     * @param route
      * @param handler
      * @return {this}
+     * @param routes
      */
-    addHandler(route: string | string[], handler: Handler): StateMachine {
-        this.log.v(`addHandler`, route, handler)
+    addHandler(routes: string | string[], handler: Handler): StateMachine {
+        this.log.v(`addHandler`, routes, handler)
 
-        if (typeof route === 'string')
-            route = [route]
+        if (typeof routes === 'string')
+            routes = [routes]
 
         try {
-            let routes = route.map(r => new Route(r))
-            this._routeHandlers.push({routes, handler})
+            let mapped: [string, Route][] = <[string, Route][]>routes.map(r => [r, new Route(r)])
+            this._routeHandlers.push({routes: mapped, handler})
         } catch (e) {
-            Log.e(e, route || 'No route!')
+            Log.e(e, routes || 'No route!')
             throw e
         }
         return this
@@ -286,7 +287,7 @@ export class StateMachine extends EventEmitter {
 
         for (const routeHandler of this._routeHandlers) {
             for (let route of routeHandler.routes) {
-                let result = route.match(eventRoute)
+                let result = route[1].match(eventRoute)
                 if (result) {
                     return {routeHandler, result, route: eventRoute}
                 }
@@ -522,5 +523,14 @@ export class StateMachine extends EventEmitter {
      */
     async getData() {
         return await this.call('getData')
+    }
+
+    toGraph() {
+        for (const routeHandler of this._routeHandlers) {
+            for (let route of routeHandler.routes) {
+                let [event, context, current] = route[0].split('#')
+                console.log(`${current} on ${event}(${context} --> `)
+            }
+        }
     }
 }

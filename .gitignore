@@ -1,3 +1,5 @@
+graph/
+Graph.ts
 sites/
 build/
 *.swp
