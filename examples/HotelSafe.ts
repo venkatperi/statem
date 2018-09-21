@@ -75,7 +75,7 @@ export default class HotelSafe extends StateMachine {
         // User entered digit(s).
         // Keep state if code is not long enough
         // OPEN if input matches code
-        // go to INCORRECT if code does not match and set a timeout
+        // go to MESSAGE if code does not match and set a timeout
         ['cast#button/:digit#closed', ({args, data}) => {
             let digit = Number(args.digit)
             let input = data.input.concat(digit)
@@ -83,11 +83,10 @@ export default class HotelSafe extends StateMachine {
                 keepState().data({input: {$push: [digit]}}) :
                 arrayEqual(data.code, input) ?
                     nextState('open') :
-                    nextState('incorrect').timeout(data.msgDisplay)
+                    nextState(['closed', 'message']).timeout(data.msgDisplay)
         }],
 
-        // go back to CLOSED after showing message
-        ['genericTimeout#time/:time#incorrect', 'closed'],
+        ['genericTimeout#*_#closed/message', 'closed'],
     ]
 
     constructor(timeout: Timeout) {

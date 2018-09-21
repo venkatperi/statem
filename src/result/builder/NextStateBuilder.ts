@@ -19,10 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Data, State} from "../../types";
+import {Data,} from "../../types";
 import ResultBuilder from "./ResultBuilder";
 import {ActionList} from "../../action";
-import Result, {NextState, NextStateWithData} from "..";
+import Result, {NextState, NextStateWithData,} from "..";
+import {State} from '../../State'
 
 export default class NextStateBuilder extends ResultBuilder {
     _nextState: State

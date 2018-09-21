@@ -20,9 +20,10 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import ResultBuilder from './ResultBuilder'
-import {EventContext, State, Timeout} from "../../types";
+import {EventContext,  Timeout} from "../../types";
 import NextStateBuilder from "./NextStateBuilder";
 import KeepStateBuilder from "./KeepStateBuilder";
+import {State} from "../../State";
 
 export default ResultBuilder
 export {KeepStateBuilder, NextStateBuilder}

@@ -23,8 +23,8 @@ import 'mocha'
 import {expect} from 'chai'
 import delay from "../src/util/delay";
 import HotelSafe from "../examples/HotelSafe";
-import {State} from "../src/types";
-import bdd = Mocha.interfaces.bdd;
+import {State} from "..";
+import {stateRoute} from "../src/State";
 
 let safe
 let code = [1, 2, 3, 4]
@@ -33,7 +33,7 @@ let badCode = [0, 2, 3, 4]
 
 function stateIs(s: State) {
     it(`in state "${s}"`, async () =>
-        expect(await safe.getState()).to.eq(s))
+        expect(stateRoute(await safe.getState())).is.eq(s))
 }
 
 function sendCode(code: number[]) {
@@ -62,9 +62,17 @@ describe('hotel safe', () => {
 
         stateIs('locking')
 
-        describe('enter code', () => {
+        describe('times out on inactivity', () => {
+            beforeEach(async () => {
+                sendCode([1, 2])
+                await delay(500)
+            })
+            stateIs('open')
+        })
+
+        describe('enter new code', () => {
             beforeEach(() => {
-                sendCode(badCode)
+                sendCode(badCode)   //gets pushed out by next batch of digits
                 sendCode(code)
             })
 
@@ -73,39 +81,30 @@ describe('hotel safe', () => {
                 expect(data.code).to.eql(code)
             })
 
-            it('press LOCK to lock the safe', async () => {
-                safe.lock()
+            describe('press LOCK', () => {
+                beforeEach(() => safe.lock())
                 stateIs('closed')
             })
 
             describe('locked safe', () => {
-                beforeEach(async () => {
-                    safe.lock()
-                    // await delay(200)
-                })
+                beforeEach(async () => safe.lock())
 
-                it('correct code opens safe', async () => {
-                    sendCode(code)
+                describe('enter correct code', () => {
+                    beforeEach(() => sendCode(code))
                     stateIs('open')
                 })
 
-                it('wrong code sends it to INCORRECT, then CLOSED', async () => {
-                    sendCode(badCode)
-                    expect(await safe.getState()).to.eq('incorrect')
-                    stateIs('incorrect')
-                    await delay(500)
-                    stateIs('closed')
+                describe('enter wrong code', () => {
+                    beforeEach(() => sendCode(badCode))
+                    describe('shows error', () => {
+                        stateIs('closed/message')
+                    })
+                    describe('removes message after timeout', () => {
+                        beforeEach(async () => await delay(500))
+                        stateIs('closed')
+                    })
                 })
             })
-        })
-
-        it('times out on inactivity and goes back to OPEN', async () => {
-            safe.button(1)
-            safe.button(2)
-            await delay(500)
-            stateIs('open')
-            let data = await safe.getData()
-            expect(data.code.length).to.eq(0)
         })
     })
 

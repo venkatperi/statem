@@ -25,6 +25,7 @@ import Result from "./result/Result";
 import ResultBuilder from "./result/builder";
 import {arrayEqual, objEqual} from "./util/arrayEqual";
 import Route = require("route-parser");
+import {State} from "./State";
 
 export type Primitive = number | string | boolean | null | undefined
 
@@ -33,47 +34,6 @@ export type PrimitiveObject = { [k in string]: Primitive }
 export type NamedPrimitiveObject = {
     name: string,
     [k: string]: Primitive
-}
-
-export type ComplexState = string[] | NamedPrimitiveObject
-
-export type State = string | ComplexState
-
-export function isStringState(s: State): s is string {
-    return typeof s === 'string'
-}
-
-export function isComplexState(s: State): s is ComplexState {
-    return typeof s !== 'string'
-}
-
-export function isArrayState(s: State): s is string[] {
-    return Array.isArray(s)
-}
-
-export function isObjState(s: State): s is NamedPrimitiveObject {
-    return typeof s === 'object'
-}
-
-export function stateName(s: State) {
-    if (typeof s === 'string')
-        return s
-    if (Array.isArray(s))
-        return s[0]
-    return s.name
-}
-
-export function stateEquals(a: State, b: State) {
-    if (isStringState(a) && isStringState(b))
-        return a === b
-
-    if (isArrayState(a) && isArrayState(b))
-        return arrayEqual(a, b)
-
-    if (isObjState(a) && isObjState(b))
-        return objEqual(a, b)
-
-    return false
 }
 
 export type Data = any;

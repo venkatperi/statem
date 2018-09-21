@@ -31,13 +31,9 @@ import {
     HandlerOpts,
     HandlerResult,
     Handlers,
-    isComplexState,
     MatchedHandler,
     Priority,
     RouteHandlers,
-    State,
-    stateEquals,
-    stateName,
     Timeout
 } from "./types";
 
@@ -64,6 +60,7 @@ import ResultBuilder from "./result/builder";
 import Logger from './Logger'
 import Timers from "./util/Timers";
 import {keepState, nextState} from "..";
+import {isComplexState, State, stateEquals, stateName, stateRoute} from "./State";
 
 const Log = Logger('StateMachine')
 
@@ -94,11 +91,11 @@ export class StateMachine extends EventEmitter {
 
     defaultHandlers: Handlers = [
         // Get the current state
-        ['call/:from#getState#:state', ({args, current}) =>
+        ['call/:from#getState#*_', ({args, current}) =>
             keepState().reply(args.from, current)],
 
         // Get the current data
-        ['call/:from#getData#:state', ({args, data}) =>
+        ['call/:from#getData#*_', ({args, data}) =>
             keepState().reply(args.from, data)],
     ]
 
@@ -130,7 +127,7 @@ export class StateMachine extends EventEmitter {
 
     logger(level: string) {
         return (tag2: string, ...args: any[]) => {
-            Log[level](`${tag2}/${this.state}: `, ...args)
+            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args)
         }
     }
 
@@ -300,7 +297,7 @@ export class StateMachine extends EventEmitter {
      * @return {string} the route
      */
     protected makeRoute(e: Event): string {
-        return `${e.route}#${this.state}`
+        return `${e.route}#${stateRoute(this.state)}`
     }
 
     /**

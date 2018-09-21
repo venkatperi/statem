@@ -1,7 +1,8 @@
 import ResultWithData from "./ResultWithData";
-import {Data, State} from "../types";
+import {Data,} from "../types";
 import {ActionList} from "../action";
 import {Stateful} from "./Stateful";
+import {State} from "../State";
 
 /**
  * Represents a state transition, maybe to the same state.

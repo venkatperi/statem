@@ -19,10 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {State} from "../types";
 import {ActionList} from "../action";
 import Result from "./Result";
 import {Stateful} from "./Stateful";
+import {State} from "../State";
 
 /**
  * Represents a state transition, maybe to the same state. Keeps the current data
