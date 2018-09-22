@@ -20,7 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import {State} from "../State";
+import { State } from "../State";
+
 
 export interface Stateful {
     nextState: State;

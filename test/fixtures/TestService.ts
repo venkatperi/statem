@@ -19,20 +19,27 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
+import Service from "../../examples/Service"
+import Deferred from "../../src/util/Deferred"
 
+export class TestService extends Service {
+    started: Deferred<any> = new Deferred()
 
-export default class TimeoutAction extends Action {
-    /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
-     */
-    constructor(public time: Timeout) {
-        super()
+    stopped = new Deferred()
+
+    cancelled = new Deferred()
+
+    timeout = 500
+
+    async doStart() {
+        await this.started
     }
 
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
+    async doStop() {
+        await this.stopped
+    }
+
+    async doCancel() {
+        await this.cancelled
     }
 }

@@ -19,12 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {EventContext, EventExtra, From, Priority} from "../types";
+import { EventContext, EventExtra, From, Priority } from "../types";
 import Event from "./event";
 
-export default class CallEvent extends Event {
-    type = 'call'
 
+export default class CallEvent extends Event {
+    type = "call"
     priority = Priority.Low
 
     /**

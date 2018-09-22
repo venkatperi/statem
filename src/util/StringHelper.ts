@@ -19,14 +19,30 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export function dataToString(c: any) {
-    if (typeof c === 'object')
-        return JSON.stringify(c)
+import inspect = require("object-inspect")
 
+/**
+ *
+ * @param c
+ * @return {string}
+ */
+export function dataToString(c: any) {
+    return inspect(c)
+}
+
+/**
+ * Convert data to route
+ * @param c
+ * @return {string}
+ */
+export function dataToRoute(c: any) {
     if (c === undefined || c === null) {
         return ''
     }
 
+    if (typeof c === 'object') {
+        return Object.entries(c).map((x) => x.join('/')).join('/')
+    }
+
     return String(c)
 }
-

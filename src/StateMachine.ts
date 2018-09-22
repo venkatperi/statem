@@ -20,223 +20,213 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import Route = require("route-parser");
-import EventEmitter = require('events');
-import StablePriorityQueue = require('stablepriorityqueue');
-import {
-    Data,
-    EventContext,
-    EventExtra,
-    Handler,
-    HandlerOpts,
-    HandlerResult,
-    Handlers,
-    MatchedHandler,
-    Priority,
-    RouteHandlers,
-    Timeout
-} from "./types";
-
-import Result, {KeepStateAndData, NextState, NextStateWithData} from "./result";
-import Pending from "./util/Pending";
-import Event, {
-    CallEvent,
-    CastEvent,
-    EnterEvent,
-    EventTimeoutEvent,
-    GenericTimeoutEvent,
-    makeNextEvent,
-    StateTimeoutEvent
-} from "./event";
-
+import EventEmitter = require("events")
+import Route = require("route-parser")
+import StablePriorityQueue = require("stablepriorityqueue")
+import { nextState } from "..";
 import Action, {
-    EventTimeoutAction,
-    GenericTimeoutAction,
-    NextEventAction,
-    ReplyAction,
+    EventTimeoutAction, GenericTimeoutAction, NextEventAction, ReplyAction,
     StateTimeoutAction
 } from "./action";
-import ResultBuilder from "./result/builder";
-import Logger from './Logger'
+import Event, {
+    CallEvent, CastEvent, EnterEvent, EventTimeoutEvent, GenericTimeoutEvent,
+    makeNextEvent, StateTimeoutEvent
+} from "./event";
+import { IStateMachine } from "./IStateMachine"
+import Logger from "./Logger";
+import Result, { NextState, NextStateWithData } from "./result";
+import ResultBuilder, { reply } from "./result/builder";
+import { SMOptions } from "./SMOptions"
+import {
+    isComplexState, State, stateEquals, stateName, stateRoute
+} from "./State";
+import {
+    Data, EventContext, EventExtra, Handler, HandlerOpts, HandlerResult,
+    Handlers, MatchedHandler, Priority, RouteHandlers, Timeout
+} from "./types";
+import './util/ArrayHelpers'
+import Pending from "./util/Pending";
 import Timers from "./util/Timers";
-import {keepState, nextState} from "..";
-import {isComplexState, State, stateEquals, stateName, stateRoute} from "./State";
 
-const Log = Logger('StateMachine')
+const Log = Logger("StateMachine");
 
-type SMOptions = {
-    initialState?: State,
-    handlers?: Handlers,
-    data?: Data,
-}
+export class StateMachine extends EventEmitter
+    implements IStateMachine {
 
-export interface StateMachine {
-}
-
-export class StateMachine extends EventEmitter {
-    /**
-     *
-     */
     initialState: State
 
-    /**
-     *
-     */
-    initialData: Data
-
-    /**
-     *
-     */
     handlers: Handlers
 
-    defaultHandlers: Handlers = [
-        // Get the current state
-        ['call/:from#getState#*_', ({args, current}) =>
-            keepState().reply(args.from, current)],
-
-        // Get the current data
-        ['call/:from#getData#*_', ({args, data}) =>
-            keepState().reply(args.from, data)],
-    ]
-
-    protected _routeHandlers: RouteHandlers = []
-    protected _state: State
-    protected _data: Data
-    protected _pending = new Pending()
-    private timers = new Timers()
-    private processingEvent = false
-    private events = new StablePriorityQueue<Event>((a, b) => a.priority - b.priority)
+    initialData: Data
 
     log = {
-        v: this.logger('v'),
-        i: this.logger('i'),
-        d: this.logger('d'),
-        w: this.logger('w'),
-        e: this.logger('e'),
-    }
-
-    constructor({initialState, handlers, data}: SMOptions = {}) {
-        super()
-        if (initialState)
-            this.initialState = initialState
-        if (handlers)
-            this.handlers = handlers
-        if (data)
-            this.data = data
-    }
-
-    logger(level: string) {
-        return (tag2: string, ...args: any[]) => {
-            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args)
-        }
-    }
-
+        "d": this.logger("d"),
+        "e": this.logger("e"),
+        "i": this.logger("i"),
+        "v": this.logger("v"),
+        "w": this.logger("w"),
+    };
 
     /**
-     * Starts the state machine
+     * Built in handlers. Appended to the end.
      *
-     * @param options
-     * @return {this}
+     * @type {Handlers}
      */
-    startSM(options: object = {}) {
-        this.log.i('start', options)
+    protected defaultHandlers: Handlers = [
+        // Get the current state
+        ["call/:from#getState#*_",
+            ({args, current}) => reply(args.from, current)],
+
+        // Get the current data
+        ["call/:from#getData#*_",
+            ({args, data}) => reply(args.from, data)],
+    ];
+
+    private _routeHandlers: RouteHandlers = [];
+
+    private _pending = new Pending();
+
+    private timers = new Timers();
+
+    private processingEvent = false;
+
+    private events = new StablePriorityQueue(Event.comparator);
+
+    private _started: boolean = false
+
+    private _state: State;
+
+    private _data: Data;
+
+    /**
+     * Creates a StateMachine
+     * @param init
+     */
+    constructor(init?: Partial<SMOptions>) {
+        super();
+        Object.assign(this, init)
+    }
+
+    get hasStateTimer(): boolean {
+        return this.hasTimer("stateTimeout");
+    }
+
+
+    get hasEventTimer(): boolean {
+        return this.hasTimer("eventTimeout");
+    }
+
+    startSM() {
+        if (this._started) {
+            return
+        }
+        this.log.i("startSM");
+
+        if (!this.initialState) {
+            throw new Error("initialState must be set");
+        }
 
         // set data before setting state to handle initial state
-        // entry event
-        this.data = this.initialData
-        let that = this
-        let timers = this.timers
-        this.on('state', (s, old) => that.addEvent(new EnterEvent({old})))
-            .on('stateChanged', () => timers.cancel('stateTimeout'))
-            .on('event', () => timers.cancel('eventTimeout'))
+        this.data = this.initialData;
+        let that = this;
+        let timers = this.timers;
+        this.on("state", (s, old) => that.addEvent(new EnterEvent({old})))
+            .on("stateChanged", () => timers.cancel("stateTimeout"))
+            .on("event", () => timers.cancel("eventTimeout"));
 
-        this.initHandlers()
-        this.state = this.initialState
-        this.emit('init', options)
-        return this
+        this.initHandlers();
+        this.state = this.initialState;
+        this.emit("init");
+        this._started = true
+        return this;
     }
 
-    /**
-     * Stops the state machine
-     *
-     * @param reason
-     * @param timeout
-     */
     stopSM(reason?: string, timeout?: number) {
-        this.log.i(`stop: ${reason}`)
-        this.emit('terminate', reason)
+        this.log.i(`stop: ${reason}`);
+        this.emit("terminate", reason);
     }
 
-    /**
-     * Makes a call and waits for its reply.
-     *
-     * @param request
-     * @param timeout
-     * @return {Promise<any>}
-     */
-    async call(request: EventContext, timeout: number = Infinity): Promise<any> {
-        const from = this._pending.create()
-        this.log.i(`call`, request, from)
+    async call(request: EventContext,
+        timeout: number = Infinity): Promise<any> {
+        const from = this._pending.create();
+        this.log.i(`call`, request, from);
 
-        this.addEvent(new CallEvent(from, request))
-        return await this._pending.get(from)
+        this.addEvent(new CallEvent(from, request));
+        return await this._pending.get(from);
     }
 
-    /**
-     * Sends an asynchronous request to the server.
-     * This function always returns regardless of whether the
-     * request was successful or handled by the StateMachine.
-     *
-     * The appropriate state function will be called to handle the request.
-     * @param request
-     * @param extra
-     */
     cast(request: EventContext, extra?: EventExtra): void {
-        this.log.v(`cast`, request)
+        this.log.v(`cast`, request);
         try {
-            this.addEvent(new CastEvent(request, extra))
+            this.addEvent(new CastEvent(request, extra));
         } catch (e) {
             // ignore error for cast
-            Log.e(e)
+            Log.e(e);
         }
     }
 
-    /**
-     *
-     * @param handler
-     * @return {this}
-     * @param routes
-     */
-    addHandler(routes: string | string[], handler: Handler): StateMachine {
-        this.log.v(`addHandler`, routes, handler)
+    addHandler(routes: string | Array<string>,
+        handler: Handler): IStateMachine {
+        this.log.v(`addHandler`, routes, handler);
 
-        if (typeof routes === 'string')
-            routes = [routes]
+        if (typeof routes === "string") {
+            routes = [routes];
+        }
 
         try {
-            let mapped: [string, Route][] = <[string, Route][]>routes.map(r => [r, new Route(r)])
-            this._routeHandlers.push({routes: mapped, handler})
+            let mapped: Array<[string, Route]> = <Array<[string, Route]>> routes.map(
+                (r) => [r, new Route(r)]);
+            this._routeHandlers.push({"routes": mapped, handler});
         } catch (e) {
-            Log.e(e, routes || 'No route!')
-            throw e
+            Log.e(e, routes || "No route!");
+            throw e;
         }
-        return this
+        return this;
+    }
+
+    defaultEventHandler({event, args, current, data}: HandlerOpts): Result | undefined {
+        this.log.i("defaultHandler", event.toString(), args);
+        return undefined;
+        // return new KeepStateAndData();
     }
 
     /**
+     * Gets the current state. Internal use only.
+     * Use getState() to query state safely.
      *
-     * @param event
-     * @param args
-     * @param current
-     * @param data
+     * @return {State}
      */
-    handleDefaultEvent({event, args, current, data}: HandlerOpts): Result {
-        this.log.i('defaultHandler', event.toString(), args)
-        return new KeepStateAndData()
+    private get state(): State {
+        return this._state;
     }
 
     /**
-     * Gets the current {Data} of this {StateMachine}
+     * Sets the current state. Internal use only.
+     * @param s
+     */
+    private set state(s: State) {
+        this.log.i("setState", s);
+        let old = this._state || this.initialState;
+        let oldName = stateName(old);
+        this._state = s;
+        let currentName = stateName(s);
+
+        this.emit("state", s, old);
+
+        if ((isComplexState(s) || isComplexState(old)) && oldName ===
+            currentName) {
+            this.emit("complexStateChanged", s, old);
+        }
+
+        if (!stateEquals(s, old)) {
+            this.emit("stateChanged", s, old);
+        }
+
+    }
+
+    /**
+     * Gets the current data. Internal use only.
+     *
      * @return {Data} the current data
      */
     private get data(): Data {
@@ -244,199 +234,14 @@ export class StateMachine extends EventEmitter {
     }
 
     /**
-     * Sets the current {Data}
+     * Sets the current {Data}. Internal only.
      * @param value the {Data}
      */
     private set data(value: Data) {
-        this.log.i('setData', value)
-        let old = this._data
+        this.log.i("setData", value);
+        let old = this._data;
         this._data = value;
-        this.emit('data', value, old)
-    }
-
-    /**
-     *  Gets the current state
-     * @return {State}
-     */
-    private get state(): State {
-        return this._state
-    }
-
-    /**
-     * Sets the current state
-     * @param s
-     */
-    private set state(s: State) {
-        this.log.i('setState', s)
-        let old = this._state || this.initialState
-        let oldName = stateName(old)
-        this._state = s
-        let currentName = stateName(s)
-
-        this.emit('state', s, old)
-
-        if ((isComplexState(s) || isComplexState(old)) && oldName === currentName)
-            this.emit('complexStateChanged', s, old)
-
-        if (!stateEquals(s, old)) {
-            this.emit('stateChanged', s, old)
-        }
-
-    }
-
-    protected initHandlers() {
-        let that = this
-        this.handlers = this.handlers || []
-        let h = this.defaultHandlers.concat(this.handlers)
-        h.forEach(([route, handler]) => that.addHandler(route, handler))
-    }
-
-    /**
-     * Returns a route for the given event
-     * @param e the event
-     * @return {string} the route
-     */
-    protected makeRoute(e: Event): string {
-        return `${e.route}#${stateRoute(this.state)}`
-    }
-
-    /**
-     *
-     * @param e
-     * @return {MatchedHandler|undefined}
-     */
-    protected getRouteHandler(e: Event): MatchedHandler | undefined {
-        const eventRoute = this.makeRoute(e)
-        this.log.i('getRouteHandler', eventRoute)
-
-        for (const routeHandler of this._routeHandlers) {
-            for (let route of routeHandler.routes) {
-                let result = route[1].match(eventRoute)
-                if (result) {
-                    return {routeHandler, result, route: eventRoute}
-                }
-            }
-        }
-    }
-
-    /**
-     * Handle the given event. Matches the event's route to the
-     * @param event
-     */
-    protected handleEvent(event: Event) {
-        this.processingEvent = true
-        const h = this.getRouteHandler(event)
-        const args = {
-            event,
-            args: h ? h.result : {},
-            current: this.state,
-            data: this.data,
-            route: h ? h.route : ''
-        }
-
-        this.log.i('handleEvent', event.toString(),
-            {args: args.args, route: args.route})
-
-        let result = this.getHandlerResult(h, args);
-        this.handleResult(result)
-        this.processingEvent = false
-        this.processEvents()
-    }
-
-    private getHandlerResult(h: MatchedHandler | undefined, args: { event: Event; args: { [x: string]: string; }; current: State; data: any; route: string; }) {
-        if (!h) {
-            return this.handleDefaultEvent(args);
-        }
-
-        let handler: Handler = h.routeHandler.handler
-        if (typeof handler === 'function') {
-            return handler(args);
-        }
-
-        if (Array.isArray(handler)) {
-            return nextState(handler[0]).eventTimeout(handler[1]);
-        }
-
-        return nextState(handler)
-    }
-
-    /**
-     * Add event to the queue. Emits the 'event' event
-     *
-     * @param event
-     * @return {this}
-     */
-    addEvent(event: Event) {
-        this.log.i('addEvent', event.toString())
-
-        this.emit('event', event)
-        this.events.add(event)
-        this.doProcessEvents()
-        return this
-    }
-
-    processEvents() {
-        setImmediate(this.doProcessEvents.bind(this))
-    }
-
-    doProcessEvents() {
-        if (this.events.isEmpty() || this.processingEvent)
-            return
-        this.log.v('processEvents', this.events)
-
-        let e = this.events.poll()
-        if (e)
-            this.handleEvent(e)
-    }
-
-    /**
-     *
-     * @param res
-     */
-    protected handleResult(res: HandlerResult) {
-        if (!res)
-            res = keepState()
-        if (res instanceof ResultBuilder)
-            res = res.getResult(this.data)
-
-        this.log.i(`handleResult`, res.toString())
-
-        if (res instanceof NextState || res instanceof NextStateWithData) {
-            this.state = res.nextState
-        }
-
-        if (res.hasData) {
-            this.data = res.newData
-        }
-
-        res.actions.forEach(this.handleAction.bind(this))
-    }
-
-    /**
-     *
-     * @param action
-     */
-    protected handleAction(action: Action) {
-        this.log.i(`handleAction`, action.toString())
-
-        if (action instanceof ReplyAction) {
-            this._pending.resolve(action.from, action.reply)
-        }
-        else if (action instanceof StateTimeoutAction) {
-            this.setStateTimeout(action.time)
-        }
-        else if (action instanceof EventTimeoutAction) {
-            this.setEventTimeout(action.time)
-        }
-        else if (action instanceof GenericTimeoutAction) {
-            this.setGenericTimeout(action.time, action.name)
-        }
-        else if (action instanceof NextEventAction) {
-            this.addNextEvent(action)
-        }
-        else {
-            throw new Error(`No handler for action: ${action}`)
-        }
+        this.emit("data", value, old);
     }
 
     /**
@@ -445,12 +250,12 @@ export class StateMachine extends EventEmitter {
      * @return {this}
      */
     addNextEvent(action: NextEventAction): StateMachine {
-        let event = makeNextEvent(action)
+        let event = makeNextEvent(action);
         if (event) {
-            event.priority = Priority.Highest
-            return this.addEvent(event)
+            event.priority = Priority.Highest;
+            return this.addEvent(event);
         }
-        return this
+        return this;
     }
 
     /**
@@ -465,25 +270,17 @@ export class StateMachine extends EventEmitter {
      * @return {this}
      */
     setStateTimeout(time: Timeout): StateMachine {
-        this.log.i('setStateTimeout', time)
+        this.log.i("setStateTimeout", time);
 
-        let that = this
+        let that = this;
         this.timers
-            .create(time, 'stateTimeout')
-            .on('timer', () => that.addEvent(new StateTimeoutEvent({time})))
-        return this
-    }
-
-    get hasStateTimer(): boolean {
-        return this.hasTimer('stateTimeout')
-    }
-
-    get hasEventTimer(): boolean {
-        return this.hasTimer('eventTimeout')
+            .create(time, "stateTimeout")
+            .on("timer", () => that.addEvent(new StateTimeoutEvent({time})));
+        return this;
     }
 
     hasTimer(name: string): boolean {
-        return !!this.timers.get(name)
+        return !!this.timers.get(name);
     }
 
     /**
@@ -497,14 +294,14 @@ export class StateMachine extends EventEmitter {
      * @return {this}
      */
     setEventTimeout(time: Timeout) {
-        this.log.i('setEventTimeout', time)
+        this.log.i("setEventTimeout", time);
 
-        let that = this
+        let that = this;
         this.timers
-            .create(time, 'eventTimeout')
-            .on('timer', () =>
-                that.addEvent(new EventTimeoutEvent({time})))
-        return this
+            .create(time, "eventTimeout")
+            .on("timer", () =>
+                that.addEvent(new EventTimeoutEvent({time})));
+        return this;
     }
 
     /**
@@ -514,15 +311,15 @@ export class StateMachine extends EventEmitter {
      * @param name optional name. Defaults to "DEFAULT"
      * @return {this}
      */
-    setGenericTimeout(time: Timeout, name = 'DEFAULT') {
-        this.log.i('setEventTimeout', name, time)
+    setGenericTimeout(time: Timeout, name = "DEFAULT") {
+        this.log.i("setEventTimeout", name, time);
 
-        let that = this
+        let that = this;
         this.timers
             .create(time, name)
-            .on('timer', () =>
-                that.addEvent(new GenericTimeoutEvent({name, time})))
-        return this
+            .on("timer", () =>
+                that.addEvent(new GenericTimeoutEvent({name, time})));
+        return this;
     }
 
     /**
@@ -532,8 +329,8 @@ export class StateMachine extends EventEmitter {
      * @return {this}
      */
     cancelTimer(name: string): StateMachine {
-        this.timers.cancel(name)
-        return this
+        this.timers.cancel(name);
+        return this;
     }
 
     /**
@@ -542,7 +339,7 @@ export class StateMachine extends EventEmitter {
      * @return {Promise<any>}
      */
     async getState(): Promise<State> {
-        return await this.call('getState')
+        return await this.call("getState");
     }
 
     /**
@@ -551,8 +348,186 @@ export class StateMachine extends EventEmitter {
      * @return {Promise<any>}
      */
     async getData() {
-        return await this.call('getData')
+        return await this.call("getData");
     }
 
+    /**
+     * Adds state to log tags
+     * @param level
+     * @return {(tag2: string, ...args: any[]) => void}
+     */
+    logger(level: string) {
+        return (tag2: string, ...args: Array<any>) => {
+            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args);
+        };
+    }
 
+    /**
+     * Add event to the queue. Emits the 'event' event
+     *
+     * @param event
+     * @return {this}
+     */
+    protected addEvent(event: Event) {
+        this.log.i("addEvent", event.toString());
+
+        this.emit("event", event);
+        this.events.add(event);
+        this.doProcessEvents();
+        return this;
+    }
+
+    /**
+     * Initialize handlers,
+     * Default handlers come last
+     */
+    protected initHandlers() {
+        let that = this;
+        this.handlers = this.handlers || [];
+        let h = this.defaultHandlers.concat(this.handlers);
+        h.forEach(([route, handler]) => that.addHandler(route, handler));
+    }
+
+    /**
+     * Get route handler for given event
+     * @param e
+     * @return {MatchedHandler|undefined}
+     */
+    protected getRouteHandler(e: Event): MatchedHandler | undefined {
+        const eventRoute = e.toRoute(this.state);
+        this.log.i("getRouteHandler", String(e), eventRoute);
+
+        for (let routeHandler of this._routeHandlers) {
+            for (let route of routeHandler.routes) {
+                let result = route[1].match(eventRoute)
+
+                if (result) {
+                    return {routeHandler, result, "route": route[0]}
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle the given event. Matches the event's route to the
+     * @param event
+     */
+    protected handleEvent(event: Event): void {
+        this.processingEvent = true;
+        const h = this.getRouteHandler(event);
+        let handlerOpts: HandlerOpts = {
+            "args": h ? h.result : {},
+            "current": this.state,
+            "data": this.data,
+            event,
+            "route": h ? h.route : ''
+        }
+
+        this.log.i("handleEvent", event.type,
+            {"args": handlerOpts.args, "route": handlerOpts.route});
+
+        let result = this.getHandlerResult(h, handlerOpts);
+        this.handleResult(result);
+        this.processingEvent = false;
+        this.processEvents();
+    }
+
+    /**
+     * Process event handler result
+     * @param res -- result from event handler
+     */
+    protected handleResult(res: HandlerResult): void {
+        if (!res) {
+            return
+        }
+        if (res instanceof ResultBuilder) {
+            res = res.getResult(this.data);
+        }
+
+        this.log.i(`handleResult`, res.toString());
+
+        if (res instanceof NextState || res instanceof NextStateWithData) {
+            this.state = res.nextState;
+        }
+
+        if (res.hasData) {
+            this.data = res.newData;
+        }
+
+        res.actions.forEach(this.handleAction.bind(this));
+    }
+
+    /**
+     *
+     * @param action
+     */
+    protected handleAction(action: Action) {
+        this.log.i(`handleAction`, action.toString());
+
+        if (action instanceof ReplyAction) {
+            this._pending.resolve(action.from, action.reply);
+        }
+        else if (action instanceof StateTimeoutAction) {
+            this.setStateTimeout(action.time);
+        }
+        else if (action instanceof EventTimeoutAction) {
+            this.setEventTimeout(action.time);
+        }
+        else if (action instanceof GenericTimeoutAction) {
+            this.setGenericTimeout(action.time, action.name);
+        }
+        else if (action instanceof NextEventAction) {
+            this.addNextEvent(action);
+        }
+        else {
+            throw new Error(`No handler for action: ${action}`);
+        }
+    }
+
+    /**
+     * Process the next event on the event queue
+     */
+    private processEvents() {
+        setImmediate(this.doProcessEvents.bind(this));
+    }
+
+    /**
+     * Actually process events
+     */
+    private doProcessEvents() {
+        if (this.events.isEmpty() || this.processingEvent) {
+            return;
+        }
+        this.log.v("processEvents", this.events);
+
+        let e = this.events.poll();
+        if (e) {
+            this.handleEvent(e);
+        }
+    }
+
+    /**
+     * Executes handler and returns result
+     * @param h
+     * @return {any}
+     * @param opts
+     */
+    private getHandlerResult(h: MatchedHandler | undefined,
+        opts: HandlerOpts): HandlerResult {
+        if (!h) {
+            return this.defaultEventHandler(opts);
+        }
+
+        let handler: Handler = h.routeHandler.handler;
+        if (typeof handler === "function") {
+            return handler(opts);
+        }
+
+        if (Array.isArray(handler)) {
+            return nextState(handler[0]).eventTimeout(handler[1]);
+        }
+
+        return nextState(handler);
+    }
 }
+

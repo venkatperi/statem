@@ -19,20 +19,15 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
+abstract class LogMixin implements Loggable {
+    log = {
+        "d": this.logger("d"),
+        "e": this.logger("e"),
+        "i": this.logger("i"),
+        "v": this.logger("v"),
+        "w": this.logger("w"),
+    };
 
-
-export default class TimeoutAction extends Action {
-    /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
-     */
-    constructor(public time: Timeout) {
-        super()
-    }
-
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
-    }
+    abstract logger(level: string): void
 }
+

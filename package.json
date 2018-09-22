@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha $@",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",
     "build": "tsc",
-    "prepare": "npm run clean && npm run build"
+    "prepare": "npm run clean && npm run build",
+    "lint": "tslint --project ."
   },
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
@@ -15,18 +16,21 @@
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.9.4",
+    "@types/object-inspect": "^1.4.0",
     "@types/route-parser": "^0.1.1",
     "@types/uniqid": "^4.1.2",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "mocha-typescript": "^1.1.17",
     "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
     "typescript": "^3.0.3"
   },
   "dependencies": {
     "immutability-helper": "^2.8.1",
     "lodash": "^4.17.11",
     "ntimer": "^0.5.3",
+    "object-inspect": "^1.6.0",
     "route-parser": "0.0.5",
     "stablepriorityqueue": "^0.1.0",
     "uniqid": "^5.0.3",

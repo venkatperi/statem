@@ -19,15 +19,16 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {uniqId} from "./uniqId";
+import { Timer } from "ntimer";
 import Logger from "../Logger";
-import {Timeout} from "../types";
-import {Timer} from "ntimer";
+import { Timeout } from "../types";
+import { uniqId } from "./uniqId";
 
-const Log = Logger('Timers')
+
+const Log = Logger("Timers");
 
 export default class Timers {
-    timers: { [k in string]: Timer } = {}
+    private timers: { [k in string]: Timer } = {};
 
     /**
      * Creates a auto starting timer with the given timeout and returns its
@@ -43,16 +44,16 @@ export default class Timers {
      * @param n
      */
     create(timeout: Timeout, n?: string, opts?: any): Timer {
-        let that = this
+        let that = this;
 
-        let name = n || uniqId()
+        let name = n || uniqId();
 
-        Log.i('create', timeout, name, opts)
+        Log.i("create", timeout, name, opts);
 
-        this.cancel(name)
-        let t = this.timers[name] = new Timer({name, timeout, auto: true})
-        t.on('timer', () => that.cancel(name))
-        return t
+        this.cancel(name);
+        let t = this.timers[name] = new Timer({name, timeout, "auto": true});
+        t.on("timer", () => that.cancel(name));
+        return t;
     }
 
     /**
@@ -64,17 +65,21 @@ export default class Timers {
      */
     cancel(name: string): boolean {
         if (!this.timers[name]) {
-            return false
+            return false;
         }
 
-        Log.i('cancel', name)
-        this.timers[name].cancel()
-        delete this.timers[name]
-        return true
+        Log.i("cancel", name);
+        this.timers[name].cancel();
+        delete this.timers[name];
+        return true;
     }
 
+    /**
+     * Gets the named timer
+     * @param name
+     */
     get(name: string): Timer {
-        return this.timers[name]
+        return this.timers[name];
     }
 }
 

@@ -21,6 +21,7 @@
 
 import NextStateWithData from "./NextStateWithData";
 
+
 export default class Stop extends NextStateWithData {
     type = 'stop'
 }

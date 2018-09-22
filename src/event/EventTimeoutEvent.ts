@@ -22,6 +22,7 @@
 
 import TimeoutEvent from "./TimeoutEvent";
 
+
 export default class EventTimeoutEvent extends TimeoutEvent {
     type = 'eventTimeout'
 }

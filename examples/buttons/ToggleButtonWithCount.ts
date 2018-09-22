@@ -19,20 +19,24 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
+import StateMachine, { Handlers, nextState } from "../../index"
 
 
-export default class TimeoutAction extends Action {
-    /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
-     */
-    constructor(public time: Timeout) {
-        super()
+export class ToggleButtonWithCount extends StateMachine {
+    initialState = 'off'
+
+    initialData = {
+        "count": 0
     }
 
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
+    handlers: Handlers = [
+        ['cast#flip#off',
+            ({data}) => nextState('on')
+                .data({"count": {"$set": data.count + 1}})],
+        ['cast#flip#on', 'off']
+    ]
+
+    flip() {
+        this.cast('flip')
     }
 }

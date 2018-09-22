@@ -19,20 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
+import { State } from "./State"
+import { Data, Handlers } from "./types"
 
-
-export default class TimeoutAction extends Action {
+export interface SMOptions {
     /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
+     * State machine's initial state. Must be defined.
      */
-    constructor(public time: Timeout) {
-        super()
-    }
+    initialState: State;
 
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
-    }
+    /**
+     * Array of handlers.
+     * The heart of the state machine.
+     */
+    handlers: Handlers;
+
+    /**
+     * Initial data. optional.
+     */
+    initialData?: Data;
 }

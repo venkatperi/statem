@@ -19,11 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {From} from "../types";
+import { From } from "../types";
 import Action from "./action";
 
+
 export default class ReplyAction extends Action {
-    type = 'reply'
+    type = "reply"
 
     /**
      * Creates a Reply action
@@ -35,13 +36,14 @@ export default class ReplyAction extends Action {
     }
 
     get replyString(): string {
-        if (typeof this.reply === 'object')
+        if (typeof this.reply === "object") {
             return JSON.stringify(this.reply)
+        }
 
         switch (this.reply) {
             case undefined:
             case null:
-                return ''
+                return ""
 
             default:
                 return String(this.reply)

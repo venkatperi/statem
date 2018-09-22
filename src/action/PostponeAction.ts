@@ -21,9 +21,10 @@
 
 import Action from "./action";
 
+
 /**
  * Postpones the current event and retries it when the state changes
  */
 export default class PostponeAction extends Action {
-    type = 'postpone'
+    type = "postpone"
 }

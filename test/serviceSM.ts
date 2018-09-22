@@ -19,31 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import Service from "./fixtures/Service";
+import { State } from "../src/State"
 import Deferred from "../src/util/Deferred";
-import {expect} from 'chai'
 import delay from "../src/util/delay";
-import {State} from "../src/types";
-
-class TestService extends Service {
-    started = new Deferred()
-    stopped = new Deferred()
-    cancelled = new Deferred()
-    timeout = 500
-
-    async doStart() {
-        await this.started
-    }
-
-    async doStop() {
-        await this.stopped
-    }
-
-    async doCancel() {
-        await this.cancelled
-    }
-}
+import { TestService } from "./fixtures/TestService"
 
 let sm
 
@@ -208,7 +189,6 @@ describe('service', () => {
             })
         })
     })
-
 })
 
 

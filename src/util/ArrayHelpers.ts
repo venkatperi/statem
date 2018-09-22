@@ -19,20 +19,32 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
 
+interface Array<T> {
 
-export default class TimeoutAction extends Action {
     /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
+     * Like Array.find(), applies callback fn() on successive array entries and
+     * returns the first value that is non null
+     *
+     * @param fn
      */
-    constructor(public time: Timeout) {
-        super()
+    findValue<T, V>(fn: (item: T) => V | undefined): V | undefined
+}
+
+((proto: any) => {
+    if (typeof proto.findValue === "function") {
+        return;
     }
 
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
+    proto.findValue = function findValue<T, V>(this: Array<T>,
+        fn: (item: T, index: number,
+            array: Array<T>) => V | undefined): V | undefined {
+        for (let i = 0; i < this.length; i++) {
+            const ret = fn(this[i], i, this)
+            if (ret) {
+                return ret
+            }
+        }
     }
-}
+})(Array.prototype)
+

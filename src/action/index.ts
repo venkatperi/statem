@@ -20,14 +20,15 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import Action from './Action'
-import NextEventAction from "./NextEventAction";
-import ReplyAction from "./ReplyAction";
-import PostponeAction from "./PostponeAction";
-import StateTimeoutAction from "./StateTimeoutAction";
+import Action from "./Action"
 import EventTimeoutAction from "./EventTimeoutAction";
 import GenericTimeoutAction from "./GenericTimeoutAction";
-import TimeoutAction from './TimeoutAction';
+import NextEventAction from "./NextEventAction";
+import PostponeAction from "./PostponeAction";
+import ReplyAction from "./ReplyAction";
+import StateTimeoutAction from "./StateTimeoutAction";
+import TimeoutAction from "./TimeoutAction";
+
 
 export default Action
 

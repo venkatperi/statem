@@ -20,7 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // @ts-ignore
-import logger from 'wtlog'
+import logger from "wtlog"
+
 
 export default (tag: string) => logger(tag)
 

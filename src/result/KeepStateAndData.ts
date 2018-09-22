@@ -21,6 +21,7 @@
 
 import Result from "./result";
 
+
 export default class KeepStateAndData extends Result {
-    type = 'keepStateAndData'
+    type = "keepStateAndData"
 }

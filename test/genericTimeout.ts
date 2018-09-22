@@ -19,24 +19,20 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import {expect} from 'chai'
 import StateMachine from "..";
-import Deferred from "../src/util/Deferred";
-import {nextState} from "../index";
+import { nextState } from "../index";
 import delay from "../src/util/delay";
 
 let hodor = 'hodor'
-let timeout
 let sm
 
 describe('genericTimeout', () => {
     beforeEach(() => {
-        timeout = new Deferred()
 
         sm = new StateMachine({
-            initialState: "ONE",
-            handlers: [
+            "handlers": [
                 /**
                  * (cast:next, ONE) --> (TWO, genericTimeout)
                  */
@@ -51,8 +47,8 @@ describe('genericTimeout', () => {
                  * (genericTimeout, TWO) --> THREE
                  */
                 ['genericTimeout#*_#TWO', () => nextState('THREE')],
-                ['enter#*_#THREE', () => timeout.resolve()],
-            ]
+            ],
+            "initialState": "ONE",
         }).startSM()
         sm.cast('next')
     })
@@ -63,16 +59,14 @@ describe('genericTimeout', () => {
     })
 
     it("fires unless cancelled", async () => {
-        await timeout
-        await delay(0)  //otherwise returns 2. Domain issue?
+        await delay(400)  // otherwise returns 2. Domain issue?
         expect(await sm.getState()).to.eq('THREE')
     })
 
     it("doesn't fire if cancelled", async () => {
-        await delay(100)    //ensure state transition within timeout
+        await delay(100)    // ensure state transition within timeout
         sm.cancelTimer(hodor)
-        await delay(500)    //wait for a long time
-        expect(timeout.completed).to.be.false
+        await delay(500)    // wait for a long time
         expect(sm.hasTimer(hodor)).to.be.false
         expect(await sm.getState()).to.eq('TWO')
     })

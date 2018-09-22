@@ -19,11 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import {expect} from 'chai'
 import StateMachine from "..";
+import { nextState } from "../index";
 import Deferred from "../src/util/Deferred";
-import {nextState} from "../index";
 import delay from "../src/util/delay";
 
 describe('timeouts', () => {
@@ -32,14 +32,13 @@ describe('timeouts', () => {
 
     beforeEach(() => {
         timeouts = {
-            state: new Deferred(),
-            event: new Deferred(),
-            generic: new Deferred(),
+            "event": new Deferred(),
+            "generic": new Deferred(),
+            "state": new Deferred(),
         }
 
         sm = new StateMachine({
-            initialState: "ONE",
-            handlers: [
+            "handlers": [
                 /**
                  * (cast:st, ONE) --> (TWO, stateTimeout)
                  */
@@ -76,8 +75,8 @@ describe('timeouts', () => {
                  */
                 ['eventTimeout#*_#THREE', () => nextState('FIVE')],
                 ['enter#*_#FIVE', () => timeouts.event.resolve()],
-
-            ]
+            ],
+            "initialState": "ONE",
         }).startSM()
     })
 
@@ -90,14 +89,15 @@ describe('timeouts', () => {
             expect(await sm.getState()).to.eq('FOUR')
         })
 
-        it("cancels state timeout timer if state transition occurs before it fires", async () => {
-            await delay(100)    //ensure state transition within timeout
-            sm.cast('next')
-            await delay(500)    //wait for a long time
-            expect(timeouts.state.completed).to.be.false
-            expect(sm.hasStateTimer).to.be.false
-            expect(await sm.getState()).to.eq('ONE')
-        })
+        it("cancels state timeout timer if state transition occurs before it fires",
+            async () => {
+                await delay(100)    // ensure state transition within timeout
+                sm.cast('next')
+                await delay(500)    // wait for a long time
+                expect(timeouts.state.completed).to.be.false
+                expect(sm.hasStateTimer).to.be.false
+                expect(await sm.getState()).to.eq('ONE')
+            })
     })
 
     describe('setting an event timeout', () => {
@@ -111,14 +111,15 @@ describe('timeouts', () => {
             expect(await sm.getState()).to.eq('FIVE')
         })
 
-        it("cancels timer if an event is received before it fires", async () => {
-            await delay(100)    //ensure state transition within timeout
-            sm.cast('nop')
-            await delay(500)    //wait for a long time
-            expect(timeouts.event.completed).to.be.false
-            expect(sm.hasEventTimer).to.be.false
-            expect(await sm.getState()).to.eq('THREE')
-        })
+        it("cancels timer if an event is received before it fires",
+            async () => {
+                await delay(100)    // ensure state transition within timeout
+                sm.cast('nop')
+                await delay(500)    // wait for a long time
+                expect(timeouts.event.completed).to.be.false
+                expect(sm.hasEventTimer).to.be.false
+                expect(await sm.getState()).to.eq('THREE')
+            })
     })
 
 })

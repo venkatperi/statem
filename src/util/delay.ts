@@ -21,6 +21,6 @@
 
 
 export default function delay(time: number): Promise<void> {
-    return new Promise(r => setTimeout(r, time))
+    return new Promise((r) => setTimeout(r, time))
 }
 

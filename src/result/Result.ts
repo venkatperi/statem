@@ -19,10 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Action, {ActionList} from "../action";
-import {Data, ResultType} from "../types";
-import _ = require('lodash');
-import {dataToString} from "../util/StringHelper";
+import * as objectInspect from "object-inspect"
+import Action, { ActionList } from "../action";
+import { Data, ResultType } from "../types";
+import { dataToString } from "../util/StringHelper";
+
 
 /**
  * This class encapsulates the result of a call to a state handler
@@ -33,17 +34,17 @@ export default class Result {
      */
     readonly type: ResultType;
 
-    /**
-     * Optional state machine data
-     */
-    private _newData?: Data;
-
     hasData = false
 
     /**
      * The list of actions for this state
      */
     actions: Array<Action>;
+
+    /**
+     * Optional state machine data
+     */
+    private _newData?: Data;
 
     /**
      * Creates a new result
@@ -63,15 +64,21 @@ export default class Result {
     }
 
     get actionsString(): string {
-        return this.actions.map(x => x.toString()).join(', ')
+        return this.actions.map((x) => x.toString()).join(", ")
     }
 
     get dataString(): string {
-        return this.hasData ? dataToString(this.newData) : ''
+        return this.hasData ? dataToString(this.newData) : ""
     }
 
     toString(): string {
-        return `${_.upperFirst(this.type)}Result ${this.dataString}${this.actionsString}!`
+        // return
+        // `${_.upperFirst(this.type)}Result${this.dataString}${this.actionsString}!`
+        return [this.type,
+            objectInspect({
+                "actions": this.actions,
+                "data": this.newData,
+            })].join(' ')
     }
 }
 

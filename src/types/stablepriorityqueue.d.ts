@@ -29,7 +29,7 @@ type TimerOpts = {
 }
 
 declare module 'ntimer' {
-    import EventEmitter = require('events');
+    import EventEmitter = require('events')
 
     namespace ntimer {
 
@@ -45,7 +45,8 @@ declare module 'ntimer' {
 
         function repeat(name: string, timeout: Timeout, repeat: number): Timer
 
-        function autoRepeat(name: string, timeout: Timeout, repeat: number): Timer
+        function autoRepeat(name: string, timeout: Timeout,
+            repeat: number): Timer
     }
 
     function ntimer(name: string, timeout: Timeout): ntimer.Timer

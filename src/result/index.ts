@@ -19,27 +19,22 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result from './Result'
+import KeepState from "./KeepState";
+import KeepStateAndData from "./KeepStateAndData";
 import NextState from "./NextState";
 import NextStateWithData from "./NextStateWithData";
 import RepeatState from "./RepeatState";
 import RepeatStateAndData from "./RepeatStateAndData";
-import KeepState from "./KeepState";
-import KeepStateAndData from "./KeepStateAndData";
+import Result from "./Result"
+import ResultWithData from "./ResultWithData";
 import Stop from "./Stop";
-import ResultWithData from './ResultWithData';
+
 
 export default Result
 
 export {
-    NextState,
-    NextStateWithData,
-    RepeatState,
-    RepeatStateAndData,
-    KeepState,
-    KeepStateAndData,
-    Stop,
-    ResultWithData
+    NextState, NextStateWithData, RepeatState, RepeatStateAndData,
+    KeepState, KeepStateAndData, Stop, ResultWithData
 }
 
 

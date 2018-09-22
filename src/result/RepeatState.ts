@@ -21,6 +21,7 @@
 
 import ResultWithData from "./ResultWithData";
 
+
 export default class RepeatState extends ResultWithData {
     type = 'repeatState'
 }

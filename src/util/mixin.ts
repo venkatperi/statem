@@ -19,20 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
-
-
-export default class TimeoutAction extends Action {
-    /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
-     */
-    constructor(public time: Timeout) {
-        super()
-    }
-
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
-    }
+/**
+ * Apply mixins
+ * http://www.typescriptlang.org/docs/handbook/mixins.html
+ *
+ * @param derivedCtor
+ * @param baseCtors
+ */
+function applyMixins(derivedCtor: any, baseCtors: Array<any>) {
+    baseCtors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            derivedCtor.prototype[name] = baseCtor.prototype[name];
+        });
+    });
 }
+

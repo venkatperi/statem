@@ -19,9 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Data} from "../types";
-import {ActionList} from "../action";
+import { ActionList } from "../action";
+import { Data } from "../types";
 import Result from "./Result";
+
 
 export default class ResultWithData extends Result {
     constructor(newData: Data, ...actions: ActionList) {

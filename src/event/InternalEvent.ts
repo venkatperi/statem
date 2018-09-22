@@ -21,6 +21,7 @@
 
 import Event from "./event";
 
+
 export default class InternalEvent extends Event {
     type = 'internal'
 }

@@ -19,7 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import uniqid = require('uniqid');
+import uniqid = require('uniqid')
+
 
 export function uniqId(): string {
     return uniqid()

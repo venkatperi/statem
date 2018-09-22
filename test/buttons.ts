@@ -19,10 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from "chai";
 import 'mocha'
-import {PushButton, PushButtonCountdownTimer, ToggleButton, ToggleButtonWithCount} from "../examples/Buttons";
-import {State} from "..";
-import {expect} from "chai";
+import { State } from "..";
+import { PushButton } from "../examples/buttons/PushButton"
+import { PushButtonCountdownTimer } from "../examples/buttons/PushButtonCountdownTimer"
+import { ToggleButton } from "../examples/buttons/ToggleButton";
+import { ToggleButtonWithCount } from "../examples/buttons/ToggleButtonWithCount"
 import delay from "../src/util/delay";
 
 
@@ -41,7 +44,7 @@ function countIs(count: number) {
 
 
 describe('buttons', () => {
-    describe('toggle button', () => {
+    describe('simple toggle button', () => {
         beforeEach(() => sm = new ToggleButton().startSM())
 
         stateIs('off')
@@ -98,8 +101,9 @@ describe('buttons', () => {
                         beforeEach(() => sm.release())
                         stateIs('off')
                     })
-                    if (count < max - 1)
+                    if (count < max - 1) {
                         cycle(max, count + 1)
+                    }
                 })
             })
         }
@@ -121,8 +125,9 @@ describe('buttons', () => {
                     describe('after timeout', () => {
                         beforeEach(async () => await delay(150))
                         stateIs('off')
-                        if (count < max - 1)
+                        if (count < max - 1) {
                             cycle(max, count + 1)
+                        }
                     })
                 })
             })

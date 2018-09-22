@@ -19,15 +19,15 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {Data,} from "../../types";
+import Result, { NextState, NextStateWithData, } from "..";
+import { State } from "../../State"
+import { ActionList } from "../../action";
+import { Data, } from "../../types";
 import ResultBuilder from "./ResultBuilder";
-import {ActionList} from "../../action";
-import Result, {NextState, NextStateWithData,} from "..";
-import {State} from '../../State'
+
 
 export default class NextStateBuilder extends ResultBuilder {
     _nextState: State
-    _data: Data
     _actions: ActionList = []
 
     constructor(state: State) {
@@ -38,12 +38,13 @@ export default class NextStateBuilder extends ResultBuilder {
     /**
      *
      * @param data
-     * @return {any}
+     * @return {Result}
      */
     getResult(data?: Data): Result {
         if (this._updates.length > 0) {
             data = this.applyUpdates(data)
-            return new NextStateWithData(this._nextState, data, ...this._actions)
+            return new NextStateWithData(this._nextState, data,
+                ...this._actions)
         }
 
         return new NextState(this._nextState, ...this._actions)

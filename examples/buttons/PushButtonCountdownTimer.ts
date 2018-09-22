@@ -19,20 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Timeout } from "../types";
-import Action from "./action";
+import StateMachine, { Handlers, nextState, Timeout } from "../../index"
 
 
-export default class TimeoutAction extends Action {
-    /**
-     * Creates a new TimeoutAction
-     * @param time the timeout in ms
-     */
-    constructor(public time: Timeout) {
+export class PushButtonCountdownTimer extends StateMachine {
+    initialState = 'off'
+
+    handlers: Handlers = [
+        ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
+        ['genericTimeout#*_#on', 'off']
+    ]
+
+    constructor(timeout: Timeout) {
         super()
+        this.initialData = {timeout}
     }
 
-    toString(): string {
-        return `${super.toString()}, time=${this.time}`
+    push() {
+        this.cast('push')
     }
 }

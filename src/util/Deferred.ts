@@ -43,8 +43,9 @@ export default class Deferred<T> implements Promise<T> {
      * If the promise is already settled it does nothing.
      *
      * @param reason: the reason for the rejection of the Promise.
-     * Generally its an Error object. If however a Promise is passed, then the Promise
-     * itself will be the reason for rejection no matter the state of the Promise.
+     * Generally its an Error object. If however a Promise is passed, then the
+     *     Promise itself will be the reason for rejection no matter the state
+     *     of the Promise.
      */
     reject: Rejector
 
@@ -112,7 +113,8 @@ export default class Deferred<T> implements Promise<T> {
 
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @returns {Promise<R1 | R2>} Promise for the completion of which ever callback is executed.
+     * @returns {Promise<R1 | R2>} Promise for the completion of which ever
+     *     callback is executed.
      * @param onFulfilled handles fulfillment
      * @param onRejected handles rejection
      */

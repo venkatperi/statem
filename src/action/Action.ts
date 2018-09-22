@@ -19,8 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {ActionType} from "../types";
-import _ = require("lodash");
+import _ = require("lodash")
+import { ActionType } from "../types";
+
 
 export default class Action {
     readonly type: ActionType

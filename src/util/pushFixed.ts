@@ -28,7 +28,8 @@
  * @param size {number} - Max size of the array.
  * @return {T[]} The updated array
  */
-export default function pushFixed<T>(item: T, arr: Array<T>, size: number): Array<T> {
+export default function pushFixed<T>(item: T, arr: Array<T>,
+    size: number): Array<T> {
     return arr.slice(Math.max(0, arr.length - size + 1)).concat(item)
 }
 

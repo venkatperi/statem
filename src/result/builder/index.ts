@@ -19,14 +19,15 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import ResultBuilder from './ResultBuilder'
-import {EventContext,  Timeout} from "../../types";
-import NextStateBuilder from "./NextStateBuilder";
+import { State } from "../../State";
+import { EventContext, Timeout } from "../../types";
 import KeepStateBuilder from "./KeepStateBuilder";
-import {State} from "../../State";
+import NextStateBuilder from "./NextStateBuilder";
+import ResultBuilder from "./ResultBuilder"
+
 
 export default ResultBuilder
-export {KeepStateBuilder, NextStateBuilder}
+export { KeepStateBuilder, NextStateBuilder }
 
 export function nextState(state: State): NextStateBuilder {
     return new NextStateBuilder(state)
@@ -34,6 +35,10 @@ export function nextState(state: State): NextStateBuilder {
 
 export function keepState(): KeepStateBuilder {
     return new KeepStateBuilder()
+}
+
+export function reply(from: string, msg: any): KeepStateBuilder {
+    return new KeepStateBuilder().reply(from, msg)
 }
 
 export function internalEvent(context?: EventContext): KeepStateBuilder {

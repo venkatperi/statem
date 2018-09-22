@@ -21,6 +21,7 @@
 
 import Result from "./Result";
 
+
 export default class RepeatStateAndData extends Result {
     type = 'repeatStateAndData'
 

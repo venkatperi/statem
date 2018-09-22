@@ -19,11 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { Priority } from "../types";
 import Event from "./event";
-import {Priority} from "../types";
+
 
 export default class CastEvent extends Event {
     type = 'cast'
-
     priority = Priority.Low
 }

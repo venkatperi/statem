@@ -19,9 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import StateMachine, {Handlers, keepState, nextState, State, Timeout} from '../..';
-import Deferred from "../../src/util/Deferred";
-import {stateName} from "../../src/types";
+import StateMachine, {
+    Handlers, keepState, nextState, State, Timeout
+} from '../index';
+import { stateName } from "../src/State"
+import Deferred from "../src/util/Deferred";
+
 
 export default class Service extends StateMachine {
     /**
@@ -29,24 +32,6 @@ export default class Service extends StateMachine {
      * @type {string}
      */
     initialState = 'new'
-
-    /**
-     * Timeout for completing service start|stop
-     *
-     * @type {number|string} optional
-     */
-    timeout?: Timeout
-
-    /**
-     * List of errors
-     * @type {Error[]}
-     */
-
-    initialData = {
-        running: new Deferred(),
-        terminated: new Deferred(),
-        errors: []
-    }
 
     handlers: Handlers = [
         ['cast#start#new', () => this.doNext('starting')],
@@ -67,13 +52,36 @@ export default class Service extends StateMachine {
         ['enter#*_#terminated', ({data}) => data.terminated.resolve()],
         ['enter#*_#failed', ({data}) => data.terminated.reject(data.errors)],
 
-        ['cast#error#*_', ({event}) => nextState('failed').data({
-            errors: {$push: [event.extra.reason]}
-        })],
+        ['cast#error#*_', ({event}) => nextState('failed')
+            .data({
+                "errors": {"$push": [event.extra.reason]}
+            })],
 
-        ['stateTimeout#*_#*_', ({current}) => keepState().nextEvent('cast', 'error',
-            {reason: new Error(`Timeout waiting for state change in state: ${current}`)})],
+        ['stateTimeout#*_#*_',
+            ({current}) => keepState().nextEvent('cast', 'error',
+                {
+                    "reason": new Error(
+                        `Timeout waiting for state change in state: ${current}`)
+                })],
     ]
+
+    /**
+     * List of errors
+     * @type {Error[]}
+     */
+
+    initialData = {
+        "errors": [],
+        "running": new Deferred(),
+        "terminated": new Deferred(),
+    }
+
+    /**
+     * Timeout for completing service start|stop
+     *
+     * @type {number|string} optional
+     */
+    timeout?: Timeout
 
     /**
      * Constructor
@@ -96,8 +104,9 @@ export default class Service extends StateMachine {
      * @return {Promise<void>}
      */
     async start() {
-        if (await this.getState() !== 'new')
+        if (await this.getState() !== 'new') {
             throw new Error('Service is not in state new')
+        }
         this.cast('start')
     }
 

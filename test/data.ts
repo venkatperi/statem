@@ -19,24 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import {expect} from 'chai'
 import StateMachine from "..";
-import {nextState} from "../index";
+import { nextState } from "../index";
 
 let sm
 
 describe('SM data', () => {
     beforeEach(() => {
         sm = new StateMachine({
-            initialState: "ONE",
-            handlers: [
+            "handlers": [
                 ['cast#next#ONE', () =>
-                    nextState('TWO').data({$set: 'ONE'})],
+                    nextState('TWO').data({"$set": 'ONE'})],
 
                 ['cast#next#TWO', () => nextState('ONE')],
-
-            ]
+            ],
+            "initialState": "ONE",
         }).startSM()
     })
 

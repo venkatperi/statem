@@ -19,21 +19,21 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {ActionList} from "../action";
+import { State } from "../State";
+import { ActionList } from "../action";
 import Result from "./Result";
-import {Stateful} from "./Stateful";
-import {State} from "../State";
+import { Stateful } from "./Stateful";
+
 
 /**
- * Represents a state transition, maybe to the same state. Keeps the current data
+ * Represents a state transition, maybe to the same state. Keeps the current
+ * data
  */
 export default class NextState extends Result implements Stateful {
     type = "nextState"
-    nextState: State
 
-    constructor(nextState: State, ...actions: ActionList) {
+    constructor(public nextState: State, ...actions: ActionList) {
         super(...actions);
-        this.nextState = nextState;
     }
 }
 

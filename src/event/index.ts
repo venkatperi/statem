@@ -19,26 +19,22 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Event from './Event'
-import StateTimeoutEvent from "./StateTimeoutEvent";
-import EventTimeoutEvent from "./EventTimeoutEvent";
-import GenericTimeoutEvent from "./GenericTimeoutEvent";
+import NextEventAction from "../action/NextEventAction";
 import CallEvent from './CallEvent';
 import CastEvent from './CastEvent';
-import InternalEvent from './InternalEvent';
 import EnterEvent from './EnterEvent';
-import NextEventAction from "../action/NextEventAction";
+import Event from './Event'
+import EventTimeoutEvent from "./EventTimeoutEvent";
+import GenericTimeoutEvent from "./GenericTimeoutEvent";
+import InternalEvent from './InternalEvent';
+import StateTimeoutEvent from "./StateTimeoutEvent";
+
 
 export default Event
 
 export {
-    CallEvent,
-    CastEvent,
-    InternalEvent,
-    EnterEvent,
-    StateTimeoutEvent,
-    EventTimeoutEvent,
-    GenericTimeoutEvent,
+    CallEvent, CastEvent, InternalEvent, EnterEvent,
+    StateTimeoutEvent, EventTimeoutEvent, GenericTimeoutEvent,
 }
 
 export function makeNextEvent(action: NextEventAction) {
@@ -48,4 +44,5 @@ export function makeNextEvent(action: NextEventAction) {
         case 'cast':
             return new CastEvent(action.context, action.extra)
     }
+    throw new Error(`makeNextEvent: Not implemented for ${action.eventType}`)
 }

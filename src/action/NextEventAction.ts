@@ -19,12 +19,19 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import _ = require("lodash")
+import { EventContext, EventExtra, EventType } from "../types";
+import { dataToString } from "../util/StringHelper"
 import Action from "./action";
-import {EventContext, EventExtra, EventType} from "../types";
-import _ = require('lodash');
+
 
 export default class NextEventAction extends Action {
-    type = 'nextEvent'
+    type = "nextEvent"
+
+    toString(): string {
+        return `${super.toString()}, event=${_.upperFirst(
+            this.eventType)}, context=${this.contextString}`
+    }
 
     /**
      * Creates a next event action
@@ -32,25 +39,12 @@ export default class NextEventAction extends Action {
      * @param context
      * @param extra
      */
-    constructor(public eventType: EventType, public context?: EventContext, public extra?: EventExtra) {
+    constructor(public eventType: EventType, public context?: EventContext,
+        public extra?: EventExtra) {
         super()
     }
 
     get contextString(): string {
-        if (typeof this.context === 'object')
-            return JSON.stringify(this.context)
-
-        switch (this.context) {
-            case undefined:
-            case null:
-                return ''
-
-            default:
-                return String(this.context)
-        }
-    }
-
-    toString(): string {
-        return `${super.toString()}, event=${_.upperFirst(this.eventType)}, context=${this.contextString}`
+        return dataToString(this.context)
     }
 }

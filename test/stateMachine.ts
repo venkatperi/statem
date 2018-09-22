@@ -19,9 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import {expect} from 'chai'
-import StateMachine, {internalEvent, stateTimeout} from "..";
+import StateMachine, { internalEvent, stateTimeout } from "..";
 import Deferred from "../src/util/Deferred";
 
 describe('State Machine', () => {
@@ -46,9 +46,7 @@ describe('State Machine', () => {
         }
 
         sm = new StateMachine({
-            initialState: "ONE",
-            data: 123,
-            handlers: [
+            "handlers": [
                 /**
                  * Trap all state enter events
                  */
@@ -66,32 +64,40 @@ describe('State Machine', () => {
                 ['cast#next#TWO', 'ONE'],
 
                 /**
-                 * (state: any, event: (cast, sendInternal)) --> adds internal event
+                 * (state: any, event: (cast, sendInternal)) --> adds internal
+                 * event
                  */
-                ['cast#sendInternal#:state', () => internalEvent('INTERNAL-EVENT')],
+                ['cast#sendInternal#:state',
+                    () => internalEvent('INTERNAL-EVENT')],
 
                 /**
                  * Trap internal event
                  */
-                ['internal#*context#:state', ({args}) => internal.resolve(args.context)],
+                ['internal#*context#:state',
+                    ({args}) => internal.resolve(args.context)],
 
                 /**
-                 * (state: any, event: (cast, {stateTimeout: time})) --> starts state timeout
+                 * (state: any, event: (cast, {stateTimeout: time})) --> starts
+                 * state timeout
                  */
-                ['cast#stateTimeout/:time#:state', ({args}) => stateTimeout(args.time)],
+                ['cast#stateTimeout/:time#:state',
+                    ({args}) => stateTimeout(args.time)],
 
                 /**
                  * Trap state timeout event
                  */
-                ["stateTimeout#*context#:state", ({args}) => stateDefer.resolve(args.context)],
+                ["stateTimeout#*context#:state",
+                    ({args}) => stateDefer.resolve(args.context)],
 
                 /**
                  * Catch-all route
                  */
                 [':event#*context#:state', ({args}) => catchAll.resolve(args)]
-            ]
+            ],
+            "initialData": 123,
+            "initialState": "ONE",
         }).on('state', (cur, old) => events[cur].resolve(old))
-            .startSM()
+          .startSM()
     })
 
     it("initial state is set", async () =>
@@ -117,7 +123,7 @@ describe('State Machine', () => {
     })
 
     it("state timeout", async () => {
-        sm.cast({stateTimeout: 100})
+        sm.cast({"stateTimeout": 100})
         await stateDefer
     })
 

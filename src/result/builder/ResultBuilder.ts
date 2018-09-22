@@ -19,39 +19,30 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import update, { CustomCommands, Spec } from "immutability-helper";
+
+import {
+    ActionList, EventTimeoutAction, GenericTimeoutAction, NextEventAction,
+    PostponeAction, ReplyAction, StateTimeoutAction
+} from "../../action";
+import {
+    Data, EventContext, EventExtra, EventType, From, Timeout
+} from "../../types";
 import Result from "../Result";
-import {ActionList, EventTimeoutAction, GenericTimeoutAction, ReplyAction, StateTimeoutAction} from "../../action";
-import {Data, EventContext, EventExtra, EventType, From, Timeout} from "../../types";
-import PostponeAction from "../../action/PostponeAction";
-import NextEventAction from "../../action/NextEventAction";
-import update, {CustomCommands, Spec} from 'immutability-helper';
 
 
 /**
  * Fluent builder for {Result}s
  */
 export default abstract class ResultBuilder {
-    _hasNewData = false
-    _data?: Data
     _actions: ActionList = []
-    _updates: Spec<Data>[] = []
+    _updates: Array<Spec<Data>> = []
 
     /**
      * Builds the result
      * @param data
      */
     abstract getResult(data?: Data): Result
-
-    /**
-     * Use the given data for the result
-     * @return {this} for chaining
-     * @param data
-     */
-    // withData(data: Data): ResultBuilder {
-    //     this._hasNewData = true
-    //     this._data = data
-    //     return this
-    // }
 
     /**
      * Adds the given actions to the result
@@ -121,7 +112,8 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder}
      * @param extra
      */
-    nextEvent(type: EventType, context?: EventContext, extra?: EventExtra): ResultBuilder {
+    nextEvent(type: EventType, context?: EventContext,
+        extra?: EventExtra): ResultBuilder {
         return this.action(new NextEventAction(type, context, extra))
     }
 
@@ -131,7 +123,7 @@ export default abstract class ResultBuilder {
      * @return {ResultBuilder}
      */
     internalEvent(context?: EventContext): ResultBuilder {
-        return this.action(new NextEventAction('internal', context))
+        return this.action(new NextEventAction("internal", context))
     }
 
     /**

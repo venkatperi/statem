@@ -20,12 +20,12 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import Route = require("route-parser")
 import Event from "./event";
-import Result from "./result/Result";
+import Result from "./result";
 import ResultBuilder from "./result/builder";
-import {arrayEqual, objEqual} from "./util/arrayEqual";
-import Route = require("route-parser");
-import {State} from "./State";
+import { State } from "./State";
+
 
 export type Primitive = number | string | boolean | null | undefined
 
@@ -68,14 +68,22 @@ export type StateWithTimeout = [State, Timeout]
 
 export type Handler = HandlerFn | State | StateWithTimeout
 
-export type Handlers = [string | string[], Handler][]
+export type Handlers = Array<[string | Array<string>, Handler]>
 
 export type RouteHandler = {
-    routes: [string, Route][],
+    routes: Array<[string, Route]>,
     handler: Handler
 }
 
-export type RouteHandlers = RouteHandler[]
+export type RouteHandlers = Array<RouteHandler>
+
+export type MatchArgs = {
+    current: State;
+    data: Data;
+    event: Event,
+    args?: object,
+    route?: string
+}
 
 export type MatchedHandler = {
     routeHandler: RouteHandler,

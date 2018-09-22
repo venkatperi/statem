@@ -19,12 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { expect } from 'chai'
 import 'mocha'
-import {expect} from 'chai'
-import delay from "../src/util/delay";
+import { State } from "..";
 import HotelSafe from "../examples/HotelSafe";
-import {State} from "..";
-import {stateRoute} from "../src/State";
+import { stateRoute } from "../src/State";
+import delay from "../src/util/delay";
 
 let safe
 let code = [1, 2, 3, 4]
@@ -36,7 +36,7 @@ function stateIs(s: State) {
         expect(stateRoute(await safe.getState())).is.eq(s))
 }
 
-function sendCode(code: number[]) {
+function sendCode(code: Array<number>) {
     for (let d of code) {
         safe.button(d)
     }
@@ -72,7 +72,7 @@ describe('hotel safe', () => {
 
         describe('enter new code', () => {
             beforeEach(() => {
-                sendCode(badCode)   //gets pushed out by next batch of digits
+                sendCode(badCode)   // gets pushed out by next batch of digits
                 sendCode(code)
             })
 
@@ -107,6 +107,4 @@ describe('hotel safe', () => {
             })
         })
     })
-
-
 })

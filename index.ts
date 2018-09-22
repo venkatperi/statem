@@ -22,22 +22,18 @@
 import Action from './src/action'
 import Event from './src/event'
 import Result from './src/result'
-import {StateMachine} from './src/StateMachine'
-import {Handlers, Timeout} from './src/types';
-import {internalEvent, keepState, nextState, stateTimeout} from './src/result/builder';
-import {State} from './src/State';
+import {
+    internalEvent, keepState, nextState, stateTimeout
+} from './src/result/builder';
+import { State } from './src/State';
+import { StateMachine } from './src/StateMachine'
+import { Handlers, Timeout } from './src/types';
+
 
 export default StateMachine
 
 export {
-    Event,
-    Result,
-    Action,
-    State,
-    keepState,
-    nextState,
-    internalEvent,
-    stateTimeout,
-    Handlers,
-    Timeout
+    Event, Result, Action, State, keepState,
+    nextState, internalEvent, stateTimeout,
+    Handlers, Timeout
 }

@@ -19,38 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-import StateMachine, {Handlers, nextState, Timeout} from "../index"
-
-export class ToggleButton extends StateMachine {
-    initialState = 'off'
-
-    handlers: Handlers = [
-        ['cast#flip#off', 'on'],
-        ['cast#flip#on', 'off']
-    ]
-
-    flip() {
-        this.cast('flip')
-    }
-}
-
-export class ToggleButtonWithCount extends StateMachine {
-    initialState = 'off'
-
-    initialData = {
-        count: 0
-    }
-
-    handlers: Handlers = [
-        ['cast#flip#off', ({data}) => nextState('on').data({count: {$set: data.count + 1}})],
-        ['cast#flip#on', 'off']
-    ]
-
-    flip() {
-        this.cast('flip')
-    }
-}
+import StateMachine, { Handlers } from "../../index"
 
 
 export class PushButton extends StateMachine {
@@ -69,23 +38,3 @@ export class PushButton extends StateMachine {
         this.cast('release')
     }
 }
-
-
-export class PushButtonCountdownTimer extends StateMachine {
-    initialState = 'off'
-
-    handlers: Handlers = [
-        ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
-        ['genericTimeout#*_#on', 'off']
-    ]
-
-    constructor(timeout: Timeout) {
-        super()
-        this.initialData = {timeout}
-    }
-
-    push() {
-        this.cast('push')
-    }
-}
-

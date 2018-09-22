@@ -20,7 +20,8 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Deferred from './Deferred'
-import {uniqId} from "./uniqId";
+import { uniqId } from "./uniqId";
+
 
 export default class Pending {
     private pending: { [K in string]: Deferred<any> } = {}
@@ -49,7 +50,8 @@ export default class Pending {
     }
 
     cleanup() {
-        let completed = Object.entries(this.pending).filter(([id, defer]) => defer.completed)
+        let completed = Object.entries(this.pending)
+                              .filter(([id, defer]) => defer.completed)
         for (let [id] of completed) {
             this.remove(id)
         }

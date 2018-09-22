@@ -20,62 +20,67 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import {NamedPrimitiveObject} from "./types";
-import {arrayEqual, objEqual} from "./util/arrayEqual";
+import { NamedPrimitiveObject } from "./types";
+import { arrayEqual, objEqual } from "./util/arrayEqual";
 
-export type ComplexState = string[] | NamedPrimitiveObject
+
+export type ComplexState = Array<string> | NamedPrimitiveObject
 
 export type State = string | ComplexState
 
 export function isStringState(s: State): s is string {
-    return typeof s === 'string'
+    return typeof s === "string"
 }
 
 export function isComplexState(s: State): s is ComplexState {
-    return typeof s !== 'string'
+    return typeof s !== "string"
 }
 
-export function isArrayState(s: State): s is string[] {
+export function isArrayState(s: State): s is Array<string> {
     return Array.isArray(s)
 }
 
 export function isObjState(s: State): s is NamedPrimitiveObject {
-    return typeof s === 'object'
+    return typeof s === "object"
 }
 
 export function stateName(s: State) {
-    if (typeof s === 'string')
+    if (typeof s === "string") {
         return s
-    if (Array.isArray(s))
+    }
+    if (Array.isArray(s)) {
         return s[0]
+    }
     return s.name
 }
 
-export function stateEquals(a: State, b: State) {
-    if (isStringState(a) && isStringState(b))
+export function stateEquals(a: State, b: State): boolean | undefined {
+    if (isStringState(a) && isStringState(b)) {
         return a === b
+    }
 
-    if (isArrayState(a) && isArrayState(b))
+    if (isArrayState(a) && isArrayState(b)) {
         return arrayEqual(a, b)
+    }
 
-    if (isObjState(a) && isObjState(b))
-        return objEqual(a, b)
-
-    return false
+    return isObjState(a) && isObjState(b) ? objEqual(a, b) : false
 }
 
 export function stateRoute(s?: State): string {
-    if (!s)
-        return '*'
+    if (!s) {
+        return "*"
+    }
 
-    if (isStringState(s))
+    if (isStringState(s)) {
         return String(s)
+    }
 
-    if (isArrayState(s))
-        return s.join('/')
+    if (isArrayState(s)) {
+        return s.join("/")
+    }
 
-    return s.name + '/' +
+    return s.name + "/" +
         Object.entries(s)
-            .filter(([k]) => k !== 'name')
-            .map(x => x.join('/')).join('/')
+              .filter(([k]) => k !== "name")
+              .map((x) => x.join("/")).join("/")
 }

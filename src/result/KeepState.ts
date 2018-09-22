@@ -21,6 +21,7 @@
 
 import ResultWithData from "./ResultWithData";
 
+
 export default class KeepState extends ResultWithData {
-    type = 'keepState'
+    type = "keepState"
 }
