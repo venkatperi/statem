@@ -29,13 +29,16 @@ import Action, {
     StateTimeoutAction
 } from "./action";
 import Event, {
-    CallEvent, CastEvent, EnterEvent, EventTimeoutEvent, GenericTimeoutEvent,
-    makeNextEvent, StateTimeoutEvent
+    CallEvent, CastEvent, EventTimeoutEvent, GenericTimeoutEvent, makeNextEvent,
+    StateTimeoutEvent
 } from "./event";
+import EnterEvent from "./event/EnterEvent"
 import { IStateMachine } from "./IStateMachine"
 import Logger from "./Logger";
 import Result, { NextState, NextStateWithData } from "./result";
 import ResultBuilder, { reply } from "./result/builder";
+import KeepState from "./result/KeepState"
+import KeepStateAndData from "./result/KeepStateAndData"
 import ResultWithData from "./result/ResultWithData"
 import { SMOptions } from "./SMOptions"
 import {
@@ -131,8 +134,12 @@ export class StateMachine<TData> extends EventEmitter
         this.data = this.initialData;
         let that = this;
         let timers = this.timers;
-        this.on("state", (s, old) => that.addEvent(new EnterEvent({old})))
-            .on("stateChanged", () => timers.cancel("stateTimeout"))
+        this
+        // .on("state", (s, old) => that.addEvent(new EnterEvent({old})))
+            .on("stateChanged", (s, old) => {
+                that.addEvent(new EnterEvent({old}))
+                timers.cancel("stateTimeout")
+            })
             .on("event", () => timers.cancel("eventTimeout"));
 
         this.initHandlers();
@@ -211,6 +218,7 @@ export class StateMachine<TData> extends EventEmitter
         }
 
         this.log.i("setState", s);
+        let initial = !!this._state
         let old = this._state || this.initialState;
         let oldName = stateName(old);
         this._state = s;
@@ -223,10 +231,9 @@ export class StateMachine<TData> extends EventEmitter
             this.emit("complexStateChanged", s, old);
         }
 
-        if (!stateEquals(s, old)) {
+        if (initial || !stateEquals(s, old)) {
             this.emit("stateChanged", s, old);
         }
-
     }
 
     /**
@@ -397,6 +404,9 @@ export class StateMachine<TData> extends EventEmitter
 
         if (res instanceof NextState || res instanceof NextStateWithData) {
             this.state = res.nextState;
+        }
+        else if (res instanceof KeepState || res instanceof KeepStateAndData) {
+            this.state = this.state
         }
 
         if (res instanceof ResultWithData && res.hasData) {

@@ -21,6 +21,7 @@
 
 
 import Route = require("route-parser")
+import { inherits } from "util"
 import Event from "./event";
 import Result from "./result";
 import ResultBuilder from "./result/builder";
@@ -36,8 +37,6 @@ export type NamedPrimitiveObject = {
     name: string,
     [k: string]: Primitive
 }
-
-// export type Data = any;
 
 export type EventType = string
 
