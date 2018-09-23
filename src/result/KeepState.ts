@@ -22,6 +22,6 @@
 import ResultWithData from "./ResultWithData";
 
 
-export default class KeepState extends ResultWithData {
+export default class KeepState<TData> extends ResultWithData<TData> {
     type = "keepState"
 }

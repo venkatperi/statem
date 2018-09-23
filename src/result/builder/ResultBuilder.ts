@@ -19,16 +19,16 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import update, { CustomCommands, Spec } from "immutability-helper";
-
+import update, { Spec } from "immutability-helper"
 import {
     ActionList, EventTimeoutAction, GenericTimeoutAction, NextEventAction,
     PostponeAction, ReplyAction, StateTimeoutAction
 } from "../../action";
 import {
-    Data, EventContext, EventExtra, EventType, From, Timeout
+    EventContext, EventExtra, EventType, From, Timeout
 } from "../../types";
-import Result from "../Result";
+import Result from "../Result"
+import ResultWithData from "../ResultWithData"
 
 
 /**
@@ -36,13 +36,8 @@ import Result from "../Result";
  */
 export default abstract class ResultBuilder {
     _actions: ActionList = []
-    _updates: Array<Spec<Data>> = []
 
-    /**
-     * Builds the result
-     * @param data
-     */
-    abstract getResult(data?: Data): Result
+    _updates: Array<Spec<any>> = []
 
     /**
      * Adds the given actions to the result
@@ -80,7 +75,7 @@ export default abstract class ResultBuilder {
      * @param name - optional name
      * @return {ResultBuilder} this
      */
-    timeout(time: number, name?: string): ResultBuilder {
+    timeout(time: Timeout, name?: string): ResultBuilder {
         return this.action(new GenericTimeoutAction(time, name))
     }
 
@@ -91,7 +86,7 @@ export default abstract class ResultBuilder {
      * @param msg - the message to send
      * @return {ResultBuilder}
      */
-    reply(from: From, msg: any): ResultBuilder {
+    reply(from: From, msg?: any): ResultBuilder {
         return this.action(new ReplyAction(from, msg))
     }
 
@@ -127,11 +122,16 @@ export default abstract class ResultBuilder {
     }
 
     /**
+     * Builds the result
+     */
+    abstract getResult<TData>(data?: TData): Result | ResultWithData<TData>
+
+    /**
      * Set data mutation specs
      * @param spec
-     * @return {this}
+     * @return {this<TData>}
      */
-    data<T, C extends CustomCommands<object> = never>(spec: Spec<T, C>,): ResultBuilder {
+    data<TData>(spec: Spec<TData>): ResultBuilder {
         this._updates.push(spec)
         return this
     }
@@ -139,14 +139,13 @@ export default abstract class ResultBuilder {
     /**
      * Apply updates to the given data
      * @param data
-     * @return {Data}
+     * @return {TData}
      */
-    protected applyUpdates(data: Data) {
+    protected applyUpdates<TData>(data: TData): TData {
         for (let u of this._updates) {
             data = update(data, u)
         }
         return data
     }
-
 }
 

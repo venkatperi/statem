@@ -20,9 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { State } from "./State"
-import { Data, Handlers } from "./types"
+import { Handlers } from "./types"
 
-export interface SMOptions {
+export interface SMOptions<TData = void> {
     /**
      * State machine's initial state. Must be defined.
      */
@@ -32,10 +32,10 @@ export interface SMOptions {
      * Array of handlers.
      * The heart of the state machine.
      */
-    handlers: Handlers;
+    handlers: Handlers<TData>
 
     /**
      * Initial data. optional.
      */
-    initialData?: Data;
+    initialData?: TData
 }

@@ -45,8 +45,8 @@ describe('State Machine', () => {
             events[s] = new Deferred()
         }
 
-        sm = new StateMachine({
-            "handlers": [
+        sm = new StateMachine<number>({
+            handlers: [
                 /**
                  * Trap all state enter events
                  */
@@ -94,8 +94,8 @@ describe('State Machine', () => {
                  */
                 [':event#*context#:state', ({args}) => catchAll.resolve(args)]
             ],
-            "initialData": 123,
-            "initialState": "ONE",
+            initialData: 123,
+            initialState: "ONE",
         }).on('state', (cur, old) => events[cur].resolve(old))
           .startSM()
     })
@@ -123,7 +123,7 @@ describe('State Machine', () => {
     })
 
     it("state timeout", async () => {
-        sm.cast({"stateTimeout": 100})
+        sm.cast({stateTimeout: 100})
         await stateDefer
     })
 

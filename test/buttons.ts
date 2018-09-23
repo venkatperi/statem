@@ -45,7 +45,10 @@ function countIs(count: number) {
 
 describe('buttons', () => {
     describe('simple toggle button', () => {
-        beforeEach(() => sm = new ToggleButton().startSM())
+        beforeEach(() => {
+            sm = new ToggleButton()
+            sm.startSM()
+        })
 
         stateIs('off')
         describe('flip the toggle', () => {
@@ -60,7 +63,10 @@ describe('buttons', () => {
 
 
     describe('toggle button with count', () => {
-        beforeEach(() => sm = new ToggleButtonWithCount().startSM())
+        beforeEach(() => {
+            sm = new ToggleButtonWithCount()
+            sm.startSM()
+        })
 
         stateIs('off')
         countIs(0)
@@ -83,7 +89,10 @@ describe('buttons', () => {
 
 
     describe('push button', () => {
-        beforeEach(() => sm = new PushButton().startSM())
+        beforeEach(() => {
+            sm = new PushButton()
+            sm.startSM()
+        })
 
         stateIs('off')
         let cycle = (max, count = 0) => {
@@ -112,7 +121,10 @@ describe('buttons', () => {
 
 
     describe('push button countdown timer', () => {
-        beforeEach(() => sm = new PushButtonCountdownTimer("200ms").startSM())
+        beforeEach(() => {
+            sm = new PushButtonCountdownTimer("200ms")
+            sm.startSM()
+        })
 
         stateIs('off')
         let cycle = (max, count = 0) => {

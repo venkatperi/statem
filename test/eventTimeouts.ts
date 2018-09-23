@@ -21,55 +21,69 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import StateMachine from "..";
-import { nextState } from "../index";
+import StateMachine, { keepState } from "..";
 import delay from "../src/util/delay";
 
-let hodor = 'hodor'
 let sm
+let promise
 
-describe('genericTimeout', () => {
+type SMData = {
+    from: Array<string>
+}
+
+describe('event timeouts', () => {
+
     beforeEach(() => {
-
-        sm = new StateMachine({
+        sm = new StateMachine<SMData>({
             handlers: [
+                ['call/:from#waitForTimeout#*_', ({args}) =>
+                    keepState().data({from: {$push: [args.from]}})],
+
                 /**
-                 * (cast:next, ONE) --> (TWO, genericTimeout)
+                 * (cast:st, ONE) --> (TWO, eventTimeout)
                  */
-                ['cast#next#ONE', () => nextState('TWO').timeout(200, hodor)],
+                ['cast#next#ONE', ['TWO', 200]],
 
                 /**
                  * (cast:next, TWO) --> ONE
                  */
-                ['cast#next#TWO', () => nextState('ONE')],
+                ['cast#next#TWO', 'ONE'],
 
                 /**
-                 * (genericTimeout, TWO) --> THREE
+                 * (eventTimeout, TWO) --> THREE
                  */
-                ['genericTimeout#*_#TWO', () => nextState('THREE')],
+                ['eventTimeout#*_#TWO', 'THREE'],
+                ['enter#*_#THREE', ({data}) => {
+                    let res = keepState()
+                    for (const x of data.from) {
+                        res = res.reply(x)
+                    }
+                    return res
+                }],
             ],
+            initialData: {from: []},
             initialState: "ONE",
-        }).startSM()
+        })
+        sm.startSM()
+
+        // register promise otherwise
+        // we'll cancel the timeout
+        promise = sm.call('waitForTimeout')
         sm.cast('next')
     })
 
-    it("has a timer", async () => {
-        await delay(10) // wait for cast event to be processed
-        expect(sm.hasTimer(hodor)).to.be.true
-    })
-
-    it("fires unless cancelled", async () => {
-        await delay(400)
+    it("fires if no events received before timeout", async () => {
+        await promise
         expect(await sm.getState()).to.eq('THREE')
     })
 
-    it("doesn't fire if cancelled", async () => {
-        await delay(100)    // ensure state transition within timeout
-        sm.cancelTimer(hodor)
-        await delay(500)    // wait for a long time
-        expect(sm.hasTimer(hodor)).to.be.false
-        expect(await sm.getState()).to.eq('TWO')
-    })
+    it("cancels timer if an event is received",
+        async () => {
+            await delay(100)    // wait less than the timeout
+            sm.cast('next')
+            await delay(500)    // wait for a long time
+            expect(sm.hasEventTimer).to.be.false
+            expect(await sm.getState()).to.eq('ONE')
+        })
 })
-
 

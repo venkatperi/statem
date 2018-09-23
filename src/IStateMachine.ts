@@ -23,7 +23,7 @@ import Result from "./result"
 import { SMOptions } from "./SMOptions"
 import { EventContext, EventExtra, Handler, HandlerOpts } from "./types"
 
-export interface IStateMachine extends SMOptions {
+export interface IStateMachine<TData> extends SMOptions<TData> {
     /**
      * Returns true is state timer is currently set
      * @return {boolean}
@@ -40,7 +40,7 @@ export interface IStateMachine extends SMOptions {
      * Starts the state machine
      *
      */
-    startSM(): void
+    startSM(): IStateMachine<TData>
 
     /**
      * Stops the state machine
@@ -78,7 +78,7 @@ export interface IStateMachine extends SMOptions {
      * @param routes
      */
     addHandler(routes: string | Array<string>,
-        handler: Handler): IStateMachine
+        handler: Handler<TData>): IStateMachine<TData>
 
     /**
      *
@@ -87,5 +87,5 @@ export interface IStateMachine extends SMOptions {
      * @param current
      * @param data
      */
-    defaultEventHandler({event, args, current, data}: HandlerOpts): Result | undefined
+    defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined
 }

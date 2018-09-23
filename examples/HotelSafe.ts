@@ -20,28 +20,22 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine, {Handlers, keepState, nextState, Timeout} from "../index"
+import StateMachine, { Handlers, keepState, nextState, Timeout } from "../index"
+import { arrayEqual } from "../src/util/arrayEqual";
 import pushFixed from "../src/util/pushFixed";
-import {arrayEqual} from "../src/util/arrayEqual";
 
-export default class HotelSafe extends StateMachine {
+type SafeData = {
+    code: Array<number>,
+    input: Array<number>,
+    codeTimeout: Timeout,
+    msgDisplay: Timeout,
+    codeSize: number
+}
+
+export default class HotelSafe extends StateMachine<SafeData> {
     initialState = 'open'
 
-    initialData: {
-        code: number[],
-        input: number[],
-        codeTimeout: Timeout,
-        msgDisplay: Timeout,
-        codeSize: number
-    } = {
-        code: [],
-        input: [],
-        codeTimeout: 200,
-        msgDisplay: 200,
-        codeSize: 4
-    }
-
-    handlers: Handlers = [
+    handlers: Handlers<SafeData> = [
 
         // Clear data when safe enters OPEN
         ['enter#*_#open', () =>
@@ -69,8 +63,8 @@ export default class HotelSafe extends StateMachine {
         // else ignore
         ['cast#lock#locking', ({data}) =>
             data.code.length === data.codeSize ?
-                nextState('closed') :
-                keepState()],
+            nextState('closed') :
+            keepState()],
 
         // User entered digit(s).
         // Keep state if code is not long enough
@@ -80,14 +74,22 @@ export default class HotelSafe extends StateMachine {
             let digit = Number(args.digit)
             let input = data.input.concat(digit)
             return input.length < data.code.length ?
-                keepState().data({input: {$push: [digit]}}) :
-                arrayEqual(data.code, input) ?
-                    nextState('open') :
-                    nextState(['closed', 'message']).timeout(data.msgDisplay)
+                   keepState().data({input: {$push: [digit]}}) :
+                   arrayEqual(data.code, input) ?
+                   nextState('open') :
+                   nextState('closed/message').timeout(data.msgDisplay)
         }],
 
         ['genericTimeout#*_#closed/message', 'closed'],
     ]
+
+    initialData: SafeData = {
+        code: [],
+        codeSize: 4,
+        codeTimeout: 200,
+        input: [],
+        msgDisplay: 200,
+    }
 
     constructor(timeout: Timeout) {
         super()

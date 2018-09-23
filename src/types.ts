@@ -24,6 +24,7 @@ import Route = require("route-parser")
 import Event from "./event";
 import Result from "./result";
 import ResultBuilder from "./result/builder";
+import ResultWithData from "./result/ResultWithData"
 import { State } from "./State";
 
 
@@ -36,7 +37,7 @@ export type NamedPrimitiveObject = {
     [k: string]: Primitive
 }
 
-export type Data = any;
+// export type Data = any;
 
 export type EventType = string
 
@@ -52,41 +53,46 @@ export type From = string;
 
 export type Timeout = number | string;
 
-export type HandlerOpts = {
+export type HandlerOpts<TData> = {
     event: Event,
     args: { [k in string]: string },
     current: State,
-    data: Data,
+    data: TData,
     route: string
 }
 
-export type HandlerResult = Result | ResultBuilder | void
+export type HandlerResult<TData> =
+    Result
+    | ResultWithData<TData>
+    | ResultBuilder
+    | void
 
-export type HandlerFn = (handler: HandlerOpts) => HandlerResult
+export type HandlerFn<TData> = (handler: HandlerOpts<TData>) => HandlerResult<TData>
 
-export type StateWithTimeout = [State, Timeout]
+export type StateWithEventTimeout = [State, Timeout]
 
-export type Handler = HandlerFn | State | StateWithTimeout
+export type Handler<TData> = HandlerFn<TData> | State
+    | StateWithEventTimeout
 
-export type Handlers = Array<[string | Array<string>, Handler]>
+export type Handlers<TData> = Array<[string | Array<string>, Handler<TData>]>
 
-export type RouteHandler = {
+export type RouteHandler<TData> = {
     routes: Array<[string, Route]>,
-    handler: Handler
+    handler: Handler<TData>
 }
 
-export type RouteHandlers = Array<RouteHandler>
+export type RouteHandlers<TData> = Array<RouteHandler<TData>>
 
-export type MatchArgs = {
-    current: State;
-    data: Data;
-    event: Event,
-    args?: object,
+export type MatchArgs<TData> = {
+    current: State
+    data: TData
+    event: Event
+    args?: object
     route?: string
 }
 
-export type MatchedHandler = {
-    routeHandler: RouteHandler,
+export type MatchedHandler<TData> = {
+    routeHandler: Handler<TData>,
     route: string,
     result: { [k in string]: string }
 }

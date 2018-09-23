@@ -23,10 +23,10 @@
 import StateMachine, { Handlers } from "../../index"
 
 
-export class ToggleButton extends StateMachine {
+export class ToggleButton extends StateMachine<void> {
     initialState = 'off'
 
-    handlers: Handlers = [
+    handlers: Handlers<void> = [
         ['cast#flip#off', 'on'],
         ['cast#flip#on', 'off']
     ]

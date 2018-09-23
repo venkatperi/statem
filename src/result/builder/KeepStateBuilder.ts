@@ -19,19 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { KeepState, KeepStateAndData } from "../";
-import { Data } from "../../types";
+import { KeepStateAndData } from "../";
+import KeepState from "../KeepState"
 import Result from "../Result";
+import ResultWithData from "../ResultWithData"
 import ResultBuilder from "./ResultBuilder";
 
 
 export default class KeepStateBuilder extends ResultBuilder {
-    getResult(data?: Data): Result {
-        if (this._updates.length > 0) {
-            data = this.applyUpdates(data)
-            return new KeepState(data, ...this._actions)
-        }
-
-        return new KeepStateAndData(...this._actions)
+    getResult<TData>(data?: TData): Result | ResultWithData<TData> {
+        return this._updates.length === 0 ?
+               new KeepStateAndData(...this._actions) :
+               new KeepState(this.applyUpdates(data), ...this._actions)
     }
 }
+

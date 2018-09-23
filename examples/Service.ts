@@ -25,15 +25,20 @@ import StateMachine, {
 import { stateName } from "../src/State"
 import Deferred from "../src/util/Deferred";
 
+type ServiceData = {
+    errors: [],
+    running: Deferred<void>,
+    terminated: Deferred<void>,
+}
 
-export default class Service extends StateMachine {
+export default class Service extends StateMachine<ServiceData> {
     /**
      * Initial state
      * @type {string}
      */
     initialState = 'new'
 
-    handlers: Handlers = [
+    handlers: Handlers<ServiceData> = [
         ['cast#start#new', () => this.doNext('starting')],
 
         [['cast#stop#new',
@@ -52,15 +57,15 @@ export default class Service extends StateMachine {
         ['enter#*_#terminated', ({data}) => data.terminated.resolve()],
         ['enter#*_#failed', ({data}) => data.terminated.reject(data.errors)],
 
-        ['cast#error#*_', ({event}) => nextState('failed')
-            .data({
-                "errors": {"$push": [event.extra.reason]}
+        ['cast#error#*_', ({event}) =>
+            nextState('failed').data({
+                errors: {$push: [event.extra.reason]}
             })],
 
         ['stateTimeout#*_#*_',
             ({current}) => keepState().nextEvent('cast', 'error',
                 {
-                    "reason": new Error(
+                    reason: new Error(
                         `Timeout waiting for state change in state: ${current}`)
                 })],
     ]
@@ -70,10 +75,10 @@ export default class Service extends StateMachine {
      * @type {Error[]}
      */
 
-    initialData = {
-        "errors": [],
-        "running": new Deferred(),
-        "terminated": new Deferred(),
+    initialData: ServiceData = {
+        errors: [],
+        running: new Deferred<void>(),
+        terminated: new Deferred<void>(),
     }
 
     /**
@@ -192,7 +197,7 @@ export default class Service extends StateMachine {
      * @param p
      */
     private dispatch(p: Promise<void>) {
-        p.then(() => this.done()).catch((e) => this.error(e))
+        p.then(() => this.done()).catch(e => this.error(e))
     }
 
     private onStarting() {

@@ -19,34 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import Result, { NextState, NextStateWithData, } from "..";
+import Result, { NextState, } from "..";
 import { State } from "../../State"
-import { ActionList } from "../../action";
-import { Data, } from "../../types";
+import NextStateWithData from "../NextStateWithData"
+import ResultWithData from "../ResultWithData"
 import ResultBuilder from "./ResultBuilder";
 
 
 export default class NextStateBuilder extends ResultBuilder {
-    _nextState: State
-    _actions: ActionList = []
-
-    constructor(state: State) {
+    constructor(private state: State) {
         super()
-        this._nextState = state
     }
 
-    /**
-     *
-     * @param data
-     * @return {Result}
-     */
-    getResult(data?: Data): Result {
-        if (this._updates.length > 0) {
-            data = this.applyUpdates(data)
-            return new NextStateWithData(this._nextState, data,
-                ...this._actions)
-        }
-
-        return new NextState(this._nextState, ...this._actions)
+    getResult<TData>(data?: TData): Result | ResultWithData<TData> {
+        return this._updates.length === 0 ?
+               new NextState(this.state, ...this._actions) :
+               new NextStateWithData(this.state,
+                   this.applyUpdates(data),
+                   ...this._actions)
     }
 }

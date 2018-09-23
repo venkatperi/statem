@@ -22,10 +22,10 @@
 import StateMachine, { Handlers } from "../../index"
 
 
-export class PushButton extends StateMachine {
+export class PushButton extends StateMachine<void> {
     initialState = 'off'
 
-    handlers: Handlers = [
+    handlers: Handlers<void> = [
         ['cast#push#off', 'on'],
         ['cast#release#on', 'off']
     ]

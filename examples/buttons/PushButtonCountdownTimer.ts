@@ -21,11 +21,14 @@
 
 import StateMachine, { Handlers, nextState, Timeout } from "../../index"
 
+type PushButtonCountdownTimerData = {
+    timeout: Timeout
+}
 
-export class PushButtonCountdownTimer extends StateMachine {
+export class PushButtonCountdownTimer extends StateMachine<PushButtonCountdownTimerData> {
     initialState = 'off'
 
-    handlers: Handlers = [
+    handlers: Handlers<PushButtonCountdownTimerData> = [
         ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
         ['genericTimeout#*_#on', 'off']
     ]

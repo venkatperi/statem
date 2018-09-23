@@ -19,9 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import NextStateWithData from "./NextStateWithData";
+import NextState from "./NextState"
 
 
-export default class Stop extends NextStateWithData {
+export default class Stop extends NextState {
     type = 'stop'
 }

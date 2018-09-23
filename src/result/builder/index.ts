@@ -21,7 +21,7 @@
 
 import { State } from "../../State";
 import { EventContext, Timeout } from "../../types";
-import KeepStateBuilder from "./KeepStateBuilder";
+import KeepStateBuilder from "./KeepStateBuilder"
 import NextStateBuilder from "./NextStateBuilder";
 import ResultBuilder from "./ResultBuilder"
 

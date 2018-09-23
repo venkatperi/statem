@@ -22,6 +22,6 @@
 import ResultWithData from "./ResultWithData";
 
 
-export default class RepeatState extends ResultWithData {
+export default class RepeatState<TData> extends ResultWithData<TData> {
     type = 'repeatState'
 }

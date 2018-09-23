@@ -29,14 +29,15 @@ let sm
 describe('SM data', () => {
     beforeEach(() => {
         sm = new StateMachine({
-            "handlers": [
+            handlers: [
                 ['cast#next#ONE', () =>
-                    nextState('TWO').data({"$set": 'ONE'})],
+                    nextState('TWO').data({$set: 'ONE'})],
 
                 ['cast#next#TWO', () => nextState('ONE')],
             ],
-            "initialState": "ONE",
-        }).startSM()
+            initialState: "ONE",
+        })
+        sm.startSM()
     })
 
     it("no initial data", async () => {

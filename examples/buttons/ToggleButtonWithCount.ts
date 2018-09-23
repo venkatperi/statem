@@ -21,20 +21,23 @@
 
 import StateMachine, { Handlers, nextState } from "../../index"
 
+type ToggleButtonWithCountData = {
+    count: number
+}
 
-export class ToggleButtonWithCount extends StateMachine {
+export class ToggleButtonWithCount
+    extends StateMachine<ToggleButtonWithCountData> {
     initialState = 'off'
 
-    initialData = {
-        "count": 0
-    }
-
-    handlers: Handlers = [
-        ['cast#flip#off',
-            ({data}) => nextState('on')
-                .data({"count": {"$set": data.count + 1}})],
+    handlers: Handlers<ToggleButtonWithCountData> = [
+        ['cast#flip#off', ({data}) => nextState('on')
+            .data({count: {$set: data.count + 1}})],
         ['cast#flip#on', 'off']
     ]
+
+    initialData: ToggleButtonWithCountData = {
+        count: 0
+    }
 
     flip() {
         this.cast('flip')

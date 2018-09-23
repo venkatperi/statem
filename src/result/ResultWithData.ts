@@ -19,14 +19,43 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import objectInspect = require("object-inspect")
 import { ActionList } from "../action";
-import { Data } from "../types";
+import { dataToString } from "../util/StringHelper"
 import Result from "./Result";
 
 
-export default class ResultWithData extends Result {
-    constructor(newData: Data, ...actions: ActionList) {
+export default class ResultWithData<TData> extends Result {
+    hasData = false
+
+    /**
+     * Optional state machine data
+     */
+    private _newData: TData
+
+    constructor(newData: TData, ...actions: ActionList) {
         super(...actions)
         this.newData = newData
+    }
+
+    get newData(): TData {
+        return this._newData;
+    }
+
+    set newData(value: TData) {
+        this.hasData = true
+        this._newData = value;
+    }
+
+    get dataString(): string {
+        return this.hasData ? dataToString(this.newData) : ""
+    }
+
+    toString(): string {
+        return [this.type,
+            objectInspect({
+                actions: this.actions,
+                data: this.newData,
+            })].join(' ')
     }
 }

@@ -20,6 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { Timeout } from "../..";
 import TimeoutAction from "./TimeoutAction";
 
 
@@ -34,7 +35,7 @@ export default class GenericTimeoutAction extends TimeoutAction {
      * @param time
      * @param name
      */
-    constructor(time: number, public name?: string) {
+    constructor(time: Timeout, public name?: string) {
         super(time)
     }
 }
