@@ -41,7 +41,7 @@ export function dataToRoute(c: any) {
     }
 
     if (typeof c === 'object') {
-        return Object.entries(c).map((x) => x.join('/')).join('/')
+        return Object.entries(c).map(x => x.join('/')).join('/')
     }
 
     return String(c)

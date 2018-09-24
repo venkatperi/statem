@@ -21,11 +21,11 @@
 
 abstract class LogMixin implements Loggable {
     log = {
-        "d": this.logger("d"),
-        "e": this.logger("e"),
-        "i": this.logger("i"),
-        "v": this.logger("v"),
-        "w": this.logger("w"),
+        d: this.logger("d"),
+        e: this.logger("e"),
+        i: this.logger("i"),
+        v: this.logger("v"),
+        w: this.logger("w"),
     };
 
     abstract logger(level: string): void

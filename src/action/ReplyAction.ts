@@ -24,7 +24,11 @@ import Action from "./action";
 
 
 export default class ReplyAction extends Action {
-    type : ActionType = "reply"
+    type: ActionType = "reply"
+
+    toString(): string {
+        return `${super.toString()}, from=${this.from}, reply=${this.replyString}`
+    }
 
     /**
      * Creates a Reply action
@@ -48,9 +52,5 @@ export default class ReplyAction extends Action {
             default:
                 return String(this.reply)
         }
-    }
-
-    toString(): string {
-        return `${super.toString()}, from=${this.from}, reply=${this.replyString}`
     }
 }

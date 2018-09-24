@@ -109,7 +109,7 @@ export default class Event {
         //     this.type)}@${Priority[this.priority]} ${this.contextString}`
         return [`${_.upperFirst(this.type)}@${Priority[this.priority]}`,
             objectInspect({
-                "context": this.context
+                context: this.context
             })].join(' ')
     }
 }

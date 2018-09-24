@@ -24,6 +24,7 @@ import Event from "./event";
 
 
 export default class CastEvent extends Event {
-    type : EventType= 'cast'
+    type: EventType = 'cast'
+
     priority = Priority.Low
 }

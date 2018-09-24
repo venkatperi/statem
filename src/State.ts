@@ -82,5 +82,5 @@ export function stateRoute(s?: State): string {
     return s.name + "/" +
         Object.entries(s)
               .filter(([k]) => k !== "name")
-              .map((x) => x.join("/")).join("/")
+              .map(x => x.join("/")).join("/")
 }

@@ -1,8 +1,8 @@
 {
-  "name": "state-m",
+  "name": "gen-statem",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",
@@ -10,6 +10,10 @@
     "prepare": "npm run clean && npm run build",
     "lint": "tslint --project ."
   },
+  "files": [
+    "/src",
+    "/dist"
+  ],
   "author": "Venkat Peri <venkatperi@gmail.com> (http://www.vperi.com/)",
   "license": "MIT",
   "devDependencies": {

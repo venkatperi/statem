@@ -51,7 +51,7 @@ export default class Timers {
         Log.i("create", timeout, name, opts);
 
         this.cancel(name);
-        let t = this.timers[name] = new Timer({name, timeout, "auto": true});
+        let t = this.timers[name] = new Timer({name, timeout, auto: true});
         t.on("timer", () => that.cancel(name));
         return t;
     }
