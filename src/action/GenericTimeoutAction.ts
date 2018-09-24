@@ -21,6 +21,7 @@
 
 
 import { Timeout } from "../..";
+import { ActionType } from "../types"
 import TimeoutAction from "./TimeoutAction";
 
 
@@ -28,7 +29,7 @@ import TimeoutAction from "./TimeoutAction";
  * Generates a {GenericTimeoutEvent} after the specified timeout interval
  */
 export default class GenericTimeoutAction extends TimeoutAction {
-    type = "genericTimeout"
+    type: ActionType  = "genericTimeout"
 
     /**
      * Creates a generic timeout action

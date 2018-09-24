@@ -19,9 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { ResultType } from "../types"
 import ResultWithData from "./ResultWithData";
 
 
 export default class KeepState<TData> extends ResultWithData<TData> {
-    type = "keepState"
+    type: ResultType = "keepState"
 }

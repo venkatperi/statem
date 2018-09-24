@@ -45,27 +45,29 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
     /**
      * Stops the state machine
      *
-     * @param reason
-     * @param timeout
+     * @param reason -- the reason for stopping
+     * @param data -- if set updates the machine's data before stopping
      */
-    stopSM(reason?: string, timeout?: number): void
+    stopSM(reason: string, data?: TData): void
 
     /**
-     * Makes a call and waits for its reply.
+     * Fires a Call event and returns a promise that resolves or rejects when
+     * the state machine sends a reply (via a Reply(from)) handler action.
+     *
+     * The state machine generates a unique string id for each invocation
+     * of `call` and provides it to the state machine as:
+     * "call/uniqueId#args#state"
      *
      * @param request
-     * @param timeout
-     * @return {Promise<any>}
+     * @param extra
      */
-    call(request: EventContext,
-        timeout: number): Promise<any>
+    call(request: EventContext, extra?: EventExtra): Promise<any>
 
     /**
      * Sends an asynchronous request to the server.
      * This function always returns regardless of whether the
      * request was successful or handled by the StateMachine.
      *
-     * The appropriate state function will be called to handle the request.
      * @param request
      * @param extra
      */

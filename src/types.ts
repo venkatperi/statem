@@ -21,12 +21,11 @@
 
 
 import Route = require("route-parser")
-import { inherits } from "util"
-import Event from "./event";
-import Result from "./result";
-import ResultBuilder from "./result/builder";
+import Event from "./event"
+import Result from "./result"
+import ResultBuilder from "./result/builder"
 import ResultWithData from "./result/ResultWithData"
-import { State } from "./State";
+import { State } from "./State"
 
 
 export type Primitive = number | string | boolean | null | undefined
@@ -38,42 +37,75 @@ export type NamedPrimitiveObject = {
     [k: string]: Primitive
 }
 
-export type EventType = string
+export type EventType =
+    'call'
+    | 'cast'
+    | 'enter'
+    | 'eventTimeout'
+    | 'stateTimeout'
+    | 'genericTimeout'
+    | 'internal'
 
-export type ActionType = string
+export type ActionType =
+    'reply'
+    | 'nextEvent'
+    | 'postpone'
+    | 'stateTimeout'
+    | 'eventTimeout'
+    | 'genericTimeout'
 
-export type ResultType = string
+export type ResultType =
+    'keepState'
+    | 'keepStateAndData'
+    | 'nextState'
+    | 'nextStateWithData'
+    | 'repeatState'
+    | 'repeatStateAndData'
+    | 'stop'
 
 export type EventContext = Primitive | PrimitiveObject
 
-export type EventExtra = any;
+export type EventExtra = any
 
-export type From = string;
+export type From = string
 
-export type Timeout = number | string;
+export type Timeout = number | string
 
 export type HandlerOpts<TData> = {
-    event: Event,
     args: { [k in string]: string },
     current: State,
     data: TData,
+    event: Event,
     route: string
 }
 
-export type HandlerResult<TData> =
-    Result
-    | ResultWithData<TData>
-    | ResultBuilder
-    | void
-
-export type HandlerFn<TData> = (handler: HandlerOpts<TData>) => HandlerResult<TData>
+export type HandlerFn<TData> =
+    (opts: HandlerOpts<TData>) => HandlerResult<TData>
 
 export type StateWithEventTimeout = [State, Timeout]
 
-export type Handler<TData> = HandlerFn<TData> | State
+/**
+ * Route handler. Can be a function, a state or a
+ * [state, event timeout] tuple
+ */
+export type Handler<TData> =
+    HandlerFn<TData>
+    | State
     | StateWithEventTimeout
 
-export type Handlers<TData> = Array<[string | Array<string>, Handler<TData>]>
+export type HandlerRoute = string | Array<string>
+
+/**
+ * Maps a handler to a route (or list or routes)
+ */
+export type HandlerSpec<TData> =
+    [HandlerRoute, Handler<TData>]
+    | { [k in string]: Handler<TData> }
+
+/**
+ * List of route handlers
+ */
+export type Handlers<TData> = Array<HandlerSpec<TData>>
 
 export type RouteHandler<TData> = {
     routes: Array<[string, Route]>,
@@ -82,19 +114,17 @@ export type RouteHandler<TData> = {
 
 export type RouteHandlers<TData> = Array<RouteHandler<TData>>
 
-export type MatchArgs<TData> = {
-    current: State
-    data: TData
-    event: Event
-    args?: object
-    route?: string
-}
-
 export type MatchedHandler<TData> = {
     routeHandler: Handler<TData>,
     route: string,
     result: { [k in string]: string }
 }
+
+export type HandlerResult<TData> =
+    Result
+    | ResultWithData<TData>
+    | ResultBuilder
+    | void
 
 export enum Priority {
     Highest = 1000,

@@ -19,6 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { ActionType } from "../types"
 import TimeoutAction from "./TimeoutAction";
 
 
@@ -27,5 +28,5 @@ import TimeoutAction from "./TimeoutAction";
  * timeout interval
  */
 export default class StateTimeoutAction extends TimeoutAction {
-    type = "stateTimeout"
+    type: ActionType = "stateTimeout"
 }

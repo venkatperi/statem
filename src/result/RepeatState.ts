@@ -19,9 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { ResultType } from "../types"
 import ResultWithData from "./ResultWithData";
 
 
+/**
+ * Same as the KeepState{AndData}, except that it repeats
+ * the state enter call as if this state was entered again.
+ */
 export default class RepeatState<TData> extends ResultWithData<TData> {
-    type = 'repeatState'
+    type: ResultType = 'repeatState'
 }

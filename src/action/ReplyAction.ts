@@ -19,12 +19,12 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { From } from "../types";
+import { ActionType, From } from "../types";
 import Action from "./action";
 
 
 export default class ReplyAction extends Action {
-    type = "reply"
+    type : ActionType = "reply"
 
     /**
      * Creates a Reply action

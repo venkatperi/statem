@@ -19,10 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { ResultType } from "../types"
 import Result from "./Result";
 
 
 export default class RepeatStateAndData extends Result {
-    type = 'repeatStateAndData'
+    type: ResultType = 'repeatStateAndData'
 
 }

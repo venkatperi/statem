@@ -24,34 +24,40 @@ import 'mocha'
 import StateMachine, { internalEvent, stateTimeout } from "..";
 import Deferred from "../src/util/Deferred";
 
+let states = ['ONE', 'TWO']
+
+type SMData = {
+    value: number,
+    internal: Deferred<string>,
+    entered: {
+        [k in 'ONE' | 'TWO']: Deferred<void>
+    }
+}
+
 describe('State Machine', () => {
-    let entered
     let events
     let sm
-    let states = ['ONE', 'TWO']
     let catchAll
-    let internal
     let stateDefer
 
     beforeEach(() => {
-        entered = {}
         events = {}
         catchAll = new Deferred()
-        internal = new Deferred()
         stateDefer = new Deferred()
 
         for (let s of states) {
-            entered[s] = new Deferred()
             events[s] = new Deferred()
         }
 
-        sm = new StateMachine<number>({
+        sm = new StateMachine<SMData>({
             handlers: [
                 /**
                  * Trap all state enter events
                  */
-                ['enter#old/:old#:state', ({args}) =>
-                    entered[args.state].resolve(args.old)],
+                {
+                    'enter#old/:old#:state': ({data, args}) =>
+                        data.entered[args.state].resolve(args.old)
+                },
 
                 /**
                  * (state: ONE, event: (cast, next)) --> (state: TWO)
@@ -74,7 +80,7 @@ describe('State Machine', () => {
                  * Trap internal event
                  */
                 ['internal#*context#:state',
-                    ({args}) => internal.resolve(args.context)],
+                    ({data, args}) => data.internal.resolve(args.context)],
 
                 /**
                  * (state: any, event: (cast, {stateTimeout: time})) --> starts
@@ -94,7 +100,14 @@ describe('State Machine', () => {
                  */
                 [':event#*context#:state', ({args}) => catchAll.resolve(args)]
             ],
-            initialData: 123,
+            initialData: {
+                entered: {
+                    ONE: new Deferred<void>(),
+                    TWO: new Deferred<void>(),
+                },
+                internal: new Deferred(),
+                value: 123,
+            },
             initialState: "ONE",
         }).on('state', (cur, old) => events[cur].resolve(old))
           .startSM()
@@ -103,11 +116,15 @@ describe('State Machine', () => {
     it("initial state is set", async () =>
         expect(await sm.getState()).to.eq('ONE'))
 
-    it("has initial data", async () =>
-        expect(await sm.getData()).to.eq(123))
+    it("has initial data", async () => {
+        let data = await sm.getData()
+        return expect(data.value).to.eq(123)
+    })
 
-    it("fires ENTER event & old state == initial", async () =>
-        expect(await entered.ONE).to.eq("ONE"))
+    it("fires ENTER event & old state == initial", async () => {
+        let data = await sm.getData()
+        return expect(await data.entered.ONE).to.eq("ONE")
+    })
 
     it("fires node event with state name", async () =>
         expect(await events.ONE).to.eq("ONE"))
@@ -118,7 +135,8 @@ describe('State Machine', () => {
 
     it("internal event", async () => {
         sm.cast('sendInternal')
-        let args = await internal
+        let data = await sm.getData()
+        let args = await data.internal
         expect(args).to.eq('INTERNAL-EVENT')
     })
 
@@ -131,8 +149,10 @@ describe('State Machine', () => {
         beforeEach(() => {
             sm.cast('next')
         })
-        it("fires ENTER event & old state is ONE", async () =>
-            expect(await entered.TWO).to.eq("ONE"))
+        it("fires ENTER event & old state is ONE", async () => {
+            let data = await sm.getData()
+            return expect(await data.entered.TWO).to.eq("ONE")
+        })
 
         it("has new state", async () =>
             expect(await sm.getState()).to.eq('TWO'))

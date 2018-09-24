@@ -20,10 +20,11 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { EventType } from "../types"
 import TimeoutEvent from "./TimeoutEvent";
 
 
 export default class StateTimeoutEvent extends TimeoutEvent {
-    type = 'stateTimeout'
+    type: EventType = 'stateTimeout'
 }
 

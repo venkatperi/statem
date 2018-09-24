@@ -20,13 +20,13 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import _ = require("lodash")
-import { EventContext, EventExtra, EventType } from "../types";
+import { ActionType, EventContext, EventExtra, EventType } from "../types";
 import { dataToString } from "../util/StringHelper"
 import Action from "./action";
 
 
 export default class NextEventAction extends Action {
-    type = "nextEvent"
+    type: ActionType = "nextEvent"
 
     toString(): string {
         return `${super.toString()}, event=${_.upperFirst(

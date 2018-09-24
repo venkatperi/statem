@@ -19,13 +19,22 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { EventContext, EventExtra, From, Priority } from "../types";
+import { EventContext, EventExtra, EventType, From, Priority } from "../types";
 import Event from "./event";
 
 
 export default class CallEvent extends Event {
-    type = "call"
+    type: EventType = "call"
+
     priority = Priority.Low
+
+    get typeRoute(): string {
+        return `${this.type}/${this.from}`
+    }
+
+    toString(): string {
+        return `${super.toString()}, from=${this.from}`
+    }
 
     /**
      *
@@ -35,13 +44,5 @@ export default class CallEvent extends Event {
      */
     constructor(public from: From, context?: EventContext, extra?: EventExtra) {
         super(context, extra)
-    }
-
-    get typeRoute(): string {
-        return `${this.type}/${this.from}`
-    }
-
-    toString(): string {
-        return `${super.toString()}, from=${this.from}`
     }
 }

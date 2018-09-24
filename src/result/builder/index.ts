@@ -19,33 +19,108 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { Spec } from "immutability-helper"
 import { State } from "../../State";
-import { EventContext, Timeout } from "../../types";
+import { EventContext, EventExtra, EventType, Timeout } from "../../types";
 import KeepStateBuilder from "./KeepStateBuilder"
 import NextStateBuilder from "./NextStateBuilder";
+import RepeatStateBuilder from "./RepeatStateBuilder"
 import ResultBuilder from "./ResultBuilder"
 
 
 export default ResultBuilder
 export { KeepStateBuilder, NextStateBuilder }
 
+/**
+ * Returns a {@link NextStateBuilder}
+ * @param state
+ * @return {NextStateBuilder}
+ */
 export function nextState(state: State): NextStateBuilder {
     return new NextStateBuilder(state)
 }
 
+/**
+ * Returns a {@link KeepStateBuilder}
+ * @return {KeepStateBuilder}
+ */
 export function keepState(): KeepStateBuilder {
     return new KeepStateBuilder()
 }
 
+/**
+ * Returns a {@link RepeatStateBuilder}
+ * @return {RepeatStateBuilder}
+ */
+export function repeatState(): RepeatStateBuilder {
+    return new RepeatStateBuilder()
+}
+
+/**
+ * Helper function to return a reply
+ * @param from
+ * @param msg
+ * @return {ResultBuilder}
+ */
 export function reply(from: string, msg: any): KeepStateBuilder {
     return new KeepStateBuilder().reply(from, msg)
 }
 
-export function internalEvent(context?: EventContext): KeepStateBuilder {
-    return new KeepStateBuilder().internalEvent(context)
+/**
+ * Helper function to insert a new event
+ * @param type
+ * @param context
+ * @param extra
+ * @return {ResultBuilder}
+ */
+export function nextEvent(type: EventType, context?: EventContext,
+    extra?: EventExtra): KeepStateBuilder {
+    return new KeepStateBuilder().internalEvent(context, extra)
 }
 
+/**
+ * Helper function to insert an 'internal' event
+ * @param {EventContext} context
+ * @param {EventExtra} extra
+ * @return {KeepStateBuilder}
+ */
+export function internalEvent(context?: EventContext,
+    extra?: EventExtra): KeepStateBuilder {
+    return new KeepStateBuilder().internalEvent(context, extra)
+}
+
+/**
+ * Helper function to set a state timeout (keeps state and data)
+ * @param time
+ * @return {ResultBuilder}
+ */
 export function stateTimeout(time: Timeout): KeepStateBuilder {
     return new KeepStateBuilder().stateTimeout(time)
 }
 
+/**
+ * Helper function to set the event timeout timer
+ * @param time
+ * @return {ResultBuilder}
+ */
+export function eventTimeout(time: Timeout): KeepStateBuilder {
+    return new KeepStateBuilder().eventTimeout(time)
+}
+
+/**
+ * helper function to set a generic timer
+ * @param time
+ * @return {ResultBuilder}
+ */
+export function timeout(time: Timeout): KeepStateBuilder {
+    return new KeepStateBuilder().timeout(time)
+}
+
+/**
+ * Helper to only mutate data
+ * @param spec
+ * @return {ResultBuilder}
+ */
+export function data<TData>(spec: Spec<TData>): ResultBuilder {
+    return new KeepStateBuilder().data(spec)
+}

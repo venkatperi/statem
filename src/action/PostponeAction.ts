@@ -19,6 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { ActionType } from "../types"
 import Action from "./action";
 
 
@@ -26,5 +27,5 @@ import Action from "./action";
  * Postpones the current event and retries it when the state changes
  */
 export default class PostponeAction extends Action {
-    type = "postpone"
+    type: ActionType  = "postpone"
 }

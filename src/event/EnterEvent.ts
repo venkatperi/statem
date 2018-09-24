@@ -19,11 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { Priority } from "../types";
+import { EventType, Priority } from "../types";
 import Event from "./event";
 
 
 export default class EnterEvent extends Event {
-    type = 'enter'
+    type: EventType = 'enter'
     priority = Priority.High
 }

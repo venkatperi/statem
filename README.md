@@ -1,5 +1,5 @@
 # StateM
-StateM is [Mealy State Machine](https://en.wikipedia.org/wiki/Mealy_machine) written in TypeScript and is largely based on Erlang OTP’s [gen\_statem](http://erlang.org/doc/design_principles/statem.html#event-time-outs "gen\_statem") behavior.
+StateM is [Mealy ](https://en.wikipedia.org/wiki/Mealy_machine) state machine written in TypeScript and is largely based on Erlang OTP’s [gen\_statem](http://erlang.org/doc/design_principles/statem.html#event-time-outs "gen\_statem") behavior.
 
 * States are arbitrary strings (except when they are not: see [ComplexState](#)).
 * State machines are specified as an ordered list of handlers keyed by `Event x State` patterns.
@@ -12,7 +12,7 @@ StateM is [Mealy State Machine](https://en.wikipedia.org/wiki/Mealy_machine) wri
 * State Entry Events: Automatically generates Entry events on state change.
 * Timeouts: Install timeouts for state transitions, new events, or just plain timeouts.
 
-# Processing Events
+## Processing Events
 When processing events, the state machine looks for the first event handler whose key matches the `incoming event x current state`, or, a catch-all handler.
 
 The matched handler is invoked with the incoming event, route matching arguments, the current state machine state and data.
@@ -20,9 +20,9 @@ The matched handler is invoked with the incoming event, route matching arguments
 The result of the handler invocation can include a state transition directive and transition actions, which are immediately executed, potentially changing the state machine’s state, mutating the internal data as well as the event queue.
 
 # Routes
-StateM adopts the url path to parameterized route matching seen in [express](www.expressjs.com) et. al.
+StateM adopts the same parameterized route matching seen in [express](www.expressjs.com) et. al. Incoming events are mapped to routes and matched against the state machine's handler routes.
 
-## Current Event Routes
+## Incoming Event Routes
 The current event and current state are mapped to a route string as:
 ```
 <current event>#<event context>#<current state>
@@ -38,8 +38,8 @@ For example:
 | call | `"getInfo"` | one | `"call/internalId#getInfo/2#one"` |
 
 
-## Event Handler Routes
-In addition to string literals, handler routes can include:
+## Handler Routes
+In addition to the string literals used in incoming event routes, handler routes can include:
 * Parameter capture patterns (`:param`) capture up to the next `/`, `#` or the end of the route.
 * Splats (`*param`) capture from up to `#` or the end of the route.
 * Parts of the route can be marked optional by wrapping in parenthesis. Optional parts can include parameter capture and splats.
@@ -49,10 +49,6 @@ For example:
 * `call/:from#getInfo#:state` will capture the callerId and state as `args.from` and `args.state` respectively.
 * `"cast#button/:digit#locked` will capture a button press in the `locked` state and provide the digit value in `args.digit`.
 * `"cast#*context#open` intercepts any `cast` events in state `open` regardless of the parameters passed when cast was invoked (note: the splat will be available as `args.context`).
-
-
-
-
 
 # Event Types
 ## Call `call(request?: any)`

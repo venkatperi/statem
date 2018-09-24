@@ -116,9 +116,10 @@ export default abstract class ResultBuilder {
      *
      * @param context
      * @return {ResultBuilder}
+     * @param extra
      */
-    internalEvent(context?: EventContext): ResultBuilder {
-        return this.action(new NextEventAction("internal", context))
+    internalEvent(context?: EventContext, extra?: EventExtra): ResultBuilder {
+        return this.action(new NextEventAction("internal", context, extra))
     }
 
     /**

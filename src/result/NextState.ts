@@ -19,8 +19,9 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { State } from "../State";
 import { ActionList } from "../action";
+import { State } from "../State";
+import { ResultType } from "../types"
 import Result from "./Result";
 import { Stateful } from "./Stateful";
 
@@ -30,7 +31,7 @@ import { Stateful } from "./Stateful";
  * data
  */
 export default class NextState extends Result implements Stateful {
-    type = "nextState"
+    type: ResultType = "nextState"
 
     constructor(public nextState: State, ...actions: ActionList) {
         super(...actions);

@@ -19,9 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { EventType } from "../types"
 import Event from "./event";
 
 
 export default class InternalEvent extends Event {
-    type = 'internal'
+    type: EventType = 'internal'
 }

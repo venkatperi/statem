@@ -29,8 +29,7 @@ export interface SMOptions<TData = void> {
     initialState: State;
 
     /**
-     * Array of handlers.
-     * The heart of the state machine.
+     * The state machine specification.
      */
     handlers: Handlers<TData>
 

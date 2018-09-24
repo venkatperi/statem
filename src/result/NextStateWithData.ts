@@ -1,5 +1,6 @@
 import { ActionList } from "../action";
 import { State } from "../State";
+import { ResultType } from "../types"
 import ResultWithData from "./ResultWithData";
 import { Stateful } from "./Stateful";
 
@@ -10,7 +11,7 @@ import { Stateful } from "./Stateful";
  */
 export default class NextStateWithData<TData> extends ResultWithData<TData>
     implements Stateful {
-    type = "nextState";
+    type: ResultType = "nextState";
 
     constructor(public nextState: State,
         newData: TData, ...actions: ActionList) {

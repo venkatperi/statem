@@ -26,8 +26,8 @@ export class PushButton extends StateMachine<void> {
     initialState = 'off'
 
     handlers: Handlers<void> = [
-        ['cast#push#off', 'on'],
-        ['cast#release#on', 'off']
+        {'cast#push#off': 'on'},
+        {'cast#release#on': 'off'}
     ]
 
     push() {

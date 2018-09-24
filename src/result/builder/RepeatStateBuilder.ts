@@ -19,10 +19,18 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { ResultType } from "../types"
-import NextState from "./NextState"
+import RepeatState from "../RepeatState"
+import RepeatStateAndData from "../RepeatStateAndData"
+import Result from "../Result";
+import ResultWithData from "../ResultWithData"
+import ResultBuilder from "./ResultBuilder";
 
 
-export default class Stop extends NextState {
-    type: ResultType = 'stop'
+export default class RepeatStateBuilder extends ResultBuilder {
+    getResult<TData>(data?: TData): Result | ResultWithData<TData> {
+        return this._updates.length === 0 ?
+               new RepeatStateAndData(...this._actions) :
+               new RepeatState(this.applyUpdates(data), ...this._actions)
+    }
 }
+

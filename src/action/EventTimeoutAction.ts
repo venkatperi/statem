@@ -20,6 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { ActionType } from "../types"
 import TimeoutAction from "./TimeoutAction";
 
 
@@ -28,5 +29,5 @@ import TimeoutAction from "./TimeoutAction";
  * the specified timeout interval
  */
 export default class EventTimeoutAction extends TimeoutAction {
-    type = "eventTimeout"
+    type: ActionType = "eventTimeout"
 }
