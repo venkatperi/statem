@@ -96,4 +96,8 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
     getState(): Promise<State>
 
     getData(): Promise<TData>
+
+    cancelTimer(name: string): void
+
+    hasTimer(name: string): boolean
 }

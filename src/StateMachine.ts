@@ -150,6 +150,7 @@ export class StateMachine<TData> extends EventEmitter
 
     stopSM(reason?: string, data?: TData) {
         this.log.i(`stop: ${reason}`);
+        this._stopped = true
         this.emit("terminate", reason);
     }
 
@@ -220,6 +221,25 @@ export class StateMachine<TData> extends EventEmitter
      */
     getData(): Promise<TData> {
         return this.call<TData>("getData");
+    }
+
+    /**
+     * Cancels the named timer
+     *
+     * @param name
+     * @return {this}
+     */
+    cancelTimer(name: string): void {
+        this.timers.cancel(name);
+    }
+
+    /**
+     *
+     * @param name
+     * @return {boolean}
+     */
+    hasTimer(name: string): boolean {
+        return !!this.timers.get(name);
     }
 
     /**
@@ -334,10 +354,6 @@ export class StateMachine<TData> extends EventEmitter
         };
     }
 
-    protected hasTimer(name: string): boolean {
-        return !!this.timers.get(name);
-    }
-
     /**
      * Initialize handlers,
      * Default handlers come last
@@ -354,6 +370,7 @@ export class StateMachine<TData> extends EventEmitter
                 }
             }
         }
+        // Object.freeze(this._routeHandlers)
     }
 
     /**
@@ -422,6 +439,8 @@ export class StateMachine<TData> extends EventEmitter
         if (isNextStateResult(res)) {
             this.state = res.nextState;
         }
+        // else if (res instanceof KeepState || res instanceof
+        // KeepStateAndData) { this.state = this.state }
 
         if (isResultWithData<TData>(res) && res.hasData) {
             this.data = res.newData;
@@ -525,7 +544,10 @@ export class StateMachine<TData> extends EventEmitter
      * Actually process events
      */
     private doProcessEvents() {
-        if (this.events.isEmpty() || this.processingEvent) {
+        if (!this._started
+            || this._stopped
+            || this.events.isEmpty()
+            || this.processingEvent) {
             return;
         }
         this.log.v("processEvents", this.events);

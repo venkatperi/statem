@@ -112,6 +112,7 @@ describe('State Machine', () => {
             initialState: "ONE",
         }).on('state', (cur, old) => events[cur].resolve(old))
           .startSM()
+
     })
 
     it("initial state is set", async () =>
