@@ -415,16 +415,13 @@ export class StateMachine<TData> extends EventEmitter
             return
         }
 
-        let res = isResultBuilder(r) ? r.getResult(this.data)
-                                     : r
+        let res = isResultBuilder(r) ? r.getResult(this.data) : r
 
         this.log.i(`handleResult`, res);
 
         if (isNextStateResult(res)) {
             this.state = res.nextState;
         }
-        // else if (res instanceof KeepState || res instanceof
-        // KeepStateAndData) { this.state = this.state }
 
         if (isResultWithData<TData>(res) && res.hasData) {
             this.data = res.newData;
@@ -460,16 +457,6 @@ export class StateMachine<TData> extends EventEmitter
         else {
             throw new Error(`No handler for action: ${action}`);
         }
-    }
-
-    /**
-     * Cancels the named timer
-     *
-     * @param name
-     * @return {this}
-     */
-    protected cancelTimer(name: string): void {
-        this.timers.cancel(name);
     }
 
     /**
