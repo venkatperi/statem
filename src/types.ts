@@ -55,13 +55,15 @@ export type ActionType =
     | 'genericTimeout'
 
 export type ResultType =
-    'keepState'
+    'none'
+    | 'keepState'
     | 'keepStateAndData'
     | 'nextState'
     | 'nextStateWithData'
     | 'repeatState'
     | 'repeatStateAndData'
     | 'stop'
+    | 'builder'
 
 export type EventContext = Primitive | PrimitiveObject
 

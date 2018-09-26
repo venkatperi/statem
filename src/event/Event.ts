@@ -26,11 +26,11 @@ import { EventContext, EventExtra, EventType, Priority } from "../types";
 import { dataToRoute, dataToString } from "../util/StringHelper";
 
 
-export default class Event {
+export default abstract class Event {
     /**
      * The event's type
      */
-    readonly type: EventType
+    readonly abstract type: EventType
 
     /**
      * Event's priority when enqueued
@@ -43,7 +43,8 @@ export default class Event {
      * @param context
      * @param extra
      */
-    constructor(public context?: EventContext, public extra?: EventExtra) {
+    constructor(public context?: EventContext,
+        public extra?: EventExtra) {
     }
 
     /**

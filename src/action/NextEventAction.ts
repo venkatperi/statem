@@ -22,7 +22,7 @@
 import _ = require("lodash")
 import { ActionType, EventContext, EventExtra, EventType } from "../types";
 import { dataToString } from "../util/StringHelper"
-import Action from "./action";
+import Action from "./Action";
 
 
 export default class NextEventAction extends Action {

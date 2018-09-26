@@ -28,20 +28,21 @@ let sm
 
 describe('SM data', () => {
     beforeEach(() => {
-        sm = new StateMachine({
+        sm = new StateMachine<string>({
             handlers: [
                 ['cast#next#ONE', () =>
                     nextState('TWO').data({$set: 'ONE'})],
 
                 ['cast#next#TWO', () => nextState('ONE')],
             ],
+            initialData: 'DATA',
             initialState: "ONE",
         })
         sm.startSM()
     })
 
-    it("no initial data", async () => {
-        expect(await sm.getData()).to.eq(undefined)
+    it("sets initial data", async () => {
+        expect(await sm.getData()).to.eq('DATA')
     })
 
     it("Updates data via action", async () => {

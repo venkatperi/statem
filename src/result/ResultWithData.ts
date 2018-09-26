@@ -25,13 +25,13 @@ import { dataToString } from "../util/StringHelper"
 import Result from "./Result";
 
 
-export default class ResultWithData<TData> extends Result {
+export default abstract class ResultWithData<TData> extends Result {
     hasData = false
 
     /**
      * Optional state machine data
      */
-    private _newData: TData
+    private _newData?: TData = undefined
 
     constructor(newData: TData, ...actions: ActionList) {
         super(...actions)
@@ -39,6 +39,9 @@ export default class ResultWithData<TData> extends Result {
     }
 
     get newData(): TData {
+        if (!this._newData) {
+            throw new Error("No data!")
+        }
         return this._newData;
     }
 

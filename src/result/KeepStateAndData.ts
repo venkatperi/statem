@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { ResultType } from "../types"
-import Result from "./result";
+import Result from "./Result";
 
 
 export default class KeepStateAndData extends Result {

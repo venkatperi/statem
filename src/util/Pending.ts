@@ -19,9 +19,11 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import Logger from "../Logger"
 import Deferred from './Deferred'
 import { uniqId } from "./uniqId";
 
+const Log = Logger("Pending");
 
 export default class Pending {
     private pending: { [K in string]: Deferred<any> } = {}
@@ -29,6 +31,7 @@ export default class Pending {
     create(): string {
         const defer = new Deferred()
         const id: string = uniqId()
+        Log.i(`created: ${id}`)
         this.pending[id] = defer
         return id
     }
@@ -42,10 +45,12 @@ export default class Pending {
     }
 
     resolve(id: string, x: any): void {
+        Log.i(`resolve: ${id}`)
         this.pending[id].resolve(x)
     }
 
     reject(id: string, x: any): void {
+        Log.i(`reject: ${id}`)
         this.pending[id].reject(x)
     }
 

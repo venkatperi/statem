@@ -23,7 +23,7 @@ import { Timeout } from "../types";
 import Action from "./action";
 
 
-export default class TimeoutAction extends Action {
+export default abstract class TimeoutAction extends Action {
     /**
      * Creates a new TimeoutAction
      * @param time the timeout in ms

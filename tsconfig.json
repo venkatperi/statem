@@ -4,8 +4,12 @@
     "target": "es5",
     "sourceMap": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
     "strictNullChecks": true,
+    "strict": true,
+    "noUnusedLocals": true,
     "outDir": "dist",
+    "forceConsistentCasingInFileNames": false,
     "types": [
       "node"
     ],

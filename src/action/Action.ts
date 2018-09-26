@@ -23,8 +23,8 @@ import _ = require("lodash")
 import { ActionType } from "../types";
 
 
-export default class Action {
-    readonly type: ActionType
+export default abstract class Action {
+    readonly abstract type: ActionType
 
     toString(): string {
         return `${_.upperFirst(this.type)}`

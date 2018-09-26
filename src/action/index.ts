@@ -43,3 +43,25 @@ export {
     EventTimeoutAction,
     GenericTimeoutAction,
 }
+
+
+export function isGenericTimeoutAction(a: Action): a is GenericTimeoutAction {
+    return a.type === 'genericTimeout'
+}
+
+export function isEventTimeoutAction(a: Action): a is EventTimeoutAction {
+    return a.type === 'eventTimeout'
+}
+
+export function isStateTimeoutAction(a: Action): a is StateTimeoutAction {
+    return a.type === 'stateTimeout'
+}
+
+export function isReplyAction(a: Action): a is ReplyAction {
+    return a.type === 'reply'
+}
+
+export function isNextEventAction(a: Action): a is NextEventAction {
+    return a.type === 'nextEvent'
+}
+

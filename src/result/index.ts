@@ -19,6 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import ResultBuilder from "./builder/ResultBuilder"
 import KeepState from "./KeepState";
 import KeepStateAndData from "./KeepStateAndData";
 import NextState from "./NextState";
@@ -37,5 +38,15 @@ export {
     KeepState, KeepStateAndData, Stop, ResultWithData
 }
 
+export function isResultBuilder(r: any): r is ResultBuilder {
+    return r.getResult !== undefined
+}
 
+export function isNextStateResult(r: Result): r is NextState {
+    return r.type === 'nextState' || r.type === 'nextStateWithData'
+}
+
+export function isResultWithData<TData>(r: any): r is ResultWithData<TData> {
+    return r.hasData !== undefined
+}
 

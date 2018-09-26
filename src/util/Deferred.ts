@@ -36,7 +36,9 @@ export default class Deferred<T> implements Promise<T> {
      * If the value is a Promise then the associated promise assumes the state
      * of Promise passed as value.
      */
-    resolve: Resolver<T>
+    resolve: Resolver<T> = () => {
+        throw new Error("Not initialized")
+    }
 
     /**
      *  A method to reject the associated Promise with the value passed.
@@ -47,7 +49,9 @@ export default class Deferred<T> implements Promise<T> {
      *     Promise itself will be the reason for rejection no matter the state
      *     of the Promise.
      */
-    reject: Rejector
+    reject: Rejector = () => {
+        throw new Error("Not initialized")
+    }
 
     /**
      * The {Promise<T>>} underlying this Deferred<T>
@@ -55,6 +59,28 @@ export default class Deferred<T> implements Promise<T> {
     promise: Promise<T>
 
     completed: boolean = false
+
+    /**
+     * Implementation from Promise<T>
+     */
+    readonly [Symbol.toStringTag]: "Promise";
+
+    /**
+     * Creates a new Deferred object
+     */
+    constructor() {
+        let that = this
+        this.promise = new Promise(function (resolve, reject) {
+            that.resolve = resolve;
+            that.reject = reject;
+        })
+
+        this.promise.then(() => {
+            that.completed = true
+        }).catch(() => {
+            that.completed = true
+        })
+    }
 
     /**
      * Return a Deferred in already resolved state
@@ -81,37 +107,6 @@ export default class Deferred<T> implements Promise<T> {
     }
 
     /**
-     * Creates a new Deferred object
-     */
-    constructor() {
-        let that = this
-        this.promise = new Promise(function (resolve, reject) {
-            that.resolve = resolve;
-            that.reject = reject;
-        })
-
-        this.promise.then(() => {
-            that.completed = true
-        }).catch(() => {
-            that.completed = true
-        })
-    }
-
-    /**
-     * Implementation from Promise<T>
-     */
-    readonly [Symbol.toStringTag]: "Promise";
-
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @returns {Promise<T | R>} Promise for the completion of the callback.
-     * @param onRejected handles rejection
-     */
-    catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
-        return this.promise.catch(onRejected)
-    }
-
-    /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @returns {Promise<R1 | R2>} Promise for the completion of which ever
      *     callback is executed.
@@ -122,6 +117,15 @@ export default class Deferred<T> implements Promise<T> {
         onFulfilled?: FulfillmentHandler<T, R1> | null | undefined,
         onRejected?: RejectionHandler<R2> | null | undefined): Promise<R1 | R2> {
         return this.promise.then(onFulfilled, onRejected)
+    }
+
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @returns {Promise<T | R>} Promise for the completion of the callback.
+     * @param onRejected handles rejection
+     */
+    catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
+        return this.promise.catch(onRejected)
     }
 }
 

@@ -21,6 +21,7 @@
 
 import Result from "./result"
 import { SMOptions } from "./SMOptions"
+import { State } from "./State"
 import { EventContext, EventExtra, Handler, HandlerOpts } from "./types"
 
 export interface IStateMachine<TData> extends SMOptions<TData> {
@@ -29,6 +30,7 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      * @return {boolean}
      */
     readonly hasStateTimer: boolean
+
 
     /**
      * Returns true is an event timer is currently set
@@ -90,4 +92,8 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      * @param data
      */
     defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined
+
+    getState(): Promise<State>
+
+    getData(): Promise<TData>
 }

@@ -34,15 +34,24 @@ type SMData = {
     }
 }
 
+let initial: SMData = {
+    entered: {
+        ONE: new Deferred<void>(),
+        TWO: new Deferred<void>(),
+    },
+    internal: new Deferred(),
+    value: 123,
+}
+
 describe('State Machine', () => {
     let events
     let sm
-    let catchAll
+    // let catchAll
     let stateDefer
 
     beforeEach(() => {
         events = {}
-        catchAll = new Deferred()
+        // catchAll = new Deferred()
         stateDefer = new Deferred()
 
         for (let s of states) {
@@ -54,10 +63,8 @@ describe('State Machine', () => {
                 /**
                  * Trap all state enter events
                  */
-                {
-                    'enter#old/:old#:state': ({data, args}) =>
-                        data.entered[args.state].resolve(args.old)
-                },
+                ['enter#old/:old#:state', ({data, args}) =>
+                    data.entered[args.state].resolve(args.old)],
 
                 /**
                  * (state: ONE, event: (cast, next)) --> (state: TWO)
@@ -98,16 +105,10 @@ describe('State Machine', () => {
                 /**
                  * Catch-all route
                  */
-                [':event#*context#:state', ({args}) => catchAll.resolve(args)]
+                // [':event#*context#:state', ({args}) =>
+                // catchAll.resolve(args)]
             ],
-            initialData: {
-                entered: {
-                    ONE: new Deferred<void>(),
-                    TWO: new Deferred<void>(),
-                },
-                internal: new Deferred(),
-                value: 123,
-            },
+            initialData: () => initial,
             initialState: "ONE",
         }).on('state', (cur, old) => events[cur].resolve(old))
           .startSM()
@@ -118,11 +119,12 @@ describe('State Machine', () => {
 
     it("has initial data", async () => {
         let data = await sm.getData()
-        return expect(data.value).to.eq(123)
+        expect(data.value).to.eq(123)
     })
 
     it("fires ENTER event & old state == initial", async () => {
         let data = await sm.getData()
+        // console.log(data)
         return expect(await data.entered.ONE).to.eq("ONE")
     })
 

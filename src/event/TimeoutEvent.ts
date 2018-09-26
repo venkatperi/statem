@@ -23,6 +23,6 @@ import { Priority } from "../types";
 import Event from "./event";
 
 
-export default class TimeoutEvent extends Event {
+export default abstract class TimeoutEvent extends Event {
     priority = Priority.High
 }

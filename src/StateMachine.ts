@@ -23,10 +23,9 @@
 import EventEmitter = require("events")
 import Route = require("route-parser")
 import StablePriorityQueue = require("stablepriorityqueue")
-import { nextState } from "..";
 import Action, {
-    EventTimeoutAction, GenericTimeoutAction, NextEventAction, ReplyAction,
-    StateTimeoutAction
+    isEventTimeoutAction, isGenericTimeoutAction, isNextEventAction,
+    isReplyAction, isStateTimeoutAction, NextEventAction
 } from "./action";
 import Event, {
     CallEvent, CastEvent, EventTimeoutEvent, GenericTimeoutEvent, makeNextEvent,
@@ -35,9 +34,10 @@ import Event, {
 import EnterEvent from "./event/EnterEvent"
 import { IStateMachine } from "./IStateMachine"
 import Logger from "./Logger";
-import Result, { NextState, NextStateWithData } from "./result";
-import ResultBuilder, { reply } from "./result/builder";
-import ResultWithData from "./result/ResultWithData"
+import Result, {
+    isNextStateResult, isResultBuilder, isResultWithData
+} from "./result";
+import { nextState, reply } from "./result/builder";
 import { SMOptions } from "./SMOptions"
 import {
     isComplexState, isStringState, State, stateEquals, stateName, stateRoute
@@ -55,11 +55,11 @@ const Log = Logger("StateMachine");
 export class StateMachine<TData> extends EventEmitter
     implements IStateMachine<TData> {
 
-    initialState: State
+    initialState?: State = undefined
 
-    handlers: Handlers<TData>
+    handlers?: Handlers<TData> = undefined
 
-    initialData: TData
+    initialData?: TData = undefined
 
     log = {
         d: this.logger("d"),
@@ -98,15 +98,19 @@ export class StateMachine<TData> extends EventEmitter
 
     private _stopped: boolean = false
 
+    // @ts-ignore
     private _state: State
 
+    // @ts-ignore
     private _data: TData
+
+    private _initial = true
 
     /**
      * Creates a StateMachine
      * @param init
      */
-    constructor(init?: Partial<SMOptions<TData>>) {
+    constructor(init?: SMOptions<TData>) {
         super();
         Object.assign(this, init)
     }
@@ -114,7 +118,6 @@ export class StateMachine<TData> extends EventEmitter
     get hasStateTimer(): boolean {
         return this.hasTimer("stateTimeout");
     }
-
 
     get hasEventTimer(): boolean {
         return this.hasTimer("eventTimeout");
@@ -127,11 +130,15 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i("startSM");
 
         if (!this.initialState) {
-            throw new Error("initialState must be set");
+            throw new Error("Initial state must be defined")
         }
 
-        // set data before setting state to handle initial state
-        this.data = this.initialData;
+        if (this.initialData) {
+            this.data =
+                typeof this.initialData === 'function'
+                ? this.initialData()
+                : this.initialData
+        }
 
         this.initHandlers();
 
@@ -146,12 +153,14 @@ export class StateMachine<TData> extends EventEmitter
         this.emit("terminate", reason);
     }
 
-    async call(request: EventContext, extra?: EventExtra): Promise<any> {
+    async call<E>(request: EventContext, extra?: EventExtra): Promise<E> {
         const from = this._pending.create();
         this.log.i(`call`, request, from);
 
         this.addEvent(new CallEvent(from, request));
-        return await this._pending.get(from);
+        let val = await this._pending.get(from);
+        this.log.i(`call resolved`, request, from, val)
+        return val
     }
 
     cast(request: EventContext, extra?: EventExtra): void {
@@ -166,6 +175,7 @@ export class StateMachine<TData> extends EventEmitter
 
     addHandler(routes: string | Array<string>,
         handler: Handler<TData>): IStateMachine<TData> {
+
         if (this._started) {
             throw new Error("Can't add handler. Already running.")
         }
@@ -193,12 +203,35 @@ export class StateMachine<TData> extends EventEmitter
     }
 
     /**
+     * Returns the current state after any already enqueued events
+     * are processed
+     *
+     * @return {Promise<any>}
+     */
+    getState(): Promise<State> {
+        return this.call<State>("getState");
+    }
+
+    /**
+     * Returns the current data after any already enqueued events are
+     * processed
+     *
+     * @return {Promise<any>}
+     */
+    getData(): Promise<TData> {
+        return this.call<TData>("getData");
+    }
+
+    /**
      * Gets the current state. Internal use only.
      * Use getState() to query state safely.
      *
      * @return {State}
      */
     private get state(): State {
+        if (!this._state) {
+            throw Error("No state?")
+        }
         return this._state;
     }
 
@@ -212,9 +245,8 @@ export class StateMachine<TData> extends EventEmitter
         }
 
         this.log.i("setState", s);
-        let initial = !this._state
-        let old = this.state || this.initialState;
-        let oldName = stateName(old);
+        const old = this._initial ? s : this._state
+        const oldName = stateName(old);
         this._state = s;
         let currentName = stateName(s);
 
@@ -225,17 +257,17 @@ export class StateMachine<TData> extends EventEmitter
             this.emit("complexStateChanged", s, old);
         }
 
-        if (initial || !stateEquals(s, old)) {
+        if (this._initial || !stateEquals(s, old)) {
             this.addEvent(new EnterEvent({old: oldName}), true)
             this.timers.cancel("stateTimeout")
             this.emit("stateChanged", s, old);
         }
+        this._initial = false
     }
 
     /**
      * Gets the current data. Internal use only.
      *
-     * @return {Data} the current data
      */
     private get data(): TData {
         return this._data;
@@ -262,7 +294,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param time the timeout
      * @return {this}
      */
-    setEventTimeout(time: Timeout) {
+    protected setEventTimeout(time: Timeout) {
         this.log.i("setEventTimeout", time);
 
         let that = this;
@@ -280,7 +312,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param name optional name. Defaults to "DEFAULT"
      * @return {this}
      */
-    setGenericTimeout(time: Timeout, name = "DEFAULT") {
+    protected setGenericTimeout(time: Timeout, name = "DEFAULT") {
         this.log.i("setEventTimeout", name, time);
 
         let that = this;
@@ -292,33 +324,13 @@ export class StateMachine<TData> extends EventEmitter
     }
 
     /**
-     * Returns the current state after any already enqueued events
-     * are processed
-     *
-     * @return {Promise<any>}
-     */
-    async getState(): Promise<State> {
-        return await this.call("getState");
-    }
-
-    /**
-     * Returns the current data after any already enqueued events are
-     * processed
-     *
-     * @return {Promise<any>}
-     */
-    async getData() {
-        return await this.call("getData");
-    }
-
-    /**
      * Adds state to log tags
      * @param level
      * @return {(tag2: string, ...args: any[]) => void}
      */
     protected logger(level: string) {
         return (tag2: string, ...args: Array<any>) => {
-            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args);
+            Log[level](`${tag2}@${stateRoute(this._state)}: `, ...args);
         };
     }
 
@@ -331,9 +343,8 @@ export class StateMachine<TData> extends EventEmitter
      * Default handlers come last
      */
     protected initHandlers(): void {
-        let that = this;
-        this.handlers = this.handlers || [];
-        let handlers = this.defaultHandlers.concat(this.handlers);
+        let handlers = this.defaultHandlers.concat(this.handlers || []);
+
         for (let h of handlers) {
             if (Array.isArray(h)) {
                 this.addHandler(h[0], h[1])
@@ -367,6 +378,7 @@ export class StateMachine<TData> extends EventEmitter
                 }
             }
         }
+        return undefined
     }
 
     /**
@@ -396,30 +408,31 @@ export class StateMachine<TData> extends EventEmitter
 
     /**
      * Process event handler result
-     * @param res -- result from event handler
+     * @param r
      */
-    protected handleResult(res: HandlerResult<TData>): void {
-        if (!res) {
+    protected handleResult(r: HandlerResult<TData>): void {
+        if (!r) {
             return
         }
 
-        if (res instanceof ResultBuilder) {
-            res = res.getResult(this.data);
-        }
+        let res = isResultBuilder(r) ? r.getResult(this.data)
+                                     : r
 
-        this.log.i(`handleResult`, res.toString());
+        this.log.i(`handleResult`, res);
 
-        if (res instanceof NextState || res instanceof NextStateWithData) {
+        if (isNextStateResult(res)) {
             this.state = res.nextState;
         }
         // else if (res instanceof KeepState || res instanceof
         // KeepStateAndData) { this.state = this.state }
 
-        if (res instanceof ResultWithData && res.hasData) {
+        if (isResultWithData<TData>(res) && res.hasData) {
             this.data = res.newData;
         }
 
-        res.actions.forEach(this.handleAction.bind(this));
+        for (let a of res.actions) {
+            this.handleAction(a)
+        }
     }
 
     /**
@@ -429,19 +442,19 @@ export class StateMachine<TData> extends EventEmitter
     protected handleAction(action: Action): void {
         this.log.i(`handleAction`, action.toString());
 
-        if (action instanceof ReplyAction) {
+        if (isReplyAction(action)) {
             this._pending.resolve(action.from, action.reply);
         }
-        else if (action instanceof StateTimeoutAction) {
+        else if (isStateTimeoutAction(action)) {
             this.setStateTimeout(action.time);
         }
-        else if (action instanceof EventTimeoutAction) {
+        else if (isEventTimeoutAction(action)) {
             this.setEventTimeout(action.time);
         }
-        else if (action instanceof GenericTimeoutAction) {
+        else if (isGenericTimeoutAction(action)) {
             this.setGenericTimeout(action.time, action.name);
         }
-        else if (action instanceof NextEventAction) {
+        else if (isNextEventAction(action)) {
             this.addNextEvent(action);
         }
         else {
@@ -538,27 +551,27 @@ export class StateMachine<TData> extends EventEmitter
 
     /**
      * Executes handler and returns result
-     * @return {any}
      * @param opts
      * @param handler
+     * @return {any}
      */
     private invokeHandler(handler: Handler<TData> | undefined,
         opts: HandlerOpts<TData>): HandlerResult<TData> {
         this.log.i('invokeHandler', handler, opts)
 
-        if (!handler) {
-            return this.defaultEventHandler(opts);
-        }
-
         if (typeof handler === "function") {
             return handler(opts);
+        }
+
+        if (typeof handler === 'string') {
+            return nextState(handler)
         }
 
         if (Array.isArray(handler)) {
             return nextState(handler[0]).eventTimeout(handler[1]);
         }
 
-        return nextState(handler);
+        return this.defaultEventHandler(opts);
     }
 }
 

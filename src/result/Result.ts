@@ -21,22 +21,19 @@
 
 import objectInspect = require("object-inspect")
 import Action, { ActionList } from "../action";
-import { ResultType } from "../types";
+import { ResultType } from "../types"
 
 
 /**
  * This class encapsulates the result of a call to a state handler
  */
-export default class Result {
-    /**
-     * The result type
-     */
-    readonly type: ResultType;
+export abstract class Result {
+    type: ResultType = 'none'
 
     /**
      * The list of actions for this state
      */
-    actions: Array<Action>;
+    actions: Array<Action> = []
 
 
     /**
@@ -44,7 +41,7 @@ export default class Result {
      * @param actions the actions
      */
     constructor(...actions: ActionList) {
-        this.actions = actions
+        this.actions.push(...actions)
     }
 
     get actionsString(): string {
@@ -56,10 +53,8 @@ export default class Result {
     }
 
     toString(): string {
-        return [this.type,
-            objectInspect({
-                actions: this.actions,
-            })].join(' ')
+        return [this.type, objectInspect({actions: this.actions})].join(' ')
     }
 }
 
+export default Result

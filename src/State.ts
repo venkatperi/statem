@@ -28,23 +28,26 @@ export type ComplexState = Array<string> | NamedPrimitiveObject
 
 export type State = string | ComplexState
 
-export function isStringState(s: State): s is string {
+export function isStringState(s?: State): s is string {
     return typeof s === "string"
 }
 
-export function isComplexState(s: State): s is ComplexState {
+export function isComplexState(s?: State): s is ComplexState {
     return typeof s !== "string"
 }
 
-export function isArrayState(s: State): s is Array<string> {
+export function isArrayState(s?: State): s is Array<string> {
     return Array.isArray(s)
 }
 
-export function isObjState(s: State): s is NamedPrimitiveObject {
+export function isObjState(s?: State): s is NamedPrimitiveObject {
     return typeof s === "object"
 }
 
-export function stateName(s: State) {
+export function stateName(s?: State) {
+    if (!s) {
+        return ''
+    }
     if (typeof s === "string") {
         return s
     }
@@ -54,7 +57,7 @@ export function stateName(s: State) {
     return s.name
 }
 
-export function stateEquals(a: State, b: State): boolean | undefined {
+export function stateEquals(a?: State, b?: State): boolean | undefined {
     if (isStringState(a) && isStringState(b)) {
         return a === b
     }

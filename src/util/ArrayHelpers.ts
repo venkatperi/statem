@@ -45,6 +45,7 @@ interface Array<T> {
                 return ret
             }
         }
+        return undefined
     }
 })(Array.prototype)
 
