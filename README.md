@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/venkatperi/statem.svg?branch=master)](https://travis-ci.org/venkatperi/statem)
+
 # StateM
 StateM is [Mealy ](https://en.wikipedia.org/wiki/Mealy_machine) state machine written in TypeScript and is largely based on Erlang OTP’s [gen\_statem](http://erlang.org/doc/design_principles/statem.html#event-time-outs "gen\_statem") behavior.
 
