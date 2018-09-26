@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { EventType } from "../types"
-import Event from "./event";
+import Event from "./Event";
 
 
 export default class InternalEvent extends Event {

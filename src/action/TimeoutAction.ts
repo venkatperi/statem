@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { Timeout } from "../types";
-import Action from "./action";
+import Action from "./Action";
 
 
 export default abstract class TimeoutAction extends Action {

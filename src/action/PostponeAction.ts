@@ -20,12 +20,12 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { ActionType } from "../types"
-import Action from "./action";
+import Action from "./Action";
 
 
 /**
  * Postpones the current event and retries it when the state changes
  */
 export default class PostponeAction extends Action {
-    type: ActionType  = "postpone"
+    type: ActionType = "postpone"
 }

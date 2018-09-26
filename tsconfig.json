@@ -9,7 +9,7 @@
     "strict": true,
     "noUnusedLocals": true,
     "outDir": "dist",
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "types": [
       "node"
     ],

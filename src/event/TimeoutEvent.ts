@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { Priority } from "../types";
-import Event from "./event";
+import Event from "./Event";
 
 
 export default abstract class TimeoutEvent extends Event {
