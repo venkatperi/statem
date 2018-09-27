@@ -285,6 +285,10 @@ export class StateMachine<TData> extends EventEmitter
         return !!this.timers.get(name);
     }
 
+    get isRunning(): boolean {
+        return this._started && !this._stopped
+    }
+
     /**
      * Gets the current state. Internal use only.
      * Use getState() to query state safely.
@@ -523,7 +527,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param internal - if true, event was internally generated
      */
     private addEvent(event: Event, internal = false): void {
-        if (!this._started || this._stopped) {
+        if (!this.isRunning) {
             throw new Error("Can't add event. Not running.")
         }
 
@@ -581,8 +585,7 @@ export class StateMachine<TData> extends EventEmitter
      * Actually process events
      */
     private doProcessEvents() {
-        if (!this._started
-            || this._stopped
+        if (!this.isRunning
             || this.events.isEmpty()
             || this.processingEvent) {
             return;
@@ -606,7 +609,7 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i('invokeHandler', handler, opts)
 
         if (typeof handler === "function") {
-            return handler(opts);
+            return handler.call(opts, opts);
         }
 
         if (typeof handler === 'string') {
