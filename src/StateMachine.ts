@@ -37,7 +37,7 @@ import Logger from "./Logger";
 import Result, {
     isNextStateResult, isResultBuilder, isResultWithData
 } from "./result";
-import { nextState, reply } from "./result/builder";
+import { keepState, nextState, reply } from "./result/builder";
 import { SMOptions } from "./SMOptions"
 import {
     isComplexState, isStringState, State, stateEquals, stateName, stateRoute
@@ -115,14 +115,26 @@ export class StateMachine<TData> extends EventEmitter
         Object.assign(this, init)
     }
 
+    /**
+     *
+     * @return {boolean}
+     */
     get hasStateTimer(): boolean {
         return this.hasTimer("stateTimeout");
     }
 
+    /**
+     *
+     * @return {boolean}
+     */
     get hasEventTimer(): boolean {
         return this.hasTimer("eventTimeout");
     }
 
+    /**
+     * Starts the state machine
+     * @return {this<TData>}
+     */
     startSM(): IStateMachine<TData> {
         if (this._started) {
             return this
@@ -148,12 +160,28 @@ export class StateMachine<TData> extends EventEmitter
         return this
     }
 
+    /**
+     * stop the state machine
+     *
+     * @param reason
+     * @param data
+     */
     stopSM(reason?: string, data?: TData) {
+        if (!this._started || this._stopped) {
+            throw new Error("Can't stop. Illegal state.")
+        }
+
         this.log.i(`stop: ${reason}`);
         this._stopped = true
         this.emit("terminate", reason);
     }
 
+    /**
+     *
+     * @param request
+     * @param extra
+     * @return {Promise<any>}
+     */
     async call<E>(request: EventContext, extra?: EventExtra): Promise<E> {
         const from = this._pending.create();
         this.log.i(`call`, request, from);
@@ -164,16 +192,23 @@ export class StateMachine<TData> extends EventEmitter
         return val
     }
 
+    /**
+     *
+     * @param request
+     * @param extra
+     */
     cast(request: EventContext, extra?: EventExtra): void {
         this.log.v(`cast`, request);
-        try {
-            this.addEvent(new CastEvent(request, extra));
-        } catch (e) {
-            // ignore error for cast
-            Log.e(e);
-        }
+        this.addEvent(new CastEvent(request, extra));
     }
 
+    /**
+     * add an event handler
+     *
+     * @param routes
+     * @param handler
+     * @return {this<TData>}
+     */
     addHandler(routes: string | Array<string>,
         handler: Handler<TData>): IStateMachine<TData> {
 
@@ -198,6 +233,14 @@ export class StateMachine<TData> extends EventEmitter
         return this;
     }
 
+    /**
+     *
+     * @param event
+     * @param args
+     * @param current
+     * @param data
+     * @return {undefined}
+     */
     defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined {
         this.log.i("defaultHandler", event.toString(), args);
         return undefined
@@ -249,9 +292,6 @@ export class StateMachine<TData> extends EventEmitter
      * @return {State}
      */
     private get state(): State {
-        if (!this._state) {
-            throw Error("No state?")
-        }
         return this._state;
     }
 
@@ -370,7 +410,6 @@ export class StateMachine<TData> extends EventEmitter
                 }
             }
         }
-        // Object.freeze(this._routeHandlers)
     }
 
     /**
@@ -417,7 +456,7 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i("handleEvent", event.type,
             {args: handlerOpts.args, route: handlerOpts.route});
 
-        let result = this.invokeHandler(h && h.routeHandler, handlerOpts);
+        let result = this.invokeHandler(h && h.routeHandler, handlerOpts)
         this.handleResult(result);
         this.processingEvent = false;
         this.processEvents();
@@ -428,9 +467,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param r
      */
     protected handleResult(r: HandlerResult<TData>): void {
-        if (!r) {
-            return
-        }
+        r = r || keepState()
 
         let res = isResultBuilder(r) ? r.getResult(this.data) : r
 
@@ -498,7 +535,7 @@ export class StateMachine<TData> extends EventEmitter
 
         this.emit("event", event);
         this.events.add(event);
-        this.doProcessEvents();
+        this.processEvents();
     }
 
     /**

@@ -84,7 +84,7 @@ export type HandlerOpts<TData> = {
 export type HandlerFn<TData> =
     (opts: HandlerOpts<TData>) => HandlerResult<TData>
 
-export type StateWithEventTimeout = [State, Timeout]
+export type NextStateWithEventTimeout = [State, Timeout]
 
 /**
  * Route handler. Can be a function, a state or a
@@ -93,7 +93,7 @@ export type StateWithEventTimeout = [State, Timeout]
 export type Handler<TData> =
     HandlerFn<TData>
     | State
-    | StateWithEventTimeout
+    | NextStateWithEventTimeout
 
 export type HandlerRoute = string | Array<string>
 

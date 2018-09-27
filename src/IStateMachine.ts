@@ -31,7 +31,6 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      */
     readonly hasStateTimer: boolean
 
-
     /**
      * Returns true is an event timer is currently set
      * @return {boolean}
@@ -93,11 +92,25 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      */
     defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined
 
+    /**
+     *
+     */
     getState(): Promise<State>
 
+    /**
+     *
+     */
     getData(): Promise<TData>
 
+    /**
+     *
+     * @param name
+     */
     cancelTimer(name: string): void
 
+    /**
+     *
+     * @param name
+     */
     hasTimer(name: string): boolean
 }

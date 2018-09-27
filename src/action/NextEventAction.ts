@@ -28,7 +28,7 @@ import Action from "./Action";
 export default class NextEventAction extends Action {
     type: ActionType = "nextEvent"
 
-    toString(): string {
+    public toString(): string {
         return `${super.toString()}, event=${_.upperFirst(
             this.eventType)}, context=${this.contextString}`
     }
@@ -39,7 +39,8 @@ export default class NextEventAction extends Action {
      * @param context
      * @param extra
      */
-    constructor(public eventType: EventType, public context?: EventContext,
+    public constructor(public eventType: EventType,
+        public context?: EventContext,
         public extra?: EventExtra) {
         super()
     }

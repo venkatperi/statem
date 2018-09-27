@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "module": "commonjs",
     "target": "es5",
     "sourceMap": true,
+    "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
-    "strict": true,
     "noUnusedLocals": true,
-    "outDir": "dist",
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     "types": [
       "node"
     ],
