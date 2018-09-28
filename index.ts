@@ -19,6 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { Spec } from "immutability-helper"
 import Action from './src/action'
 import Event from './src/event'
 import Result from './src/result'
@@ -35,5 +36,5 @@ export default StateMachine
 export {
     Event, Result, Action, State, keepState,
     nextState, internalEvent, stateTimeout,
-    Handlers, Timeout
+    Handlers, Timeout, Spec
 }
