@@ -100,7 +100,7 @@ export default class Service extends StateMachine<ServiceData> {
      * Returns true if this service is running.
      * @return {boolean}
      */
-    async isRunning() {
+    async _isRunning() {
         return await this.getState() === 'running'
     }
 

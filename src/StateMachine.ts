@@ -25,7 +25,7 @@ import Route = require("route-parser")
 import StablePriorityQueue = require("stablepriorityqueue")
 import Action, {
     isEventTimeoutAction, isGenericTimeoutAction, isNextEventAction,
-    isReplyAction, isStateTimeoutAction, NextEventAction
+    isPostponeAction, isReplyAction, isStateTimeoutAction, NextEventAction
 } from "./action";
 import Event, {
     CallEvent, CastEvent, EventTimeoutEvent, GenericTimeoutEvent, makeNextEvent,
@@ -35,7 +35,8 @@ import EnterEvent from "./event/EnterEvent"
 import { IStateMachine } from "./IStateMachine"
 import Logger from "./Logger";
 import Result, {
-    isNextStateResult, isResultBuilder, isResultWithData
+    isKeepStateResult, isNextStateResult, isRepeatStateResult, isResultBuilder,
+    isResultWithData
 } from "./result";
 import { keepState, nextState, reply } from "./result/builder";
 import { SMOptions } from "./SMOptions"
@@ -93,6 +94,8 @@ export class StateMachine<TData> extends EventEmitter
     private processingEvent = false;
 
     private events = new StablePriorityQueue(Event.comparator);
+
+    private postponedEvents: Array<Event> = []
 
     private _started: boolean = false
 
@@ -304,29 +307,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param s
      */
     private set state(s: State) {
-        if (isStringState(s) && s.indexOf('/') > 0) {
-            s = s.split('/')
-        }
-
-        this.log.i("setState", s);
-        const old = this._initial ? s : this._state
-        const oldName = stateName(old);
-        this._state = s;
-        let currentName = stateName(s);
-
-        this.emit("state", s, old);
-
-        if ((isComplexState(s) || isComplexState(old)) &&
-            oldName === currentName) {
-            this.emit("complexStateChanged", s, old);
-        }
-
-        if (this._initial || !stateEquals(s, old)) {
-            this.addEvent(new EnterEvent({old: oldName}), true)
-            this.timers.cancel("stateTimeout")
-            this.emit("stateChanged", s, old);
-        }
-        this._initial = false
+        this.doSetState(s)
     }
 
     /**
@@ -461,7 +442,7 @@ export class StateMachine<TData> extends EventEmitter
             {args: handlerOpts.args, route: handlerOpts.route});
 
         let result = this.invokeHandler(h && h.routeHandler, handlerOpts)
-        this.handleResult(result);
+        this.handleResult(result, event);
         this.processingEvent = false;
         this.processEvents();
     }
@@ -469,8 +450,9 @@ export class StateMachine<TData> extends EventEmitter
     /**
      * Process event handler result
      * @param r
+     * @param event
      */
-    protected handleResult(r: HandlerResult<TData>): void {
+    protected handleResult(r: HandlerResult<TData>, event: Event): void {
         r = r || keepState()
 
         let res = isResultBuilder(r) ? r.getResult(this.data) : r
@@ -480,23 +462,28 @@ export class StateMachine<TData> extends EventEmitter
         if (isNextStateResult(res)) {
             this.state = res.nextState;
         }
-        // else if (res instanceof KeepState || res instanceof
-        // KeepStateAndData) { this.state = this.state }
+        else if (isKeepStateResult(res)) {
+            this.state = this._state
+        }
+        else if (isRepeatStateResult(res)) {
+            this.doSetState(this._state, true)
+        }
 
         if (isResultWithData<TData>(res) && res.hasData) {
             this.data = res.newData;
         }
 
         for (let a of res.actions) {
-            this.handleAction(a)
+            this.handleAction(a, event)
         }
     }
 
     /**
      *
      * @param action
+     * @param event
      */
-    protected handleAction(action: Action): void {
+    protected handleAction(action: Action, event: Event): void {
         this.log.i(`handleAction`, action.toString());
 
         if (isReplyAction(action)) {
@@ -514,9 +501,47 @@ export class StateMachine<TData> extends EventEmitter
         else if (isNextEventAction(action)) {
             this.addNextEvent(action);
         }
+        else if (isPostponeAction(action)) {
+            this.postponedEvents.push(event)
+        }
         else {
             throw new Error(`No handler for action: ${action}`);
         }
+    }
+
+    private doSetState(s: State, entered = false) {
+        if (isStringState(s) && s.indexOf('/') > 0) {
+            s = s.split('/')
+        }
+
+        this.log.i("setState", s);
+        const old = this._initial ? s : this._state
+        const oldName = stateName(old);
+        this._state = s;
+        let currentName = stateName(s);
+
+        this.emit("state", s, old);
+
+        if ((isComplexState(s) || isComplexState(old)) &&
+            oldName === currentName) {
+            this.emit("complexStateChanged", s, old);
+        }
+
+        if (entered || this._initial || !stateEquals(s, old)) {
+            this.timers.cancel("stateTimeout")
+
+            this.addEvent(new EnterEvent({old: oldName}), true)
+
+            for (let e of this.postponedEvents) {
+                this.addEvent(e)
+            }
+            this.postponedEvents = []
+
+            this.emit("stateChanged", s, old);
+        }
+
+
+        this._initial = false
     }
 
     /**

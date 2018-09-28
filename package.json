@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",npm
   "scripts": {
     "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",

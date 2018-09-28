@@ -4,6 +4,7 @@
     "module": "commonjs",
     "target": "es5",
     "sourceMap": true,
+    "declaration": true,
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -18,7 +19,8 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "examples/**/*"
   ],
   "exclude": [
     "node_modules",

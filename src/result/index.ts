@@ -46,6 +46,14 @@ export function isNextStateResult(r: Result): r is NextState {
     return r.type === 'nextState' || r.type === 'nextStateWithData'
 }
 
+export function isKeepStateResult<TData>(r: Result): r is KeepState<TData> {
+    return r.type === 'keepState' || r.type === 'keepStateAndData'
+}
+
+export function isRepeatStateResult<TData>(r: Result): r is RepeatState<TData> {
+    return r.type === 'repeatState' || r.type === 'repeatStateAndData'
+}
+
 export function isResultWithData<TData>(r: any): r is ResultWithData<TData> {
     return r.hasData !== undefined
 }

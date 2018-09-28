@@ -65,3 +65,7 @@ export function isNextEventAction(a: Action): a is NextEventAction {
     return a.type === 'nextEvent'
 }
 
+export function isPostponeAction(a: Action): a is PostponeAction {
+    return a.type === 'postpone'
+}
+
