@@ -19,14 +19,14 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import _ = require("lodash")
 import { ActionType } from "../types";
+import { upperFirst } from "../util/StringHelper"
 
 
 export default abstract class Action {
     readonly abstract type: ActionType
 
     toString(): string {
-        return `${_.upperFirst(this.type)}`
+        return `${upperFirst(this.type)}`
     }
 }

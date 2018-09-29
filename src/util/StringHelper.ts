@@ -46,3 +46,7 @@ export function dataToRoute(c: any) {
 
     return String(c)
 }
+
+export function upperFirst(s: string): string {
+    return s[0].toUpperCase() + s.substr(1)
+}
