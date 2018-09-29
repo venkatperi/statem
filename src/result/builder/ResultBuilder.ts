@@ -132,7 +132,7 @@ export default abstract class ResultBuilder {
      * @param spec
      * @return {this<TData>}
      */
-    data<TData>(spec: Spec<TData>): ResultBuilder {
+    data<TData>(spec: object): ResultBuilder {
         this._updates.push(spec)
         return this
     }

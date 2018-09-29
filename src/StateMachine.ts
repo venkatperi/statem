@@ -484,9 +484,12 @@ export class StateMachine<TData> extends EventEmitter
             this.doSetState(this.state, true)
         }
 
-        this.data =
-            isResultWithData<TData>(res) && res.hasData ? res.newData :
-            this.data // copy data over to next context
+        if (isResultWithData<TData>(res) && res.hasData) {
+            this.data = res.newData
+        }
+        else {
+            this.data = this.data
+        }
     }
 
     /**
@@ -571,9 +574,9 @@ export class StateMachine<TData> extends EventEmitter
 
         this.emit("state", current.state, prev.state, current.data);
 
-        if (current.hasData) {
-            this.emit('data', this.data, prev.data)
-        }
+        // if (current.hasData) {
+        //     this.emit('data', this.data, prev.data)
+        // }
 
         this._next = new Context<TData>(this.state)
     }
@@ -696,7 +699,7 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i('invokeHandler', handler, opts)
 
         if (typeof handler === "function") {
-            return handler.call(opts, opts);
+            return handler.call(this, opts);
         }
 
         if (typeof handler === 'string') {

@@ -23,7 +23,8 @@ import Action from './src/action'
 import Event from './src/event'
 import Result from './src/result'
 import {
-    internalEvent, keepState, nextState, stateTimeout
+    data, eventTimeout, internalEvent, keepState, nextEvent, nextState,
+    repeatState, reply, stateTimeout
 } from './src/result/builder';
 import { State } from './src/State';
 import { StateMachine } from './src/StateMachine'
@@ -35,5 +36,6 @@ export default StateMachine
 export {
     Event, Result, Action, State, keepState,
     nextState, internalEvent, stateTimeout,
+    repeatState, reply, nextEvent, eventTimeout, data,
     Handlers, Timeout
 }
