@@ -57,7 +57,7 @@ export function stateName(s?: State) {
     return s.name
 }
 
-export function stateEquals(a?: State, b?: State): boolean | undefined {
+export function stateEquals(a?: State, b?: State): boolean {
     if (isStringState(a) && isStringState(b)) {
         return a === b
     }

@@ -21,8 +21,7 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import StateMachine from "..";
-import { nextState } from "../index";
+import StateMachine, { nextState } from "..";
 
 let sm
 

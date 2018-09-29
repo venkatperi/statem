@@ -22,53 +22,30 @@
 import { expect } from 'chai'
 import 'mocha'
 import StateMachine, { nextState } from "..";
-import delay from "../src/util/delay";
 
-let hodor = 'hodor'
 let sm
 
-describe('genericTimeout', () => {
+describe('postpone', () => {
     beforeEach(() => {
-
-        sm = new StateMachine({
+        sm = new StateMachine<string>({
             handlers: [
-                /**
-                 * (cast:next, ONE) --> (TWO, genericTimeout)
-                 */
-                ['cast#next#ONE', () => nextState('TWO').timeout(200, hodor)],
+                ['cast#next#ONE', () => nextState('ONE/A').postpone()],
 
-                /**
-                 * (cast:next, TWO) --> ONE
-                 */
+                ['cast#next#ONE/A', () => nextState('TWO')],
+
                 ['cast#next#TWO', () => nextState('ONE')],
-
-                /**
-                 * (genericTimeout, TWO) --> THREE
-                 */
-                ['genericTimeout#*_#TWO', () => nextState('THREE')],
             ],
+            initialData: 'DATA',
             initialState: "ONE",
-        }).startSM()
+        })
+        sm.startSM()
+    })
+
+    it("postpones events until state changes", async () => {
         sm.cast('next')
-    })
-
-    it("has a timer", async () => {
-        await delay(10) // wait for cast event to be processed
-        expect(sm.hasTimer(hodor)).to.be.true
-    })
-
-    it("fires unless cancelled", async () => {
-        await delay(400)
-        expect(await sm.getState()).to.eq('THREE')
-    })
-
-    it("doesn't fire if cancelled", async () => {
-        await delay(100)    // ensure state transition within timeout
-        sm.cancelTimer(hodor)
-        await delay(500)    // wait for a long time
-        expect(sm.hasTimer(hodor)).to.be.false
         expect(await sm.getState()).to.eq('TWO')
     })
+
 })
 
 
