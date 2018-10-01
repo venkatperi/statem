@@ -478,7 +478,7 @@ export class StateMachine<TData> extends EventEmitter
 
         let result = this.invokeHandler(h && h.routeHandler, handlerOpts)
         this.handleResult(result, event);
-        this.switchContext()
+        this.switchContext(event)
         this.processingEvent = false;
     }
 
@@ -572,8 +572,9 @@ export class StateMachine<TData> extends EventEmitter
 
     /**
      *
+     * @param event
      */
-    private switchContext() {
+    private switchContext(event?: Event) {
         this.log.i('switchContext')
         const prev = this.isInitialState ? this._next : this._current
         const current = this._current = this._next
@@ -613,10 +614,11 @@ export class StateMachine<TData> extends EventEmitter
         }
 
         if (stateChanged) {
-            this.emit("stateChanged", current.state, prev.state, current.data);
+            this.emit("stateChanged", current.state, prev.state, current.data,
+                event);
         }
 
-        this.emit("state", current.state, prev.state, current.data);
+        this.emit("state", current.state, prev.state, current.data, event);
 
         // if (current.hasData) {
         //     this.emit('data', this.data, prev.data)
