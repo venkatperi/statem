@@ -28,5 +28,9 @@ import ResultWithData from "./ResultWithData";
  * the state enter call as if this state was entered again.
  */
 export default class RepeatState<TData> extends ResultWithData<TData> {
+    /**
+     * @hidden
+     * @type {"repeatState"}
+     */
     type: ResultType = 'repeatState'
 }

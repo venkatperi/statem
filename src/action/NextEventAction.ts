@@ -25,14 +25,10 @@ import { dataToString } from "../util/StringHelper"
 import Action from "./Action";
 
 
+/**
+ * Specifies the next state to transition to.
+ */
 export default class NextEventAction extends Action {
-    type: ActionType = "nextEvent"
-
-    public toString(): string {
-        return `${super.toString()}, event=${_.upperFirst(
-            this.eventType)}, context=${this.contextString}`
-    }
-
     /**
      * Creates a next event action
      * @param eventType
@@ -45,7 +41,26 @@ export default class NextEventAction extends Action {
         super()
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     get contextString(): string {
         return dataToString(this.context)
     }
+
+    /**
+     * @hidden
+     * @return {string}
+     */
+    public toString(): string {
+        return `${super.toString()}, event=${_.upperFirst(
+            this.eventType)}, context=${this.contextString}`
+    }
+
+    /**
+     * @hidden
+     * @type {"nextEvent"}
+     */
+    type: ActionType = "nextEvent"
 }

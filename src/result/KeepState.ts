@@ -23,6 +23,14 @@ import { ResultType } from "../types"
 import ResultWithData from "./ResultWithData";
 
 
+/**
+ * Instructs the state machine to keep state (i.e. transition to the same state)
+ * Data mutations are provided.
+ */
 export default class KeepState<TData> extends ResultWithData<TData> {
+    /**
+     * @hidden
+     * @type {"keepState"}
+     */
     type: ResultType = "keepState"
 }

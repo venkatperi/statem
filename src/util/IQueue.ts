@@ -20,6 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+/**
+ * @hidden
+ */
 export interface IQueue<T> {
 
     readonly isEmpty: boolean

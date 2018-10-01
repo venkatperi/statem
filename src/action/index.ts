@@ -32,6 +32,9 @@ import TimeoutAction from "./TimeoutAction";
 
 export default Action
 
+/**
+ * @hidden
+ */
 export type ActionList = Array<Action>
 
 export {
@@ -45,26 +48,44 @@ export {
 }
 
 
+/**
+ * @hidden
+ */
 export function isGenericTimeoutAction(a: Action): a is GenericTimeoutAction {
     return a.type === 'genericTimeout'
 }
 
+/**
+ * @hidden
+ */
 export function isEventTimeoutAction(a: Action): a is EventTimeoutAction {
     return a.type === 'eventTimeout'
 }
 
+/**
+ * @hidden
+ */
 export function isStateTimeoutAction(a: Action): a is StateTimeoutAction {
     return a.type === 'stateTimeout'
 }
 
+/**
+ * @hidden
+ */
 export function isReplyAction(a: Action): a is ReplyAction {
     return a.type === 'reply'
 }
 
+/**
+ * @hidden
+ */
 export function isNextEventAction(a: Action): a is NextEventAction {
     return a.type === 'nextEvent'
 }
 
+/**
+ * @hidden
+ */
 export function isPostponeAction(a: Action): a is PostponeAction {
     return a.type === 'postpone'
 }

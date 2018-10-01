@@ -22,8 +22,14 @@
 import { State } from "./State"
 import { Handlers } from "./types"
 
+/**
+ * @hidden
+ */
 export type DataFn<TData> = () => TData
 
+/**
+ * State Machine Initialization options
+ */
 export interface SMOptions<TData = void> {
     /**
      * State machine's initial state. Must be defined.

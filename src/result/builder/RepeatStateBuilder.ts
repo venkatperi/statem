@@ -26,7 +26,16 @@ import ResultWithData from "../ResultWithData"
 import ResultBuilder from "./ResultBuilder";
 
 
+/**
+ * A {ResultBuilder} with a {RepeatState|RepeatStateAndData} result
+ */
 export default class RepeatStateBuilder extends ResultBuilder {
+
+    /**
+     * @hidden
+     * @param data
+     * @return {RepeatStateAndData}
+     */
     getResult<TData>(data?: TData): Result | ResultWithData<TData> {
         return this._updates.length === 0 ?
                new RepeatStateAndData(...this._actions) :

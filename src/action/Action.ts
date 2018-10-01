@@ -23,9 +23,17 @@ import { ActionType } from "../types";
 import { upperFirst } from "../util/StringHelper"
 
 
+/**
+ * @hidden
+ * Transition action base class
+ */
 export default abstract class Action {
     readonly abstract type: ActionType
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     toString(): string {
         return `${upperFirst(this.type)}`
     }

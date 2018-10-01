@@ -23,6 +23,9 @@
 import { State } from "../State";
 
 
+/**
+ * @hidden
+ */
 export interface Stateful {
     nextState: State;
 }

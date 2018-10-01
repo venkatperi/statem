@@ -22,7 +22,7 @@
 import inspect = require("object-inspect")
 
 /**
- *
+ * @hidden
  * @param c
  * @return {string}
  */
@@ -31,6 +31,7 @@ export function dataToString(c: any) {
 }
 
 /**
+ * @hidden
  * Convert data to route
  * @param c
  * @return {string}
@@ -47,6 +48,12 @@ export function dataToRoute(c: any) {
     return String(c)
 }
 
+
+/**
+ * @hidden
+ * @param s
+ * @return {string}
+ */
 export function upperFirst(s: string): string {
     return s[0].toUpperCase() + s.substr(1)
 }

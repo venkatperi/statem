@@ -24,7 +24,15 @@ import { EventType } from "../types"
 import TimeoutEvent from "./TimeoutEvent";
 
 
+/**
+ * Sets a timer that fires unless the state machines transitions to a
+ * different state.
+ */
 export default class StateTimeoutEvent extends TimeoutEvent {
+    /**
+     * @hidden
+     * @type {"stateTimeout"}
+     */
     type: EventType = 'stateTimeout'
 }
 

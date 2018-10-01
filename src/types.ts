@@ -28,15 +28,27 @@ import ResultWithData from "./result/ResultWithData"
 import { State } from "./State"
 
 
+/**
+ * Our definition of primitives (doesn't include symbol)
+ */
 export type Primitive = number | string | boolean | null | undefined
 
+/**
+ * Object with string keys and primitive values
+ */
 export type PrimitiveObject = { [k in string]: Primitive }
 
+/**
+ * Like {PrimitiveObject}, but expects a key 'name'
+ */
 export type NamedPrimitiveObject = {
     name: string,
     [k: string]: Primitive
 }
 
+/**
+ * State machine events
+ */
 export type EventType =
     'call'
     | 'cast'
@@ -46,6 +58,9 @@ export type EventType =
     | 'genericTimeout'
     | 'internal'
 
+/**
+ * Transition actions
+ */
 export type ActionType =
     'reply'
     | 'nextEvent'
@@ -54,6 +69,9 @@ export type ActionType =
     | 'eventTimeout'
     | 'genericTimeout'
 
+/**
+ * Hander results
+ */
 export type ResultType =
     'none'
     | 'keepState'
@@ -65,14 +83,30 @@ export type ResultType =
     | 'stop'
     | 'builder'
 
+/**
+ * Events can accept simple arguments of type {Primitive}, or a
+ * {PrimitiveObject}
+ */
 export type EventContext = Primitive | PrimitiveObject
 
+/**
+ * Non {Primitive|PrimitiveObject} arguments to events.
+ */
 export type EventExtra = any
 
+/**
+ * The caller's address for a {CallEvent}
+ */
 export type From = string
 
+/**
+ * Timeout values. Milliseconds if {number}. For string values, see {NTimer}
+ */
 export type Timeout = number | string
 
+/**
+ * Values passed to a {Handler}
+ */
 export type HandlerOpts<TData> = {
     args: { [k in string]: string },
     current: State,
@@ -81,9 +115,16 @@ export type HandlerOpts<TData> = {
     route: string
 }
 
+/**
+ * Handler function
+ */
 export type HandlerFn<TData> =
     (opts: HandlerOpts<TData>) => HandlerResult<TData>
 
+/**
+ * Handlers can be specified as a tuple of the next {State} and a
+ * {EventTimeout}
+ */
 export type NextStateWithEventTimeout = [State, Timeout]
 
 /**
@@ -95,10 +136,16 @@ export type Handler<TData> =
     | State
     | NextStateWithEventTimeout
 
+/**
+ * The key of a handler. Can be {string|Array<string>}. If {Array<string>},
+ * the routes are treated as a boolean OR. Any matching route in the array
+ * will invoke the handler.
+ */
 export type HandlerRoute = string | Array<string>
 
 /**
- * Maps a handler to a route (or list or routes)
+ * A {HandlerRoute} to {Handler} entry. Can be a tuple or object with string
+ * keys. If an object, the keys are treated as {string} routes.
  */
 export type HandlerSpec<TData> =
     [HandlerRoute, Handler<TData>]
@@ -109,25 +156,43 @@ export type HandlerSpec<TData> =
  */
 export type Handlers<TData> = Array<HandlerSpec<TData>>
 
+/**
+ * @hidden
+ */
 export type RouteHandler<TData> = {
     routes: Array<[string, Route]>,
     handler: Handler<TData>
 }
 
+/**
+ * @hidden
+ */
 export type RouteHandlers<TData> = Array<RouteHandler<TData>>
 
+/**
+ * @hidden
+ */
 export type MatchedHandler<TData> = {
     routeHandler: Handler<TData>,
     route: string,
     result: { [k in string]: string }
 }
 
+/**
+ * Result of a handler invocation.
+ * {ResultBuilder.getResult()}  is invoked to convert a {ResultBuilder} to a
+ * {Result}
+ * {void} implies {KeepStateWithData}
+ */
 export type HandlerResult<TData> =
     Result
     | ResultWithData<TData>
     | ResultBuilder
     | void
 
+/**
+ * Event Priorities
+ */
 export enum Priority {
     Highest = 1000,
     High = 2000,

@@ -26,7 +26,16 @@ import ResultWithData from "../ResultWithData"
 import ResultBuilder from "./ResultBuilder";
 
 
+/**
+ * A {ResultBuilder} with a {KeepState|KeepStateAndData} result
+ */
 export default class KeepStateBuilder extends ResultBuilder {
+
+    /**
+     * @hidden
+     * @param data
+     * @return {KeepStateAndData}
+     */
     getResult<TData>(data?: TData): Result | ResultWithData<TData> {
         return this._updates.length === 0 ?
                new KeepStateAndData(...this._actions) :

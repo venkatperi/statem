@@ -25,12 +25,18 @@ import { ResultType } from "../types"
 
 
 /**
+ * @hidden
  * This class encapsulates the result of a call to a state handler
  */
-export abstract class Result {
+export default abstract class Result {
+    /**
+     * @hidden
+     * @type {"none"}
+     */
     type: ResultType = 'none'
 
     /**
+     * @hidden
      * The list of actions for this state
      */
     actions: Array<Action> = []
@@ -38,16 +44,24 @@ export abstract class Result {
 
     /**
      * Creates a new result
-     * @param actions the actions
+     * @param actions the transition actions
      */
     constructor(...actions: ActionList) {
         this.actions.push(...actions)
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     get actionsString(): string {
         return this.actions.map(x => x.toString()).join(", ")
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     get dataString(): string {
         return ''
     }
@@ -57,4 +71,3 @@ export abstract class Result {
     }
 }
 
-export default Result

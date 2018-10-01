@@ -20,6 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
+ * @hidden
  * For a fixed sized array, adds item to the end of
  * an array and drops elements from the front, if needed
  *

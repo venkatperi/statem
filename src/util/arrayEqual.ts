@@ -19,6 +19,13 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+/**
+ * @hidden
+ * Returns true if both arrays are equal
+ * @param arr1
+ * @param arr2
+ * @return {boolean}
+ */
 export function arrayEqual<T>(arr1: Array<T>, arr2: Array<T>): boolean {
     const l1 = arr1.length
     if (l1 !== arr2.length) {
@@ -33,6 +40,9 @@ export function arrayEqual<T>(arr1: Array<T>, arr2: Array<T>): boolean {
     return true
 }
 
+/**
+ * @hidden
+ */
 export function objEqual(a: { [k in any]: any },
     b: { [k in any]: any }): boolean {
     const aKeys = Object.keys(a)

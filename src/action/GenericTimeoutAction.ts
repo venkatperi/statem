@@ -29,6 +29,10 @@ import TimeoutAction from "./TimeoutAction";
  * Generates a {GenericTimeoutEvent} after the specified timeout interval
  */
 export default class GenericTimeoutAction extends TimeoutAction {
+    /**
+     * @hidden
+     * @type {"genericTimeout"}
+     */
     type: ActionType  = "genericTimeout"
 
     /**

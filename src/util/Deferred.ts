@@ -19,14 +19,29 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+/**
+ * @hidden
+ */
 export type Resolver<T> = (value?: T | PromiseLike<T>) => void
 
+/**
+ * @hidden
+ */
 export type Rejector = (reason?: any) => void
 
+/**
+ * @hidden
+ */
 export type FulfillmentHandler<T, R = T> = ((value: T) => (PromiseLike<R> | R))
 
+/**
+ * @hidden
+ */
 export type RejectionHandler<R = never> = (reason: any) => (PromiseLike<R> | R)
 
+/**
+ * @hidden
+ */
 export default class Deferred<T> implements Promise<T> {
     /**
      *  A method to resolve the associated Promise with the value passed.
@@ -107,6 +122,15 @@ export default class Deferred<T> implements Promise<T> {
     }
 
     /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @returns {Promise<T | R>} Promise for the completion of the callback.
+     * @param onRejected handles rejection
+     */
+    catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
+        return this.promise.catch(onRejected)
+    }
+
+    /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @returns {Promise<R1 | R2>} Promise for the completion of which ever
      *     callback is executed.
@@ -117,15 +141,6 @@ export default class Deferred<T> implements Promise<T> {
         onFulfilled?: FulfillmentHandler<T, R1> | null | undefined,
         onRejected?: RejectionHandler<R2> | null | undefined): Promise<R1 | R2> {
         return this.promise.then(onFulfilled, onRejected)
-    }
-
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @returns {Promise<T | R>} Promise for the completion of the callback.
-     * @param onRejected handles rejection
-     */
-    catch<R = never>(onRejected?: RejectionHandler<R> | null | undefined): Promise<T | R> {
-        return this.promise.catch(onRejected)
     }
 }
 

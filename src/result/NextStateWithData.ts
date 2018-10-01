@@ -11,8 +11,17 @@ import { Stateful } from "./Stateful";
  */
 export default class NextStateWithData<TData> extends ResultWithData<TData>
     implements Stateful {
+    /**
+     * @hidden
+     * @type {"nextState"}
+     */
     type: ResultType = "nextState";
 
+    /**
+     * @param nextState - the next state to go to
+     * @param newData - new state machine data
+     * @param actions - transition actions
+     */
     constructor(public nextState: State,
         newData: TData, ...actions: ActionList) {
         super(newData, ...actions);

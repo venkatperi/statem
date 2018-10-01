@@ -23,13 +23,10 @@ import { ActionType, From } from "../types";
 import Action from "./Action";
 
 
+/**
+ * Replies to the caller (from) with the given message.
+ */
 export default class ReplyAction extends Action {
-    type: ActionType = "reply"
-
-    toString(): string {
-        return `${super.toString()}, from=${this.from}, reply=${this.replyString}`
-    }
-
     /**
      * Creates a Reply action
      * @param from
@@ -39,6 +36,10 @@ export default class ReplyAction extends Action {
         super()
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     get replyString(): string {
         if (typeof this.reply === "object") {
             return JSON.stringify(this.reply)
@@ -53,4 +54,18 @@ export default class ReplyAction extends Action {
                 return String(this.reply)
         }
     }
+
+    /**
+     * @hidden
+     * @return {string}
+     */
+    toString(): string {
+        return `${super.toString()}, from=${this.from}, reply=${this.replyString}`
+    }
+
+    /**
+     * @hidden
+     * @type {"reply"}
+     */
+    type: ActionType = "reply"
 }

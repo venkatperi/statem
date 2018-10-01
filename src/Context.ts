@@ -24,6 +24,10 @@ import Event from "./event/Event"
 import { isComplexState, State, stateEquals, stateName } from "./State"
 import { From, Timeout } from "./types"
 
+/**
+ * @hidden
+ * State machine context, between states.
+ */
 export class Context<TData> {
 
     nextEvents: Array<Event> = []

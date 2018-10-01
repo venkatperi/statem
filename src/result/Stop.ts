@@ -23,6 +23,13 @@ import { ResultType } from "../types"
 import NextState from "./NextState"
 
 
+/**
+ * Instructs the state machine to stop.
+ */
 export default class Stop extends NextState {
+    /**
+     * @hidden
+     * @type {"stop"}
+     */
     type: ResultType = 'stop'
 }

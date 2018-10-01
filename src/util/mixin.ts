@@ -20,6 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
+ * @hidden
  * Apply mixins
  * http://www.typescriptlang.org/docs/handbook/mixins.html
  *

@@ -23,5 +23,9 @@
 import logger from "wtlog"
 
 
+/**
+ * @hidden
+ * @param {string} tag
+ */
 export default (tag: string) => logger(tag)
 

@@ -37,7 +37,12 @@ export {
     StateTimeoutEvent, EventTimeoutEvent, GenericTimeoutEvent,
 }
 
-export function makeNextEvent(action: NextEventAction) {
+/**
+ * @hidden
+ * @param {NextEventAction} action
+ * @return {any}
+ */
+export function makeNextEvent(action: NextEventAction): Event {
     switch (action.eventType) {
         case 'internal':
             return new InternalEvent(action.context)

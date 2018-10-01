@@ -24,6 +24,10 @@ import { SMOptions } from "./SMOptions"
 import { State } from "./State"
 import { EventContext, EventExtra, Handler, HandlerOpts } from "./types"
 
+/**
+ * Public interface of a state machine.
+ *
+ */
 export interface IStateMachine<TData> extends SMOptions<TData> {
     /**
      * Returns true is state timer is currently set
@@ -59,8 +63,8 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      * of `call` and provides it to the state machine as:
      * "call/uniqueId#args#state"
      *
-     * @param request
-     * @param extra
+     * @param request - the request context
+     * @param extra - extra
      */
     call(request: EventContext, extra?: EventExtra): Promise<any>
 
@@ -69,47 +73,47 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
      * This function always returns regardless of whether the
      * request was successful or handled by the StateMachine.
      *
-     * @param request
+     * @param request - request context
      * @param extra
      */
     cast(request: EventContext, extra?: EventExtra): void
 
     /**
+     * Adds a event handler for the given route.
      *
-     * @param handler
+     * @param routes - The routes for which the handler will be invoked. If
+     * multiple routes are specified, the handler will be invoked if any of
+     * routes match against an incoming event (boolean OR).
+     * @param handler - the handler to invoke when a route is matched.
      * @return {this}
-     * @param routes
      */
     addHandler(routes: string | Array<string>,
         handler: Handler<TData>): IStateMachine<TData>
 
     /**
+     * A catch-all handler invoked if no routes match an incoming event.
      *
-     * @param event
-     * @param args
-     * @param current
-     * @param data
+     * @param event - the event
+     * @param args - event args
+     * @param current -the current state
+     * @param data - the current data
      */
     defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined
 
     /**
-     *
+     * Returns a promise that resolves with the current state. Sugar for
+     * `call('getState'). Handled by default handlers.
      */
     getState(): Promise<State>
 
     /**
-     *
+     * Returns a promise that resolves with the current data. Sugar for
+     * `call('getData'). Handled by default handlers.
      */
     getData(): Promise<TData>
 
     /**
-     *
-     * @param name
-     */
-    cancelTimer(name: string): void
-
-    /**
-     *
+     * Returns true if a timer with the given name is currently active
      * @param name
      */
     hasTimer(name: string): boolean

@@ -35,8 +35,20 @@ import ResultWithData from "../ResultWithData"
  * Fluent builder for {Result}s
  */
 export default abstract class ResultBuilder {
+    /**
+     * @hidden
+     *
+     * @type {any[]}
+     * @private
+     */
     _actions: ActionList = []
 
+
+    /**
+     * @hidden
+     * @type {any[]}
+     * @private
+     */
     _updates: Array<Spec<any>> = []
 
     /**
@@ -113,7 +125,7 @@ export default abstract class ResultBuilder {
     }
 
     /**
-     *
+     * Adds an event of type 'internal'
      * @param context
      * @return {ResultBuilder}
      * @param extra
@@ -123,6 +135,7 @@ export default abstract class ResultBuilder {
     }
 
     /**
+     * @hidden
      * Builds the result
      */
     abstract getResult<TData>(data?: TData): Result | ResultWithData<TData>
@@ -138,6 +151,7 @@ export default abstract class ResultBuilder {
     }
 
     /**
+     * @hidden
      * Apply updates to the given data
      * @param data
      * @return {TData}

@@ -38,22 +38,51 @@ export {
     KeepState, KeepStateAndData, Stop, ResultWithData
 }
 
+/**
+ * @hidden
+ * @param r
+ * @return {r is ResultBuilder}
+ */
 export function isResultBuilder(r: any): r is ResultBuilder {
     return r.getResult !== undefined
 }
 
+/**
+ *
+ * @hidden
+ * @param r
+ * @return {boolean}
+ */
 export function isNextStateResult(r: Result): r is NextState {
     return r.type === 'nextState' || r.type === 'nextStateWithData'
 }
 
+/**
+ * @hidden
+ *
+ * @param r
+ * @return {boolean}
+ */
 export function isKeepStateResult<TData>(r: Result): r is KeepState<TData> {
     return r.type === 'keepState' || r.type === 'keepStateAndData'
 }
 
+/**
+ *
+ * @hidden
+ * @param r
+ * @return {boolean}
+ */
 export function isRepeatStateResult<TData>(r: Result): r is RepeatState<TData> {
     return r.type === 'repeatState' || r.type === 'repeatStateAndData'
 }
 
+/**
+ *
+ * @hidden
+ * @param r
+ * @return {boolean}
+ */
 export function isResultWithData<TData>(r: any): r is ResultWithData<TData> {
     return r.hasData !== undefined
 }

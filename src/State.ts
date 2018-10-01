@@ -24,26 +24,58 @@ import { NamedPrimitiveObject } from "./types";
 import { arrayEqual, objEqual } from "./util/arrayEqual";
 
 
+/**
+ * A complex state. If an object, must have a 'name' key which
+ * specifies the base state name.
+ */
 export type ComplexState = Array<string> | NamedPrimitiveObject
 
+/**
+ * A State in the state machine.
+ */
 export type State = string | ComplexState
 
+/**
+ * @hidden
+ * @param {State} s
+ * @return {s is string}
+ */
 export function isStringState(s?: State): s is string {
     return typeof s === "string"
 }
 
+/**
+ * @hidden
+ * @param s
+ * @return {boolean}
+ */
 export function isComplexState(s?: State): s is ComplexState {
     return typeof s !== "string"
 }
 
+/**
+ * @hidden
+ * @param s
+ * @return {arg is Array<any>}
+ */
 export function isArrayState(s?: State): s is Array<string> {
     return Array.isArray(s)
 }
 
+/**
+ * @hidden
+ * @param s
+ * @return {boolean}
+ */
 export function isObjState(s?: State): s is NamedPrimitiveObject {
     return typeof s === "object"
 }
 
+/**
+ * @hidden
+ * @param s
+ * @return {string}
+ */
 export function stateName(s?: State) {
     if (!s) {
         return ''
@@ -57,6 +89,12 @@ export function stateName(s?: State) {
     return s.name
 }
 
+/**
+ * @hidden
+ * @param a
+ * @param b
+ * @return {boolean}
+ */
 export function stateEquals(a?: State, b?: State): boolean {
     if (isStringState(a) && isStringState(b)) {
         return a === b
@@ -69,6 +107,11 @@ export function stateEquals(a?: State, b?: State): boolean {
     return isObjState(a) && isObjState(b) ? objEqual(a, b) : false
 }
 
+/**
+ * @hidden
+ * @param s
+ * @return {string}
+ */
 export function stateRoute(s?: State): string {
     if (!s) {
         return "*"
@@ -87,3 +130,4 @@ export function stateRoute(s?: State): string {
               .filter(([k]) => k !== "name")
               .map(x => x.join("/")).join("/")
 }
+

@@ -20,6 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+/**
+ * @hidden
+ */
 interface Array<T> {
 
     /**

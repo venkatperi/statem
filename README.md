@@ -203,3 +203,6 @@ export class PushButtonCountdownTimer extends StateMachine {
 	}
 }
 ```
+
+# API
+[API](./docs/README.md)

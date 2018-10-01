@@ -23,7 +23,14 @@ import { ResultType } from "../types"
 import Result from "./Result";
 
 
+/**
+ * Like {RepeatState}. Data is not altered.
+ */
 export default class RepeatStateAndData extends Result {
+    /**
+     * @hidden
+     * @type {"repeatStateAndData"}
+     */
     type: ResultType = 'repeatStateAndData'
 
 }

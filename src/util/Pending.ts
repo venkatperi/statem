@@ -23,8 +23,14 @@ import Logger from "../Logger"
 import Deferred from './Deferred'
 import { uniqId } from "./uniqId";
 
+/**
+ * @hidden
+ */
 const Log = Logger("Pending");
 
+/**
+ * @hidden
+ */
 export default class Pending {
     private pending: { [K in string]: Deferred<any> } = {}
 

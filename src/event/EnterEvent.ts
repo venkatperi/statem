@@ -23,7 +23,19 @@ import { EventType, Priority } from "../types";
 import Event from "./Event";
 
 
+/**
+ * An 'enter' event. Emitted by the state machine when a state is entered.
+ */
 export default class EnterEvent extends Event {
-    type: EventType = 'enter'
+    /**
+     * @hidden
+     * @type {Priority.High}
+     */
     priority = Priority.High
+
+    /**
+     * @hidden
+     * @type {"enter"}
+     */
+    type: EventType = 'enter'
 }

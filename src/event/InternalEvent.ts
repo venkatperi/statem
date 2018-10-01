@@ -23,6 +23,13 @@ import { EventType } from "../types"
 import Event from "./Event";
 
 
+/**
+ * Represents an internally generated event.
+ */
 export default class InternalEvent extends Event {
+    /**
+     * @hidden
+     * @type {"internal"}
+     */
     type: EventType = 'internal'
 }

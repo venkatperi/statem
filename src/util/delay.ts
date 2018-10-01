@@ -20,6 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+/**
+ * @hidden
+ */
 export default function delay(time: number): Promise<void> {
     return new Promise(r => setTimeout(r, time))
 }

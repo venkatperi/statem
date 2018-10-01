@@ -23,8 +23,19 @@ import { EventType, Priority } from "../types";
 import Event from "./Event";
 
 
+/**
+ * A 'cast' event
+ */
 export default class CastEvent extends Event {
-    type: EventType = 'cast'
-
+    /**
+     * @hidden
+     * @type {Priority.Low}
+     */
     priority = Priority.Low
+
+    /**
+     * @hidden
+     * @type {"cast"}
+     */
+    type: EventType = 'cast'
 }

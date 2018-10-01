@@ -22,6 +22,9 @@
 import uniqid = require('uniqid')
 
 
+/**
+ * @hidden
+ */
 export function uniqId(): string {
     return uniqid()
 }

@@ -19,15 +19,22 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { EventEmitter } from "events"
 import { Timer } from "ntimer";
 import Logger from "../Logger";
 import { Timeout } from "../types";
 import { uniqId } from "./uniqId";
 
 
+/**
+ * @hidden
+ */
 const Log = Logger("Timers");
 
-export default class Timers {
+/**
+ * @hidden
+ */
+export default class Timers extends EventEmitter {
     private timers: { [k in string]: Timer } = {};
 
     /**
@@ -53,6 +60,7 @@ export default class Timers {
         this.cancel(name);
         let t = this.timers[name] = new Timer({name, timeout, auto: true});
         t.on("timer", () => that.cancel(name));
+        this.emit('createTimer', timeout, name)
         return t;
     }
 
@@ -71,6 +79,7 @@ export default class Timers {
         Log.i("cancel", name);
         this.timers[name].cancel();
         delete this.timers[name];
+        this.emit('cancelTimer', name)
         return true;
     }
 

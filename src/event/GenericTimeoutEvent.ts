@@ -24,6 +24,13 @@ import { EventType } from "../types"
 import TimeoutEvent from "./TimeoutEvent";
 
 
+/**
+ * Sets a generic timeout.
+ */
 export default class GenericTimeoutEvent extends TimeoutEvent {
+    /**
+     * @hidden
+     * @type {"genericTimeout"}
+     */
     type: EventType = 'genericTimeout'
 }

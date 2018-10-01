@@ -23,6 +23,15 @@ import { ResultType } from "../types"
 import Result from "./Result";
 
 
+/**
+ * Instructs the state machine to keep state (i.e. transition to the same state)
+ * Data is not mutated.
+ */
 export default class KeepStateAndData extends Result {
+    /**
+     *
+     * @hidden
+     * @type {"keepStateAndData"}
+     */
     type: ResultType = "keepStateAndData"
 }

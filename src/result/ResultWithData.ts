@@ -25,6 +25,9 @@ import { dataToString } from "../util/StringHelper"
 import Result from "./Result";
 
 
+/**
+ * @hidden
+ */
 export default abstract class ResultWithData<TData> extends Result {
     hasData = false
 
@@ -38,6 +41,10 @@ export default abstract class ResultWithData<TData> extends Result {
         this.newData = newData
     }
 
+    /**
+     * @hidden
+     * @return {TData}
+     */
     get newData(): TData {
         if (!this._newData) {
             throw new Error("No data!")
@@ -45,15 +52,27 @@ export default abstract class ResultWithData<TData> extends Result {
         return this._newData;
     }
 
+    /**
+     * @hidden
+     * @param value
+     */
     set newData(value: TData) {
         this.hasData = true
         this._newData = value;
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     get dataString(): string {
         return this.hasData ? dataToString(this.newData) : ""
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     toString(): string {
         return [this.type,
             objectInspect({

@@ -23,24 +23,43 @@ import { EventContext, EventExtra, EventType, From, Priority } from "../types";
 import Event from "./Event";
 
 
+/**
+ * Represents a 'call' event.
+ */
 export default class CallEvent extends Event {
-    type: EventType = "call"
-
+    /**
+     * @hidden
+     * @type {Priority.Low}
+     */
     priority = Priority.Low
 
-    get typeRoute(): string {
-        return `${this.type}/${this.from}`
-    }
-
+    /**
+     * @hidden
+     * @return {string}
+     */
     toString(): string {
         return `${super.toString()}, from=${this.from}`
     }
 
     /**
+     * @hidden
+     * @type {"call"}
+     */
+    type: EventType = "call"
+
+    /**
+     * @hidden
+     * @return {string}
+     */
+    get typeRoute(): string {
+        return `${this.type}/${this.from}`
+    }
+
+    /**
      *
-     * @param from
-     * @param context
-     * @param extra
+     * @param from - caller's id. Used by {ReplyAction} to send a response.
+     * @param context - Event context
+     * @param extra - Event extra data
      */
     constructor(public from: From, context?: EventContext, extra?: EventExtra) {
         super(context, extra)

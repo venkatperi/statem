@@ -26,11 +26,22 @@ import ResultWithData from "../ResultWithData"
 import ResultBuilder from "./ResultBuilder";
 
 
+/**
+ * A {ResultBuilder} with a {NextState|NextStateWitData} result
+ */
 export default class NextStateBuilder extends ResultBuilder {
+    /**
+     * @param state - the next state to transition to.
+     */
     constructor(private state: State) {
         super()
     }
 
+    /**
+     * @hidden
+     * @param data
+     * @return {NextState}
+     */
     getResult<TData>(data?: TData): Result | ResultWithData<TData> {
         return this._updates.length === 0 ?
                new NextState(this.state, ...this._actions) :

@@ -24,7 +24,14 @@ import { EventType } from "../types"
 import TimeoutEvent from "./TimeoutEvent";
 
 
+/**
+ * Sets a timeout that fires if unless a new event is seen.
+ */
 export default class EventTimeoutEvent extends TimeoutEvent {
+    /**
+     * @hidden
+     * @type {"eventTimeout"}
+     */
     type: EventType = 'eventTimeout'
 }
 

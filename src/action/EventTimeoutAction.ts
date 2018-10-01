@@ -29,5 +29,9 @@ import TimeoutAction from "./TimeoutAction";
  * the specified timeout interval
  */
 export default class EventTimeoutAction extends TimeoutAction {
+    /**
+     * @hidden
+     * @type {"eventTimeout"}
+     */
     type: ActionType = "eventTimeout"
 }

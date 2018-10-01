@@ -31,8 +31,17 @@ import { Stateful } from "./Stateful";
  * data
  */
 export default class NextState extends Result implements Stateful {
+    /**
+     * @hidden
+     * @type {"nextState"}
+     */
     type: ResultType = "nextState"
 
+    /**
+     * Creates a {NextState} result
+     * @param nextState - the next state to go to.
+     * @param actions - List of transition actions
+     */
     constructor(public nextState: State, ...actions: ActionList) {
         super(...actions);
     }

@@ -26,8 +26,12 @@ import { EventContext, EventExtra, EventType, Priority } from "../types";
 import { dataToRoute, dataToString } from "../util/StringHelper";
 
 
+/**
+ * @hidden
+ */
 export default abstract class Event {
     /**
+     * @hidden
      * The event's type
      */
     readonly abstract type: EventType
@@ -40,14 +44,15 @@ export default abstract class Event {
 
     /**
      * Constructor
-     * @param context
-     * @param extra
+     * @param context - Event data
+     * @param extra - Extra event data.
      */
     constructor(public context?: EventContext,
         public extra?: EventExtra) {
     }
 
     /**
+     * @hidden
      * Serialize this event to a route
      * @return {string}
      */
@@ -56,6 +61,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      *  Serialize event context to a string
      *
      * @return {string}
@@ -65,6 +71,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      * Serialize context to route path
      * @return {string}
      */
@@ -73,6 +80,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      * Serialize type to route path
      * @return {EventType}
      */
@@ -81,6 +89,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      * Comparator based on priorities
      *
      * @return {number}
@@ -92,6 +101,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      * Maps event to route for given state
      * @param state
      * @return {string}
@@ -101,6 +111,7 @@ export default abstract class Event {
     }
 
     /**
+     * @hidden
      * Convert to displayable string
      *
      * @return {string}

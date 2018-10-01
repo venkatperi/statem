@@ -23,6 +23,9 @@ import { Timeout } from "../types";
 import Action from "./Action";
 
 
+/**
+ * @hidden
+ */
 export default abstract class TimeoutAction extends Action {
     /**
      * Creates a new TimeoutAction
@@ -32,6 +35,10 @@ export default abstract class TimeoutAction extends Action {
         super()
     }
 
+    /**
+     * @hidden
+     * @return {string}
+     */
     toString(): string {
         return `${super.toString()}, time=${this.time}`
     }
