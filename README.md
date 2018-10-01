@@ -195,6 +195,7 @@ The following functions return a `ResultBuilder`:
 
 ### Mutating State Machine Data
 State machine data is mutated by calling the `data` on `ResultBuilder` with [immutability-helper](#) commands, including:
+
 * `{$push: array}` `push()` all the items in `array` on the target.
   * `{$unshift: array}` `unshift()` all the items in `array` on the target.
   * `{$splice: array of arrays}` for each item in `arrays` call `splice()` on the target with the parameters provided by the item. Note: The items in the array are applied sequentially, so the order matters. The indices of the target may change during the operation.*   * `{$set: any}` replace the target entirely.
@@ -229,73 +230,37 @@ The result of the handler invocation can include a state transition directive an
 ## Examples
 See the `examples` directory for more examples.
 
-
-
-
-### Toggle Button
-ToggleButton is a simple state machine of a button that toggles between `off` and `on` when it’s toggle is flipped. It’s initial state is `off`.
-
-```ts
-class ToggleButton extends StateMachine {
-	initialState = 'off'
-
-	handlers: Handlers = [
-		['cast#flip#off', 'on'],
-		['cast#flip#on', 'off']
-	]
-
-	flip() {
-		this.cast('flip')
-	}
-}
-```
-
-ToggleButton has a single event as its input, `cast('flip')` and no state transition actions. 
-
-1. `'cast#flip#off` —\> `on`
-	i.e. in state `off`, if we receive event `cast('flip')`, transition to state `on`.
-
-2. `'cast#flip#on` —\> `of` 
-	i.e. in state `on`, if we receive event `cast('flip')`, transition to state `off`.
-
-```ts
-let button = new ToggleButton()
-button.startSM()
-
-// initial state
-console.log(await button.getState())	// 'off'
-
-button.flip()
-console.log(await button.getState())	// 'on'
-
-button.flip()
-console.log(await button.getState())	// 'off'
-```
 ### Toggle Button With Count
-ToggleButtonCount adds a counter to [ToggleButton](#) that counts the number of times it turned on.
+ToggleButtonCount maintains a counter in the state machine’s data that counts the number of times it turned on.
 
 ```ts
-export class ToggleButtonWithCount extends StateMachine {
-	initialState = 'off'
+type ToggleButtonWithCountData = {
+    count: number
+}
 
-	data = {
-		count: 0
-	}
+export class ToggleButtonWithCount
+    extends StateMachine<ToggleButtonWithCountData> {
+    initialState = 'off'
 
-	handlers: Handlers = [
-		['cast#flip#off', ({data}) => nextState('on')
-			.data({count: {$set: data.count + 1}})],
-
+    handlers: Handlers<ToggleButtonWithCountData> = [
+        // if we get 'flip' in 'off', go to 'on'
+        // and increment data.count
+        ['cast#flip#off', ({data}) => nextState('on')
+            .data({count: {$set: data.count + 1}})],
+        
+		// flip from on goes back to off.
 		['cast#flip#on', 'off']
-	]
+    ]
 
-	flip() {
-		this.cast('flip')
-	}
+    initialData: ToggleButtonWithCountData = {
+        count: 0
+    }
+
+    flip() {
+        this.cast('flip')
+    }
 }
 ```
-
-ToggleButtonWith count adds a transition action when exiting `off` state.
 
 
 ```ts
@@ -310,4 +275,185 @@ console.log(await button.getState())	// 'on'
 
 button.flip()
 console.log(await button.getState())	// 'off'
+```
+### Push Button Countdown Timer
+PushButtonCountdownTimer turns on when pushed and starts a `genericTimeout`. The button turns off when the timer fires.
+
+```ts
+type PushButtonCountdownTimerData = {
+    timeout: Timeout
+}
+
+class PushButtonCountdownTimer extends StateMachine<PushButtonCountdownTimerData> {
+    initialState = 'off'
+
+    handlers: Handlers<PushButtonCountdownTimerData> = [
+		// Start a generic timer and go to 'on'
+        ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
+
+		// when we get 'genericTimeout' in 'on', 
+		// go back to 'off'
+        ['genericTimeout#*_#on', 'off']
+    ]
+
+    constructor(timeout: Timeout) {
+        super()
+        this.initialData = {timeout}
+    }
+
+    push() {
+        this.cast('push')
+    }
+}
+```
+### A Hotel Safe
+See [![](https://img.shields.io/badge/demo-online-green.svg)](https://hotel-safe.netlify.com/#/)
+`HotelSafe` simulates a type of safe frequently seen in hotel rooms. 
+
+* **Locking the Safe**
+	* Press Reset (R). The display will prompt for a new code. 
+	* Enter a 4 digit code and then press Lock (L).
+	* The code will flash. The safe is now locked.
+
+* **Unlocking the Safe**
+	* Enter the 4 digit code.
+	* The safe will flash OPENED if the code is correct. The safe is now open.
+	* If the code is incorrect, the display will flash ERROR and the safe will stay locked.
+
+
+```ts
+
+/**
+ * The state machine's data type
+ */
+type SafeData = {
+    code: Array<number>,
+    input: Array<number>,
+    timeout: Timeout,
+    codeSize: number,
+    message?: string
+}
+
+export default class HotelSafe extends StateMachine<SafeData> {
+    handlers: Handlers<SafeData> = [
+
+        // Clear data when safe enters OPEN
+        ['enter#*_#open', () => keepState().data({
+            code: {$set: []},
+            input: {$set: []},
+            message: {$set: 'Open'},
+        })],
+
+        // User pressed RESET -- get new code
+        ['cast#reset#open', () => nextState('open/locking').data({
+            message: {$set: 'Enter Code'},
+        })],
+
+        // Track the last {codeSize} digits.
+        // show code on display. Repeat state for setting timeout
+        ['cast#button/:digit#open/locking', ({args, data}) => {
+            let code = pushFixed(Number(args.digit), data.code, data.codeSize)
+            return repeatState().data({
+                code: {$set: code},
+                message: {$set: code.join('')},
+            })
+        }],
+
+        // User pressed LOCK. CLose safe if code is long enough
+        // else, repeat state (sets timeout on reentry)
+        ['cast#lock#open/locking', ({data}) =>
+            data.code.length !== data.codeSize ?
+            repeatState() :
+            nextState('closed/success').data({
+                message: {$set: `**${data.code.join('')}**`},
+            })],
+
+        // Clear input when safe is closed
+        ['enter#*_#closed', () => keepState().data({
+            input: {$set: []},
+            message: {$set: 'Locked'}
+        })],
+
+        // Postpone button press and go to closed/unlocking
+        ['cast#button/*_#closed', ({}) =>
+            nextState('closed/unlocking').postpone()],
+
+        // User entered digit(s).
+        // Keep state if code is not long enough
+        // OPEN if input matches code
+        // go to MESSAGE if code does not match and set a timeout
+        ['cast#button/:digit#closed/unlocking', ({args, data}) => {
+            let digit = Number(args.digit)
+            let input = data.input.concat(digit)
+
+            // code is the correct length. Decision time.
+            if (input.length >= data.code.length) {
+                let [state, msg] = arrayEqual(data.code, input) ?
+                    ['open/success', "Opened"] :
+                    ['closed/error', "ERROR"]
+
+                return nextState(state).data({message: {$set: msg}})
+            }
+
+            // Not long enough. Keep collecting digits.
+            // Show masked code. Repeat state for
+            // setting timeout
+            return repeatState().data({
+                input: {$push: [digit]},
+                message: {$set: "*".repeat(input.length)}
+            })
+        }],
+
+        // These states timeout on inactivity (eventTimeout)
+        [['enter#*_#open/locking',
+            'enter#*_#closed/unlocking'], ({data}) =>
+            keepState().eventTimeout(data.timeout)],
+
+        // these states just timeout
+        ['enter#*_#:state/*_', ({data}) =>
+            keepState().timeout(data.timeout)],
+
+        // If we timeout in a sub state, go to the base state
+        [['genericTimeout#*_#:state/*_',
+            'eventTimeout#*_#:state/*_',], ({args}) =>
+            nextState(args.state)],
+    ]
+
+    initialData: SafeData = {
+        code: [],
+        codeSize: 4,
+        timeout: 200,
+        input: [],
+    }
+
+    initialState = 'open'
+
+    constructor(timeout: Timeout) {
+        super()
+        this.initialData.timeout = timeout
+    }
+
+    /**
+     * Safe Interface. casts 'reset'
+     */
+    reset() {
+        this.cast('reset')
+    }
+
+    /**
+     * Safe Interface. cast 'lock'
+     */
+    lock() {
+        this.cast('lock')
+    }
+
+    /**
+     * Safe Interface. send button digit
+     * @param digit
+     */
+    button(digit: number) {
+        this.cast({button: digit})
+    }
+}
+
 ```
