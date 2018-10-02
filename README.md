@@ -457,3 +457,7 @@ export default class HotelSafe extends StateMachine<SafeData> {
 }
 
 ```
+
+Here’s the hotel safe’s state diagram:
+
+![](https://github.com/venkatperi/hotelsafe/blob/master/hotel_safe.svg)
