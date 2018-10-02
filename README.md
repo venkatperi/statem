@@ -21,6 +21,9 @@ Install with `npm`:
 npm install --save gen-statem
 ```
 ## Usage
+State machines implement the [`IStateMachine`](docs/interfaces/istatemachine.md) interface. 
+
+
 
 ### Create a StateMachine 
 You can create a state machine by calling `StateMachine's` constructor and passing it a list of handlers, the initial state and optional data.
