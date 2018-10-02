@@ -19,6 +19,9 @@ Fluent builder for {Result}s
 ### Methods
 
 * [action](resultbuilder.md#action)
+* [cancelEventTimeout](resultbuilder.md#canceleventtimeout)
+* [cancelStateTimeout](resultbuilder.md#cancelstatetimeout)
+* [cancelTimeout](resultbuilder.md#canceltimeout)
 * [data](resultbuilder.md#data)
 * [eventTimeout](resultbuilder.md#eventtimeout)
 * [internalEvent](resultbuilder.md#internalevent)
@@ -48,6 +51,39 @@ Adds the given actions to the result
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 for chaining
+
+___
+<a id="canceleventtimeout"></a>
+
+###  cancelEventTimeout
+
+▸ **cancelEventTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="cancelstatetimeout"></a>
+
+###  cancelStateTimeout
+
+▸ **cancelStateTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="canceltimeout"></a>
+
+###  cancelTimeout
+
+▸ **cancelTimeout**(name?: * `undefined` &#124; `string`*): [ResultBuilder](resultbuilder.md)
+
+**Parameters:**
+
+| Param | Type |
+| ------ | ------ |
+| `Optional` name |  `undefined` &#124; `string`|
+
+**Returns:** [ResultBuilder](resultbuilder.md)
 
 ___
 <a id="data"></a>

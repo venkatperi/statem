@@ -19,6 +19,9 @@ A {ResultBuilder} with a {NextState|NextStateWitData} result
 ### Methods
 
 * [action](nextstatebuilder.md#action)
+* [cancelEventTimeout](nextstatebuilder.md#canceleventtimeout)
+* [cancelStateTimeout](nextstatebuilder.md#cancelstatetimeout)
+* [cancelTimeout](nextstatebuilder.md#canceltimeout)
 * [data](nextstatebuilder.md#data)
 * [eventTimeout](nextstatebuilder.md#eventtimeout)
 * [internalEvent](nextstatebuilder.md#internalevent)
@@ -66,6 +69,39 @@ Adds the given actions to the result
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 for chaining
+
+___
+<a id="canceleventtimeout"></a>
+
+###  cancelEventTimeout
+
+▸ **cancelEventTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="cancelstatetimeout"></a>
+
+###  cancelStateTimeout
+
+▸ **cancelStateTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="canceltimeout"></a>
+
+###  cancelTimeout
+
+▸ **cancelTimeout**(name?: * `undefined` &#124; `string`*): [ResultBuilder](resultbuilder.md)
+
+**Parameters:**
+
+| Param | Type |
+| ------ | ------ |
+| `Optional` name |  `undefined` &#124; `string`|
+
+**Returns:** [ResultBuilder](resultbuilder.md)
 
 ___
 <a id="data"></a>

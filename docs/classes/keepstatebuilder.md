@@ -15,6 +15,9 @@ A {ResultBuilder} with a {KeepState|KeepStateAndData} result
 ### Methods
 
 * [action](keepstatebuilder.md#action)
+* [cancelEventTimeout](keepstatebuilder.md#canceleventtimeout)
+* [cancelStateTimeout](keepstatebuilder.md#cancelstatetimeout)
+* [cancelTimeout](keepstatebuilder.md#canceltimeout)
 * [data](keepstatebuilder.md#data)
 * [eventTimeout](keepstatebuilder.md#eventtimeout)
 * [internalEvent](keepstatebuilder.md#internalevent)
@@ -44,6 +47,39 @@ Adds the given actions to the result
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 for chaining
+
+___
+<a id="canceleventtimeout"></a>
+
+###  cancelEventTimeout
+
+▸ **cancelEventTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="cancelstatetimeout"></a>
+
+###  cancelStateTimeout
+
+▸ **cancelStateTimeout**(): [ResultBuilder](resultbuilder.md)
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="canceltimeout"></a>
+
+###  cancelTimeout
+
+▸ **cancelTimeout**(name?: * `undefined` &#124; `string`*): [ResultBuilder](resultbuilder.md)
+
+**Parameters:**
+
+| Param | Type |
+| ------ | ------ |
+| `Optional` name |  `undefined` &#124; `string`|
+
+**Returns:** [ResultBuilder](resultbuilder.md)
 
 ___
 <a id="data"></a>
