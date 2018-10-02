@@ -91,6 +91,18 @@ export default abstract class ResultBuilder {
         return this.action(new GenericTimeoutAction(time, name))
     }
 
+    cancelStateTimeout(): ResultBuilder {
+        return this.action(new StateTimeoutAction(-1))
+    }
+
+    cancelEventTimeout(): ResultBuilder {
+        return this.action(new EventTimeoutAction(-1))
+    }
+
+    cancelTimeout(name?: string): ResultBuilder {
+        return this.action(new GenericTimeoutAction(-1, name))
+    }
+
     /**
      * Adds a {Reply} action
      *

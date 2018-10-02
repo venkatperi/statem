@@ -44,8 +44,8 @@ import { keepState, nextState, reply } from "./result/builder";
 import { SMOptions } from "./SMOptions"
 import { isStringState, State, stateRoute } from "./State";
 import {
-    EventContext, EventExtra, Handler, HandlerOpts, HandlerResult, Handlers,
-    MatchedHandler, Priority, RouteHandlers, Timeout
+    EventContext, EventExtra, Handler, HandlerOpts, HandlerResult,
+    HandlerResult2, Handlers, MatchedHandler, Priority, RouteHandlers, Timeout
 } from "./types";
 import './util/ArrayHelpers'
 import Pending from "./util/Pending";
@@ -105,27 +105,27 @@ export class StateMachine<TData> extends EventEmitter
             ({args, data}) => reply(args.from, data)],
     ];
 
-    private _routeHandlers: RouteHandlers<TData> = [];
-
-    private _pending = new Pending();
-
-    private timers = new Timers();
-
-    private processingEvent = false;
-
-    private events = new StablePriorityQueue(Event.comparator);
-
-    private postponedEvents: Array<Event> = []
-
     private _current = new Context<TData>()
 
     private _next = new Context<TData>()
+
+    private _pending = new Pending();
+
+    private _routeHandlers: RouteHandlers<TData> = [];
 
     private _started: boolean = false
 
     private _stopped: boolean = false
 
+    private events = new StablePriorityQueue(Event.comparator);
+
     private isInitialState: boolean = true
+
+    private postponedEvents: Array<Event> = []
+
+    private processingEvent = false;
+
+    private timers = new Timers();
 
     /**
      * Creates a StateMachine
@@ -145,6 +145,22 @@ export class StateMachine<TData> extends EventEmitter
     }
 
     /**
+     * Gets the current data. Internal use only.
+     *
+     */
+    private get data(): TData {
+        return this._current.data;
+    }
+
+    /**
+     * Sets the current {Data}. Internal only.
+     * @param value the {Data}
+     */
+    private set data(value: TData) {
+        this._next.data = value;
+    }
+
+    /**
      * Gets the current state. Internal use only.
      * Use getState() to query state safely.
      *
@@ -160,22 +176,6 @@ export class StateMachine<TData> extends EventEmitter
      */
     private set state(s: State) {
         this.doSetState(s)
-    }
-
-    /**
-     * Gets the current data. Internal use only.
-     *
-     */
-    private get data(): TData {
-        return this._current.data;
-    }
-
-    /**
-     * Sets the current {Data}. Internal only.
-     * @param value the {Data}
-     */
-    private set data(value: TData) {
-        this._next.data = value;
     }
 
     /**
@@ -355,22 +355,12 @@ export class StateMachine<TData> extends EventEmitter
         this.emit("terminate", reason);
     }
 
-    /**
-     * Starts the event timeout timer.
-     *
-     * If an event arrives before the timer fires, the timer
-     * is cancelled. You get either an event or a time-out,
-     * but not both.
-     *
-     * @param time the timeout
-     * @return {this}
-     */
-    protected setEventTimeout(time: Timeout) {
-        this._next.eventTimeout = time
-    }
-
     protected doSetEventTimeout(time: Timeout) {
         this.log.i("setEventTimeout", time);
+
+        if (time < 0) {
+            return this.cancelTimer('eventTimeout')
+        }
 
         let that = this;
         this.setTimer(time, "eventTimeout")
@@ -381,55 +371,23 @@ export class StateMachine<TData> extends EventEmitter
     }
 
     /**
-     * Starts a generic timeout timer with an optional name.
      *
-     * @param time the timeout in ms
-     * @param name optional name. Defaults to "DEFAULT"
-     * @return {this}
+     * @param time
+     * @param name
+     * @return {any}
      */
-    protected setGenericTimeout(time: Timeout, name = "DEFAULT") {
-        this._next.genericTimeout = [time, name]
-    }
-
-    protected doSetGenericTimeout(time: Timeout, name = "DEFAULT") {
+    protected doSetGenericTimeout(time: Timeout, name = "DEFAULT"): void {
         this.log.i("setEventTimeout", name, time);
+
+        if (time < 0) {
+            return this.cancelTimer(name)
+        }
 
         let that = this;
         this.setTimer(time, name)
             .on("timer", () =>
                 that.addEvent(new GenericTimeoutEvent({name, time}),
                     {internal: true}));
-        return this;
-    }
-
-    /**
-     * @hidden
-     * Adds state to log tags
-     * @param level
-     * @return {(tag2: string, ...args: any[]) => void}
-     */
-    protected logger(level: string) {
-        return (tag2: string, ...args: Array<any>) => {
-            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args);
-        };
-    }
-
-    /**
-     * Initialize handlers,
-     * Default handlers come last
-     */
-    protected initHandlers(): void {
-        let handlers = this.defaultHandlers.concat(this.handlers || []);
-
-        for (let h of handlers) {
-            if (Array.isArray(h)) {
-                this.addHandler(h[0], h[1])
-            } else {
-                for (let [k, v] of Object.entries(h)) {
-                    this.addHandler(k, v)
-                }
-            }
-        }
     }
 
     /**
@@ -455,65 +413,6 @@ export class StateMachine<TData> extends EventEmitter
             }
         }
         return undefined
-    }
-
-    /**
-     * Handle the given event. Matches the event's route to the
-     * @param event
-     */
-    protected handleEvent(event: Event): void {
-        this.processingEvent = true;
-        const h = this.getEventHandler(event);
-
-        let handlerOpts: HandlerOpts<TData> = {
-            args: h ? h.result : {},
-            current: this.state,
-            data: this.data,
-            event,
-            route: h ? h.route : ''
-        }
-
-        this.log.i("handleEvent", event.type,
-            {args: handlerOpts.args, route: handlerOpts.route});
-
-        let result = this.invokeHandler(h && h.routeHandler, handlerOpts)
-        this.handleResult(result, event);
-        this.switchContext(event)
-        this.processingEvent = false;
-    }
-
-    /**
-     * Process event handler result
-     * @param r
-     * @param event
-     */
-    protected handleResult(r: HandlerResult<TData>, event: Event): void {
-        r = r || keepState()
-
-        let res = isResultBuilder(r) ? r.getResult(this.data) : r
-
-        this.log.i(`handleResult`, res);
-
-        for (let a of res.actions) {
-            this.handleAction(a, event)
-        }
-
-        if (isNextStateResult(res)) {
-            this.state = res.nextState;
-        }
-        else if (isKeepStateResult(res)) {
-            this.state = this.state
-        }
-        else if (isRepeatStateResult(res)) {
-            this.doSetState(this.state, true)
-        }
-
-        if (isResultWithData<TData>(res) && res.hasData) {
-            this.data = res.newData
-        }
-        else {
-            this.data = this.data
-        }
     }
 
     /**
@@ -551,6 +450,161 @@ export class StateMachine<TData> extends EventEmitter
     }
 
     /**
+     * Handle the given event. Matches the event's route to the
+     * @param event
+     * @return {Promise<void>}
+     */
+    protected async handleEvent(event: Event) {
+        this.processingEvent = true;
+        const h = this.getEventHandler(event);
+
+        let handlerOpts: HandlerOpts<TData> = {
+            args: h ? h.result : {},
+            current: this.state,
+            data: this.data,
+            event,
+            route: h ? h.route : ''
+        }
+
+        this.log.i("handleEvent", event.type,
+            {args: handlerOpts.args, route: handlerOpts.route});
+
+        let result = this.invokeHandler(h && h.routeHandler, handlerOpts)
+        await this.handleResult(result, event);
+        this.switchContext(event)
+        this.processingEvent = false;
+    }
+
+    /**
+     * Process event handler result
+     * @param r
+     * @param event
+     * @return {Promise<void>}
+     */
+    protected async handleResult(r: HandlerResult2<TData>, event: Event) {
+        r = (await r) || keepState()
+
+        const res: Result = isResultBuilder(r) ? r.getResult(this.data) : r
+
+        this.log.i(`handleResult`, res);
+
+        for (let a of res.actions) {
+            this.handleAction(a, event)
+        }
+
+        if (isNextStateResult(res)) {
+            this.state = res.nextState;
+        }
+        else if (isKeepStateResult(res)) {
+            this.state = this.state
+        }
+        else if (isRepeatStateResult(res)) {
+            this.doSetState(this.state, true)
+        }
+
+        if (isResultWithData<TData>(res) && res.hasData) {
+            this.data = res.newData
+        }
+        else {
+            this.data = this.data
+        }
+    }
+
+    /**
+     * Initialize handlers,
+     * Default handlers come last
+     */
+    protected initHandlers(): void {
+        let handlers = this.defaultHandlers.concat(this.handlers || []);
+
+        for (let h of handlers) {
+            if (Array.isArray(h)) {
+                this.addHandler(h[0], h[1])
+            } else {
+                for (let [k, v] of Object.entries(h)) {
+                    this.addHandler(k, v)
+                }
+            }
+        }
+    }
+
+    /**
+     * @hidden
+     * Adds state to log tags
+     * @param level
+     * @return {(tag2: string, ...args: any[]) => void}
+     */
+    protected logger(level: string) {
+        return (tag2: string, ...args: Array<any>) => {
+            Log[level](`${tag2}@${stateRoute(this.state)}: `, ...args);
+        };
+    }
+
+    /**
+     * Starts the event timeout timer.
+     *
+     * If an event arrives before the timer fires, the timer
+     * is cancelled. You get either an event or a time-out,
+     * but not both.
+     *
+     * @param time the timeout
+     * @return {this}
+     */
+    protected setEventTimeout(time: Timeout) {
+        this._next.eventTimeout = time
+    }
+
+    /**
+     * Starts a generic timeout timer with an optional name.
+     *
+     * @param time the timeout in ms
+     * @param name optional name. Defaults to "DEFAULT"
+     */
+    protected setGenericTimeout(time: Timeout, name = "DEFAULT"): void {
+        this._next.genericTimeout = [time, name]
+    }
+
+    /**
+     * Add event to the queue. Emits the 'event' event
+     *
+     * @param event
+     * @return {this}
+     * @param internal - if true, event was internally generated
+     * @param noProcess
+     */
+    private addEvent(event: Event,
+        {noProcess, internal}: { noProcess?: boolean, internal?: boolean } = {}): void {
+        if (!this.isRunning) {
+            throw new Error("Can't add event. Not running.")
+        }
+
+        this.log.i("addEvent", event.toString(), internal, noProcess);
+
+        if (!internal) {
+            this.cancelTimer('eventTimeout')
+        }
+
+        this.events.add(event);
+        this.emit("event", event);
+
+        if (!noProcess) {
+            this.processEvents();
+        }
+    }
+
+    /**
+     * Add an event as the *next* event
+     * @param action
+     */
+    private addNextEvent(action: NextEventAction): void {
+        let event = makeNextEvent(action);
+        if (event) {
+            event.priority = Priority.Highest;
+            this._next.nextEvents.push(event)
+        }
+    }
+
+    /**
      * Cancels the named timer
      *
      * @param name
@@ -558,6 +612,101 @@ export class StateMachine<TData> extends EventEmitter
      */
     private cancelTimer(name: string): void {
         this.timers.cancel(name);
+    }
+
+    /**
+     * Actually process events
+     */
+    // @ts-ignore
+    private doProcessEvents() {
+        if (!this.isRunning
+            || this.events.isEmpty()
+            || this.processingEvent) {
+            return;
+        }
+        this.log.v("processEvents", this.events);
+
+        let e = this.events.poll();
+        if (e) {
+            this.handleEvent(e).then(() => {
+                this.processEvents();
+            })
+        }
+    }
+
+    private doSetState(s: State, entered = false) {
+        if (isStringState(s) && s.indexOf('/') > 0) {
+            s = s.split('/')
+        }
+
+        this._next.state = s;
+        this._next.enterState = entered
+    }
+
+    private doSetStateTimeout(time: Timeout): void {
+        this.log.i("setStateTimeout", time);
+        if (time < 0) {
+            return this.cancelTimer('stateTimeout')
+        }
+
+        let that = this;
+        this.setTimer(time, "stateTimeout")
+            .on("timer",
+                () => that.addEvent(new StateTimeoutEvent({time}),
+                    {internal: true}));
+    }
+
+    /**
+     * Executes handler and returns result
+     * @param opts
+     * @param handler
+     * @return {any}
+     */
+    private invokeHandler(handler: Handler<TData> | undefined,
+        opts: HandlerOpts<TData>): HandlerResult<TData> {
+        this.log.i('invokeHandler', handler, opts)
+
+        if (typeof handler === "function") {
+            return handler.call(this, opts);
+        }
+
+        if (typeof handler === 'string') {
+            return nextState(handler)
+        }
+
+        if (Array.isArray(handler)) {
+            return nextState(handler[0]).eventTimeout(handler[1]);
+        }
+
+        return this.defaultEventHandler(opts);
+    }
+
+    /**
+     * Process the next event on the event queue
+     */
+    private processEvents() {
+        setImmediate(this.doProcessEvents.bind(this));
+    }
+
+    private sendPostponedEvents() {
+        for (let e of this.postponedEvents) {
+            this.addEvent(e)
+        }
+        this.postponedEvents = []
+    }
+
+    /**
+     * Starts the state timeout timer
+     *
+     * The timer for a state time-out is automatically cancelled when
+     * the state machine changes states. You can restart a state
+     * time-out by setting it to a new time, which cancels the
+     * running timer and starts a new.
+     *
+     * @param time the timeout in ms
+     */
+    private setStateTimeout(time: Timeout): void {
+        this._next.stateTimeout = time
     }
 
     /**
@@ -613,149 +762,15 @@ export class StateMachine<TData> extends EventEmitter
             this.doSetGenericTimeout(...current.genericTimeout)
         }
 
+        let args = [current.state, prev.state, current.data, event]
+
         if (stateChanged) {
-            this.emit("stateChanged", current.state, prev.state, current.data,
-                event);
+            this.emit("stateChanged", ...args);
         }
 
-        this.emit("state", current.state, prev.state, current.data, event);
-
-        // if (current.hasData) {
-        //     this.emit('data', this.data, prev.data)
-        // }
+        this.emit("state", ...args);
 
         this._next = new Context<TData>(this.state)
-    }
-
-    private doSetState(s: State, entered = false) {
-        if (isStringState(s) && s.indexOf('/') > 0) {
-            s = s.split('/')
-        }
-
-        this._next.state = s;
-        this._next.enterState = entered
-    }
-
-    private sendPostponedEvents() {
-        for (let e of this.postponedEvents) {
-            this.addEvent(e)
-        }
-        this.postponedEvents = []
-    }
-
-    /**
-     * Add event to the queue. Emits the 'event' event
-     *
-     * @param event
-     * @return {this}
-     * @param internal - if true, event was internally generated
-     * @param noProcess
-     */
-    private addEvent(event: Event,
-        {noProcess, internal}: { noProcess?: boolean, internal?: boolean } = {}): void {
-        if (!this.isRunning) {
-            throw new Error("Can't add event. Not running.")
-        }
-
-        this.log.i("addEvent", event.toString(), internal, noProcess);
-
-        if (!internal) {
-            this.cancelTimer('eventTimeout')
-        }
-
-        this.events.add(event);
-        this.emit("event", event);
-
-        if (!noProcess) {
-            this.processEvents();
-        }
-    }
-
-    /**
-     * Starts the state timeout timer
-     *
-     * The timer for a state time-out is automatically cancelled when
-     * the state machine changes states. You can restart a state
-     * time-out by setting it to a new time, which cancels the
-     * running timer and starts a new.
-     *
-     * @param time the timeout in ms
-     */
-    private setStateTimeout(time: Timeout): void {
-        this._next.stateTimeout = time
-    }
-
-    private doSetStateTimeout(time: Timeout): void {
-        this.log.i("setStateTimeout", time);
-
-        let that = this;
-        this.setTimer(time, "stateTimeout")
-            .on("timer",
-                () => that.addEvent(new StateTimeoutEvent({time}),
-                    {internal: true}));
-    }
-
-    /**
-     * Add an event as the *next* event
-     * @param action
-     */
-    private addNextEvent(action: NextEventAction): void {
-        let event = makeNextEvent(action);
-        if (event) {
-            event.priority = Priority.Highest;
-            this._next.nextEvents.push(event)
-        }
-    }
-
-    /**
-     * Process the next event on the event queue
-     */
-    private processEvents() {
-        setImmediate(this.doProcessEvents.bind(this));
-    }
-
-    /**
-     * Actually process events
-     */
-    // @ts-ignore
-    private doProcessEvents() {
-        if (!this.isRunning
-            || this.events.isEmpty()
-            || this.processingEvent) {
-            return;
-        }
-        this.log.v("processEvents", this.events);
-
-        let e = this.events.poll();
-        if (e) {
-            this.handleEvent(e);
-        }
-        this.processEvents();
-    }
-
-    /**
-     * Executes handler and returns result
-     * @param opts
-     * @param handler
-     * @return {any}
-     */
-    private invokeHandler(handler: Handler<TData> | undefined,
-        opts: HandlerOpts<TData>): HandlerResult<TData> {
-        this.log.i('invokeHandler', handler, opts)
-
-        if (typeof handler === "function") {
-            return handler.call(this, opts);
-        }
-
-        if (typeof handler === 'string') {
-            return nextState(handler)
-        }
-
-        if (Array.isArray(handler)) {
-            return nextState(handler[0]).eventTimeout(handler[1]);
-        }
-
-        return this.defaultEventHandler(opts);
     }
 }
 

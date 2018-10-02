@@ -119,7 +119,10 @@ export type HandlerOpts<TData> = {
  * Handler function
  */
 export type HandlerFn<TData> =
-    (opts: HandlerOpts<TData>) => HandlerResult<TData>
+    (opts: HandlerOpts<TData>) => HandlerResult2<TData>
+
+export type HandlerResult2<TData> = HandlerResult<TData>
+    | Promise<HandlerResult<TData>>
 
 /**
  * Handlers can be specified as a tuple of the next {State} and a

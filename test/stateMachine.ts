@@ -21,8 +21,9 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import StateMachine, { internalEvent, stateTimeout } from "..";
+import StateMachine, { internalEvent, stateTimeout } from "../index";
 import Deferred from "../src/util/Deferred";
+import delay from "../src/util/delay"
 
 let states = ['ONE', 'TWO']
 
@@ -63,8 +64,10 @@ describe('State Machine', () => {
                 /**
                  * Trap all state enter events
                  */
-                ['enter#old/:old#:state', ({data, args}) =>
-                    data.entered[args.state].resolve(args.old)],
+                ['enter#old/:old#:state', async ({data, args}) => {
+                    await delay(100)
+                    return data.entered[args.state].resolve(args.old)
+                }],
 
                 /**
                  * (state: ONE, event: (cast, next)) --> (state: TWO)

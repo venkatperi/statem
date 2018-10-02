@@ -19,6 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import { HandlerResult } from "../types"
 import ResultBuilder from "./builder/ResultBuilder"
 import KeepState from "./KeepState";
 import KeepStateAndData from "./KeepStateAndData";
@@ -55,6 +56,10 @@ export function isResultBuilder(r: any): r is ResultBuilder {
  */
 export function isNextStateResult(r: Result): r is NextState {
     return r.type === 'nextState' || r.type === 'nextStateWithData'
+}
+
+export function isPromiseResult<TData>(r: any): r is Promise<HandlerResult<TData>> {
+    return r.then !== undefined
 }
 
 /**
