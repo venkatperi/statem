@@ -1,7 +1,3 @@
-// Object.assign( window, statem )
-// window.StateMachine = statem.default
-
-
 class AppStateMachine extends StateMachine {
 
   handlers = [
@@ -19,10 +15,10 @@ class AppStateMachine extends StateMachine {
 
     ['cast#cancel#load', 'gallery'],
 
-    ['cast#enter#gallery', ( { event } ) => nextState( 'photo' )
+    ['cast#showPhoto#gallery', ( { event } ) => nextState( 'photo' )
       .data( { photo: { $set: event.extra } } )],
 
-    ['cast#exit#photo', 'gallery'],
+    ['cast#done#photo', 'gallery'],
   ]
 
   initialState = 'start'
@@ -31,24 +27,20 @@ class AppStateMachine extends StateMachine {
     this.cast( 'cancel' )
   }
 
-  done( items ) {
-    this.cast( 'done', items )
-  }
-
-  enter( item ) {
-    this.cast( 'enter', item )
+  done( ...args ) {
+    this.cast( 'done', ...args )
   }
 
   error( e ) {
     this.cast( 'error', e )
   }
 
-  exit() {
-    this.cast( 'exit' )
-  }
-
   search( q ) {
     this.cast( 'search', q )
+  }
+
+  showPhoto( item ) {
+    this.cast( 'showPhoto', item )
   }
 }
 
@@ -62,14 +54,12 @@ class App extends React.Component {
       items: [],
     };
 
-    this.sm = new AppStateMachine( {
-      initialData: this.state,
-    } )
-
-    this.sm.on( 'state', ( state, old, data ) => this.setState( {
-      current: state,
-      ...data,
-    } ) ).on( 'load', this.doLoad.bind( this ) )
+    this.sm = new AppStateMachine( { initialData: this.state } )
+      .on( 'state', ( state, old, data ) => this.setState( {
+        ...data,
+        current: state,
+      } ) )
+      .on( 'load', this.doLoad.bind( this ) )
       .startSM()
   }
 
@@ -97,9 +87,8 @@ class App extends React.Component {
 
     let res = await fetchJsonp(
       `https://api.flickr.com/services/feeds/photos_public.gne?lang=en-us&format=json&tags=${encodedQuery}`,
-      {
-        jsonpCallback: 'jsoncallback',
-      } )
+      { jsonpCallback: 'jsoncallback' },
+    )
 
     return (await res.json()).items
   }
@@ -188,7 +177,7 @@ class App extends React.Component {
               className="ui-item"
               style={ { '--i': i } }
               key={ item.link }
-              onClick={ () => this.sm.enter( item ) }
+              onClick={ () => this.sm.showPhoto( item ) }
             />,
           )
         }
@@ -202,7 +191,7 @@ class App extends React.Component {
     return (
       <section
         className="ui-photo-detail"
-        onClick={ () => this.sm.exit() }>
+        onClick={ () => this.sm.done() }>
         <img src={ this.state.photo.media.m } className="ui-photo" />
       </section>
     )
