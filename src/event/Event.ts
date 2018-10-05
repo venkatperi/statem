@@ -19,11 +19,10 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as _ from "lodash"
 import * as objectInspect from "object-inspect"
 import { State, stateRoute } from "../State"
 import { EventContext, EventExtra, EventType, Priority } from "../types";
-import { dataToRoute, dataToString } from "../util/StringHelper";
+import { dataToRoute, dataToString, upperFirst } from "../util/StringHelper";
 
 
 /**
@@ -31,16 +30,16 @@ import { dataToRoute, dataToString } from "../util/StringHelper";
  */
 export default abstract class Event {
     /**
-     * @hidden
-     * The event's type
-     */
-    readonly abstract type: EventType
-
-    /**
      * Event's priority when enqueued
      * @type {Priority}
      */
     priority: Priority = Priority.Normal
+
+    /**
+     * @hidden
+     * The event's type
+     */
+    readonly abstract type: EventType
 
     /**
      * Constructor
@@ -53,21 +52,21 @@ export default abstract class Event {
 
     /**
      * @hidden
-     * Serialize this event to a route
-     * @return {string}
-     */
-    get route(): string {
-        return `${this.typeRoute}#${this.contextRoute}`
-    }
-
-    /**
-     * @hidden
      *  Serialize event context to a string
      *
      * @return {string}
      */
     get contextString(): string {
         return dataToString(this.context)
+    }
+
+    /**
+     * @hidden
+     * Serialize this event to a route
+     * @return {string}
+     */
+    get route(): string {
+        return `${this.typeRoute}#${this.contextRoute}`
     }
 
     /**
@@ -119,7 +118,7 @@ export default abstract class Event {
     toString(): string {
         // return `${_.upperFirst(
         //     this.type)}@${Priority[this.priority]} ${this.contextString}`
-        return [`${_.upperFirst(this.type)}@${Priority[this.priority]}`,
+        return [`${upperFirst(this.type)}@${Priority[this.priority]}`,
             objectInspect({
                 context: this.context
             })].join(' ')

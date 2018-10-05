@@ -19,7 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import StateMachine, { Handlers } from "../../index"
+import { Handlers, StateMachine } from "../../index"
 
 
 export class PushButton extends StateMachine<void> {

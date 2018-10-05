@@ -21,6 +21,7 @@
 
 
 import Action from "./Action"
+import EmitAction from "./EmitAction"
 import EventTimeoutAction from "./EventTimeoutAction";
 import GenericTimeoutAction from "./GenericTimeoutAction";
 import NextEventAction from "./NextEventAction";
@@ -45,6 +46,7 @@ export {
     StateTimeoutAction,
     EventTimeoutAction,
     GenericTimeoutAction,
+    EmitAction,
 }
 
 
@@ -90,3 +92,11 @@ export function isPostponeAction(a: Action): a is PostponeAction {
     return a.type === 'postpone'
 }
 
+/**
+ * @hidden
+ * @param a
+ * @return {boolean}
+ */
+export function isEmitAction(a: Action): a is EmitAction {
+    return a.type === 'emit'
+}

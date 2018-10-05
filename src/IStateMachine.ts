@@ -30,30 +30,28 @@ import { EventContext, EventExtra, Handler, HandlerOpts } from "./types"
  */
 export interface IStateMachine<TData> extends SMOptions<TData> {
     /**
-     * Returns true is state timer is currently set
-     * @return {boolean}
-     */
-    readonly hasStateTimer: boolean
-
-    /**
      * Returns true is an event timer is currently set
      * @return {boolean}
      */
     readonly hasEventTimer: boolean
 
     /**
-     * Starts the state machine
-     *
+     * Returns true is state timer is currently set
+     * @return {boolean}
      */
-    startSM(): IStateMachine<TData>
+    readonly hasStateTimer: boolean
 
     /**
-     * Stops the state machine
+     * Adds a event handler for the given route.
      *
-     * @param reason -- the reason for stopping
-     * @param data -- if set updates the machine's data before stopping
+     * @param routes - The routes for which the handler will be invoked. If
+     * multiple routes are specified, the handler will be invoked if any of
+     * routes match against an incoming event (boolean OR).
+     * @param handler - the handler to invoke when a route is matched.
+     * @return {this}
      */
-    stopSM(reason: string, data?: TData): void
+    addHandler(routes: string | Array<string>,
+        handler: Handler<TData>): IStateMachine<TData>
 
     /**
      * Fires a Call event and returns a promise that resolves or rejects when
@@ -79,18 +77,6 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
     cast(request: EventContext, extra?: EventExtra): void
 
     /**
-     * Adds a event handler for the given route.
-     *
-     * @param routes - The routes for which the handler will be invoked. If
-     * multiple routes are specified, the handler will be invoked if any of
-     * routes match against an incoming event (boolean OR).
-     * @param handler - the handler to invoke when a route is matched.
-     * @return {this}
-     */
-    addHandler(routes: string | Array<string>,
-        handler: Handler<TData>): IStateMachine<TData>
-
-    /**
      * A catch-all handler invoked if no routes match an incoming event.
      *
      * @param event - the event
@@ -101,20 +87,39 @@ export interface IStateMachine<TData> extends SMOptions<TData> {
     defaultEventHandler({event, args, current, data}: HandlerOpts<TData>): Result | undefined
 
     /**
-     * Returns a promise that resolves with the current state. Sugar for
-     * `call('getState'). Handled by default handlers.
-     */
-    getState(): Promise<State>
-
-    /**
      * Returns a promise that resolves with the current data. Sugar for
      * `call('getData'). Handled by default handlers.
      */
     getData(): Promise<TData>
 
     /**
+     * Returns a promise that resolves with the current state. Sugar for
+     * `call('getState'). Handled by default handlers.
+     */
+    getState(): Promise<State>
+
+    /**
+     * Returns both state and data
+     */
+    getStateAndData(): Promise<[State, TData]>
+
+    /**
      * Returns true if a timer with the given name is currently active
      * @param name
      */
     hasTimer(name: string): boolean
+
+    /**
+     * Starts the state machine
+     *
+     */
+    startSM(): IStateMachine<TData>
+
+    /**
+     * Stops the state machine
+     *
+     * @param reason -- the reason for stopping
+     * @param data -- if set updates the machine's data before stopping
+     */
+    stopSM(reason: string, data?: TData): void
 }

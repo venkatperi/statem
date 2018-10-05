@@ -16,6 +16,7 @@ State Machine Initialization options
 
 ### Properties
 
+* [handlerTimeout](smoptions.md#handlertimeout)
 * [handlers](smoptions.md#handlers)
 * [initialData](smoptions.md#initialdata)
 * [initialState](smoptions.md#initialstate)
@@ -24,6 +25,16 @@ State Machine Initialization options
 
 ## Properties
 
+<a id="handlertimeout"></a>
+
+### `<Optional>` handlerTimeout
+
+**● handlerTimeout**: * `undefined` &#124; `number`
+*
+
+Watchdog timer. Fires if an event handler is taking too long.
+
+___
 <a id="handlers"></a>
 
 ### `<Optional>` handlers

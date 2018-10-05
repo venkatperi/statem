@@ -19,28 +19,23 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import {
-    Handlers, nextState, StateMachine, Timeout
-} from "../../index"
+import { ActionType } from "../types"
+import Action from "./Action";
 
-type PushButtonCountdownTimerData = {
-    timeout: Timeout
-}
 
-export class PushButtonCountdownTimer extends StateMachine<PushButtonCountdownTimerData> {
-    initialState = 'off'
+/**
+ * Postpones the current event and retries it when the state changes
+ */
+export default class EmitAction extends Action {
+    args: Array<any>
 
-    handlers: Handlers<PushButtonCountdownTimerData> = [
-        ['cast#push#off', ({data}) => nextState('on').timeout(data.timeout)],
-        ['genericTimeout#*_#on', 'off']
-    ]
+    /**
+     * @hidden
+     */
+    type: ActionType = "emit"
 
-    constructor(timeout: Timeout) {
+    constructor(public name: string, ...args: Array<any>) {
         super()
-        this.initialData = {timeout}
-    }
-
-    push() {
-        this.cast('push')
+        this.args = args
     }
 }

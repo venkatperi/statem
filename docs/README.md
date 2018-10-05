@@ -542,6 +542,7 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 
 * [CallEvent](classes/callevent.md)
 * [CastEvent](classes/castevent.md)
+* [EmitAction](classes/emitaction.md)
 * [EnterEvent](classes/enterevent.md)
 * [EventTimeoutAction](classes/eventtimeoutaction.md)
 * [EventTimeoutEvent](classes/eventtimeoutevent.md)
@@ -616,7 +617,7 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 
 ###  ActionType
 
-**Ƭ ActionType**: * "reply" &#124; "nextEvent" &#124; "postpone" &#124; "stateTimeout" &#124; "eventTimeout" &#124; "genericTimeout"
+**Ƭ ActionType**: * "reply" &#124; "nextEvent" &#124; "postpone" &#124; "stateTimeout" &#124; "eventTimeout" &#124; "genericTimeout" &#124; "emit"
 *
 
 Transition actions

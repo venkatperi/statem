@@ -31,11 +31,15 @@ import { StateMachine } from './src/StateMachine'
 import { Handlers, Timeout } from './src/types';
 
 
-export default StateMachine
-
 export {
+    StateMachine,
     Event, Result, Action, State, keepState,
     nextState, internalEvent, stateTimeout,
     repeatState, reply, nextEvent, eventTimeout, data,
     Handlers, Timeout
+}
+
+// @ts-ignore
+if (typeof(window) !== "undefined") {
+
 }

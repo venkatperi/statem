@@ -19,7 +19,7 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import StateMachine, { Handlers } from ".."
+import { Handlers, StateMachine } from "../index"
 
 class PingPong extends StateMachine<void> {
     handlers: Handlers<void> = [

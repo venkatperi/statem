@@ -2,6 +2,8 @@
 
 # Class: StateMachine
 
+State Machine
+
 ## Type parameters
 #### TData 
 ## Hierarchy

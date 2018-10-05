@@ -68,6 +68,7 @@ export type ActionType =
     | 'stateTimeout'
     | 'eventTimeout'
     | 'genericTimeout'
+    | 'emit'
 
 /**
  * Hander results

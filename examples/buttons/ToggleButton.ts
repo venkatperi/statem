@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine, { Handlers } from "../../index"
+import { Handlers, StateMachine } from "../../index"
 
 
 export class ToggleButton extends StateMachine<void> {

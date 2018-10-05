@@ -24,6 +24,7 @@ import {
     ActionList, EventTimeoutAction, GenericTimeoutAction, NextEventAction,
     PostponeAction, ReplyAction, StateTimeoutAction
 } from "../../action";
+import EmitAction from "../../action/EmitAction"
 import {
     EventContext, EventExtra, EventType, From, Timeout
 } from "../../types";
@@ -63,12 +64,48 @@ export default abstract class ResultBuilder {
     }
 
     /**
-     *
-     * @param time
+     * Cancel an existing event timeout timer
      * @return {ResultBuilder}
      */
-    stateTimeout(time: Timeout): ResultBuilder {
-        return this.action(new StateTimeoutAction(time))
+    cancelEventTimeout(): ResultBuilder {
+        return this.action(new EventTimeoutAction(-1))
+    }
+
+    /**
+     * Cancel an existing state timeout timer
+     * @return {ResultBuilder}
+     */
+    cancelStateTimeout(): ResultBuilder {
+        return this.action(new StateTimeoutAction(-1))
+    }
+
+    /**
+     * Cancel the named generic timer, if active
+     * @param name
+     * @return {ResultBuilder}
+     */
+    cancelTimeout(name?: string): ResultBuilder {
+        return this.action(new GenericTimeoutAction(-1, name))
+    }
+
+    /**
+     * Set data mutation specs
+     * @param spec
+     * @return {this<TData>}
+     */
+    data<TData>(spec: object): ResultBuilder {
+        this._updates.push(spec)
+        return this
+    }
+
+    /**
+     * Tells the state machine to emit the given event with arguments
+     * @param name
+     * @param args
+     * @return {ResultBuilder}
+     */
+    emit(name: string, ...args: Array<any>) {
+        return this.action(new EmitAction(name, ...args))
     }
 
     /**
@@ -81,46 +118,19 @@ export default abstract class ResultBuilder {
     }
 
     /**
-     * Adds a {GenericTimeout} action with the given timeout
-     * and optional name
-     * @param time - the timeout in ms
-     * @param name - optional name
-     * @return {ResultBuilder} this
+     * @hidden
+     * Builds the result
      */
-    timeout(time: Timeout, name?: string): ResultBuilder {
-        return this.action(new GenericTimeoutAction(time, name))
-    }
-
-    cancelStateTimeout(): ResultBuilder {
-        return this.action(new StateTimeoutAction(-1))
-    }
-
-    cancelEventTimeout(): ResultBuilder {
-        return this.action(new EventTimeoutAction(-1))
-    }
-
-    cancelTimeout(name?: string): ResultBuilder {
-        return this.action(new GenericTimeoutAction(-1, name))
-    }
+    abstract getResult<TData>(data?: TData): Result | ResultWithData<TData>
 
     /**
-     * Adds a {Reply} action
-     *
-     * @param from - sends the reply here
-     * @param msg - the message to send
+     * Adds an event of type 'internal'
+     * @param context
      * @return {ResultBuilder}
+     * @param extra
      */
-    reply(from: From, msg?: any): ResultBuilder {
-        return this.action(new ReplyAction(from, msg))
-    }
-
-    /**
-     * Adds a postpone action
-     *
-     * @return {ResultBuilder}
-     */
-    postpone(): ResultBuilder {
-        return this.action(new PostponeAction())
+    internalEvent(context?: EventContext, extra?: EventExtra): ResultBuilder {
+        return this.action(new NextEventAction("internal", context, extra))
     }
 
     /**
@@ -137,29 +147,43 @@ export default abstract class ResultBuilder {
     }
 
     /**
-     * Adds an event of type 'internal'
-     * @param context
+     * Adds a postpone action
+     *
      * @return {ResultBuilder}
-     * @param extra
      */
-    internalEvent(context?: EventContext, extra?: EventExtra): ResultBuilder {
-        return this.action(new NextEventAction("internal", context, extra))
+    postpone(): ResultBuilder {
+        return this.action(new PostponeAction())
     }
 
     /**
-     * @hidden
-     * Builds the result
+     * Adds a {Reply} action
+     *
+     * @param from - sends the reply here
+     * @param msg - the message to send
+     * @return {ResultBuilder}
      */
-    abstract getResult<TData>(data?: TData): Result | ResultWithData<TData>
+    reply(from: From, msg?: any): ResultBuilder {
+        return this.action(new ReplyAction(from, msg))
+    }
 
     /**
-     * Set data mutation specs
-     * @param spec
-     * @return {this<TData>}
+     *
+     * @param time
+     * @return {ResultBuilder}
      */
-    data<TData>(spec: object): ResultBuilder {
-        this._updates.push(spec)
-        return this
+    stateTimeout(time: Timeout): ResultBuilder {
+        return this.action(new StateTimeoutAction(time))
+    }
+
+    /**
+     * Adds a {GenericTimeout} action with the given timeout
+     * and optional name
+     * @param time - the timeout in ms
+     * @param name - optional name
+     * @return {ResultBuilder} this
+     */
+    timeout(time: Timeout, name?: string): ResultBuilder {
+        return this.action(new GenericTimeoutAction(time, name))
     }
 
     /**

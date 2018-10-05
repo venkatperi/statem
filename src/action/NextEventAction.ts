@@ -19,9 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import _ = require("lodash")
 import { ActionType, EventContext, EventExtra, EventType } from "../types";
-import { dataToString } from "../util/StringHelper"
+import { dataToString, upperFirst } from "../util/StringHelper"
 import Action from "./Action";
 
 
@@ -54,7 +53,7 @@ export default class NextEventAction extends Action {
      * @return {string}
      */
     public toString(): string {
-        return `${super.toString()}, event=${_.upperFirst(
+        return `${super.toString()}, event=${upperFirst(
             this.eventType)}, context=${this.contextString}`
     }
 

@@ -23,6 +23,7 @@ Fluent builder for {Result}s
 * [cancelStateTimeout](resultbuilder.md#cancelstatetimeout)
 * [cancelTimeout](resultbuilder.md#canceltimeout)
 * [data](resultbuilder.md#data)
+* [emit](resultbuilder.md#emit)
 * [eventTimeout](resultbuilder.md#eventtimeout)
 * [internalEvent](resultbuilder.md#internalevent)
 * [nextEvent](resultbuilder.md#nextevent)
@@ -59,6 +60,8 @@ ___
 
 ▸ **cancelEventTimeout**(): [ResultBuilder](resultbuilder.md)
 
+Cancel an existing event timeout timer
+
 **Returns:** [ResultBuilder](resultbuilder.md)
 
 ___
@@ -67,6 +70,8 @@ ___
 ###  cancelStateTimeout
 
 ▸ **cancelStateTimeout**(): [ResultBuilder](resultbuilder.md)
+
+Cancel an existing state timeout timer
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 
@@ -77,11 +82,13 @@ ___
 
 ▸ **cancelTimeout**(name?: * `undefined` &#124; `string`*): [ResultBuilder](resultbuilder.md)
 
+Cancel the named generic timer, if active
+
 **Parameters:**
 
-| Param | Type |
-| ------ | ------ |
-| `Optional` name |  `undefined` &#124; `string`|
+| Param | Type | Description |
+| ------ | ------ | ------ |
+| `Optional` name |  `undefined` &#124; `string`|  - |
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 
@@ -102,6 +109,24 @@ Set data mutation specs
 | Param | Type | Description |
 | ------ | ------ | ------ |
 | spec | `object` |  - |
+
+**Returns:** [ResultBuilder](resultbuilder.md)
+
+___
+<a id="emit"></a>
+
+###  emit
+
+▸ **emit**(name: *`string`*, ...args: *`Array`<`any`>*): [ResultBuilder](resultbuilder.md)
+
+Tells the state machine to emit the given event with arguments
+
+**Parameters:**
+
+| Param | Type | Description |
+| ------ | ------ | ------ |
+| name | `string` |  - |
+| `Rest` args | `Array`<`any`> |  - |
 
 **Returns:** [ResultBuilder](resultbuilder.md)
 

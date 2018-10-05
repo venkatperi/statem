@@ -21,7 +21,7 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import StateMachine, { internalEvent, stateTimeout } from "../index";
+import { internalEvent, StateMachine, stateTimeout } from "../index";
 import Deferred from "../src/util/Deferred";
 import delay from "../src/util/delay"
 

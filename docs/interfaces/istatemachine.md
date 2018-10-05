@@ -20,6 +20,7 @@ Public interface of a state machine.
 
 ### Properties
 
+* [handlerTimeout](istatemachine.md#handlertimeout)
 * [handlers](istatemachine.md#handlers)
 * [hasEventTimer](istatemachine.md#haseventtimer)
 * [hasStateTimer](istatemachine.md#hasstatetimer)
@@ -34,6 +35,7 @@ Public interface of a state machine.
 * [defaultEventHandler](istatemachine.md#defaulteventhandler)
 * [getData](istatemachine.md#getdata)
 * [getState](istatemachine.md#getstate)
+* [getStateAndData](istatemachine.md#getstateanddata)
 * [hasTimer](istatemachine.md#hastimer)
 * [startSM](istatemachine.md#startsm)
 * [stopSM](istatemachine.md#stopsm)
@@ -42,6 +44,16 @@ Public interface of a state machine.
 
 ## Properties
 
+<a id="handlertimeout"></a>
+
+### `<Optional>` handlerTimeout
+
+**● handlerTimeout**: * `undefined` &#124; `number`
+*
+
+Watchdog timer. Fires if an event handler is taking too long.
+
+___
 <a id="handlers"></a>
 
 ### `<Optional>` handlers
@@ -186,6 +198,17 @@ ___
 Returns a promise that resolves with the current state. Sugar for `call('getState'). Handled by default handlers.
 
 **Returns:** `Promise`<[State](../#state)>
+
+___
+<a id="getstateanddata"></a>
+
+###  getStateAndData
+
+▸ **getStateAndData**(): `Promise`<[[State](../#state), `TData`]>
+
+Returns both state and data
+
+**Returns:** `Promise`<[[State](../#state), `TData`]>
 
 ___
 <a id="hastimer"></a>

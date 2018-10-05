@@ -20,7 +20,9 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import StateMachine, { Handlers, keepState, nextState, Timeout } from "../index"
+import {
+    Handlers, keepState, nextState, StateMachine, Timeout
+} from "../index"
 import { arrayEqual } from "../src/util/arrayEqual";
 import pushFixed from "../src/util/pushFixed";
 

@@ -31,10 +31,11 @@ export type DataFn<TData> = () => TData
  * State Machine Initialization options
  */
 export interface SMOptions<TData = void> {
+
     /**
-     * State machine's initial state. Must be defined.
+     * Watchdog timer. Fires if an event handler is taking too long.
      */
-    initialState?: State;
+    handlerTimeout?: number
 
     /**
      * The state machine specification.
@@ -45,4 +46,9 @@ export interface SMOptions<TData = void> {
      * Initial data. optional.
      */
     initialData?: TData | DataFn<TData>
+
+    /**
+     * State machine's initial state. Must be defined.
+     */
+    initialState?: State;
 }

@@ -19,8 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import StateMachine, {
-    Handlers, keepState, nextState, State, Timeout
+import {
+    Handlers, keepState, nextState, State, StateMachine, Timeout
 } from '../index';
 import { stateName } from "../src/State"
 import Deferred from "../src/util/Deferred";
@@ -32,12 +32,6 @@ type ServiceData = {
 }
 
 export default class Service extends StateMachine<ServiceData> {
-    /**
-     * Initial state
-     * @type {string}
-     */
-    initialState = 'new'
-
     handlers: Handlers<ServiceData> = [
         ['cast#start#new', () => this.doNext('starting')],
 
@@ -82,6 +76,12 @@ export default class Service extends StateMachine<ServiceData> {
     }
 
     /**
+     * Initial state
+     * @type {string}
+     */
+    initialState = 'new'
+
+    /**
      * Timeout for completing service start|stop
      *
      * @type {number|string} optional
@@ -102,24 +102,6 @@ export default class Service extends StateMachine<ServiceData> {
      */
     async _isRunning() {
         return await this.getState() === 'running'
-    }
-
-    /**
-     * Initiates service startup and returns immediately.
-     * @return {Promise<void>}
-     */
-    async start() {
-        if (await this.getState() !== 'new') {
-            throw new Error('Service is not in state new')
-        }
-        this.cast('start')
-    }
-
-    /**
-     * Initiates service shutdown and returns immediately.
-     */
-    stop() {
-        this.cast('stop')
     }
 
     /**
@@ -152,6 +134,15 @@ export default class Service extends StateMachine<ServiceData> {
     }
 
     /**
+     * Called to initiate shutdown if the service is stopped before it
+     * has fully started.
+     *
+     * @return {Promise<void>}
+     */
+    async doCancel() {
+    }
+
+    /**
      * Called to initiate service startup.
      *
      * @return {Promise<void>}
@@ -168,12 +159,39 @@ export default class Service extends StateMachine<ServiceData> {
     }
 
     /**
-     * Called to initiate shutdown if the service is stopped before it
-     * has fully started.
-     *
+     * Initiates service startup and returns immediately.
      * @return {Promise<void>}
      */
-    async doCancel() {
+    async start() {
+        if (await this.getState() !== 'new') {
+            throw new Error('Service is not in state new')
+        }
+        this.cast('start')
+    }
+
+    /**
+     * Initiates service shutdown and returns immediately.
+     */
+    stop() {
+        this.cast('stop')
+    }
+
+    /**
+     * Dispatch result (cast -- done or error)
+     * @param p
+     */
+    private dispatch(p: Promise<void>) {
+        p.then(() => this.done()).catch(e => this.error(e))
+    }
+
+    /**
+     * Transitions to the given event with optional stateTimeout action
+     * @param next
+     * @return {ResultBuilder}
+     */
+    private doNext(next: State) {
+        let res = nextState(next)
+        return !this.timeout ? res : res.stateTimeout(this.timeout);
     }
 
     /**
@@ -192,12 +210,8 @@ export default class Service extends StateMachine<ServiceData> {
         this.cast('error', {reason})
     }
 
-    /**
-     * Dispatch result (cast -- done or error)
-     * @param p
-     */
-    private dispatch(p: Promise<void>) {
-        p.then(() => this.done()).catch(e => this.error(e))
+    private onCancelling() {
+        this.dispatch(this.doCancel())
     }
 
     private onStarting() {
@@ -206,20 +220,6 @@ export default class Service extends StateMachine<ServiceData> {
 
     private onStopping() {
         this.dispatch(this.doStop())
-    }
-
-    private onCancelling() {
-        this.dispatch(this.doCancel())
-    }
-
-    /**
-     * Transitions to the given event with optional stateTimeout action
-     * @param next
-     * @return {ResultBuilder}
-     */
-    private doNext(next: State) {
-        let res = nextState(next)
-        return !this.timeout ? res : res.stateTimeout(this.timeout);
     }
 
 }

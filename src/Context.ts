@@ -30,41 +30,34 @@ import { From, Timeout } from "./types"
  */
 export class Context<TData> {
 
+    emit: Array<[string, Array<any>]> = []
+
+    enterState = false
+
+    eventTimeout?: Timeout
+
+    genericTimeout?: [Timeout, string]
+
+    hasData = false
+
+    hasState = false
+
     nextEvents: Array<Event> = []
 
     replies: Array<[From, any]> = []
 
     stateTimeout?: Timeout
 
-    eventTimeout?: Timeout
-
-    genericTimeout?: [Timeout, string]
-
-    enterState = false
-
-    hasData = false
-
-    hasState = false
+    // @ts-ignore
+    private _data: TData
 
     // @ts-ignore
     private _state: State
-
-    // @ts-ignore
-    private _data: TData
 
     constructor(state?: State) {
         if (state) {
             this._state = state
         }
-    }
-
-    get state(): State {
-        return this._state
-    }
-
-    set state(value: State) {
-        this._state = value
-        this.hasState = true
     }
 
     get data(): TData {
@@ -76,12 +69,21 @@ export class Context<TData> {
         this.hasData = true
     }
 
-    get stateName(): string {
-        return stateName(this.state)
-    }
-
     get isComplexState(): boolean {
         return isComplexState(this.state)
+    }
+
+    get state(): State {
+        return this._state
+    }
+
+    set state(value: State) {
+        this._state = value
+        this.hasState = true
+    }
+
+    get stateName(): string {
+        return stateName(this.state)
     }
 
     stateEq(other?: Context<TData>): boolean {

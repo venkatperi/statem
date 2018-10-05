@@ -21,7 +21,7 @@
 
 import { expect } from 'chai'
 import 'mocha'
-import StateMachine, { keepState, nextState } from "..";
+import { keepState, nextState, StateMachine } from "../index";
 import delay from "../src/util/delay";
 
 
