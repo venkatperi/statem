@@ -205,3 +205,7 @@ export enum Priority {
     Lowest = 5000,
 }
 
+export type DataProxy<T> = {
+    get(): T;
+    set(value: T, state: State): void;
+}

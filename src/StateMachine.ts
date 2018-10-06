@@ -21,10 +21,10 @@
 
 
 import EventEmitter = require("events")
-import pTimeout = require("p-timeout")
-import Route = require("route-parser")
-import StablePriorityQueue = require("stablepriorityqueue")
+import  StablePriorityQueue = require("stablepriorityqueue")
 import { Timer } from "ntimer"
+import * as pTimeout from "p-timeout"
+import * as Route from "route-parser"
 import Action, {
     isEmitAction, isEventTimeoutAction, isGenericTimeoutAction,
     isNextEventAction, isPostponeAction, isReplyAction, isStateTimeoutAction,
@@ -46,7 +46,7 @@ import { keepState, nextState, reply } from "./result/builder";
 import { SMOptions } from "./SMOptions"
 import { isStringState, State, stateRoute } from "./State";
 import {
-    EventContext, EventExtra, Handler, HandlerOpts, HandlerResult,
+    DataProxy, EventContext, EventExtra, Handler, HandlerOpts, HandlerResult,
     HandlerResult2, Handlers, MatchedHandler, Priority, RouteHandlers, Timeout
 } from "./types";
 import './util/ArrayHelpers'
@@ -63,6 +63,8 @@ const Log = Logger("StateMachine");
  */
 export class StateMachine<TData> extends EventEmitter
     implements IStateMachine<TData> {
+
+    dataProxy?: DataProxy<TData>
 
     /**
      * @hidden
@@ -156,6 +158,9 @@ export class StateMachine<TData> extends EventEmitter
      *
      */
     private get data(): TData {
+        if (this.dataProxy) {
+            return this.dataProxy.get()
+        }
         return this._current.data;
     }
 
@@ -228,8 +233,7 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i(`call`, request, from);
 
         this.addEvent(new CallEvent(from, request));
-        let val = await this._pending.get(from);
-        return val
+        return await this._pending.get(from)
     }
 
     /**
@@ -760,6 +764,7 @@ export class StateMachine<TData> extends EventEmitter
      */
     private switchContext(event?: Event) {
         this.log.i('switchContext')
+
         const prev = this.isInitialState ? this._next : this._current
         const current = this._current = this._next
         const stateChanged = this.isInitialState
@@ -805,6 +810,10 @@ export class StateMachine<TData> extends EventEmitter
         events.unshift(['state', args])
         if (stateChanged) {
             events.unshift(['stateChanged', args])
+        }
+
+        if (this.dataProxy) {
+            this.dataProxy.set(current.data, current.state)
         }
 
         this._next = new Context<TData>(this.state)

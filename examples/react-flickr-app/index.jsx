@@ -54,12 +54,12 @@ class App extends React.Component {
       items: [],
     };
 
-    this.sm = new AppStateMachine( { initialData: this.state } )
-      .on( 'state', ( state, old, data ) => this.setState( {
-        ...data,
-        current: state,
-      } ) )
-      .on( 'load', this.doLoad.bind( this ) )
+    this.sm = new AppStateMachine( {
+      dataProxy: {
+        get: () => this.state,
+        set: ( d, s ) => this.setState( { ...d, currentState: s } ),
+      },
+    } ).on( 'load', this.doLoad.bind( this ) )
       .startSM()
   }
 
@@ -109,7 +109,7 @@ class App extends React.Component {
    * @return {*}
    */
   render() {
-    const galleryState = this.state.current;
+    const galleryState = this.state.currentState;
 
     return (
       <div className="ui-app" data-state={ galleryState }>

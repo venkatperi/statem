@@ -20,7 +20,7 @@
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { State } from "./State"
-import { Handlers } from "./types"
+import { DataProxy, Handlers } from "./types"
 
 /**
  * @hidden
@@ -31,6 +31,8 @@ export type DataFn<TData> = () => TData
  * State Machine Initialization options
  */
 export interface SMOptions<TData = void> {
+
+    dataProxy?: DataProxy<TData>
 
     /**
      * Watchdog timer. Fires if an event handler is taking too long.
