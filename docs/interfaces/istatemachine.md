@@ -20,6 +20,7 @@ Public interface of a state machine.
 
 ### Properties
 
+* [dataProxy](istatemachine.md#dataproxy)
 * [handlerTimeout](istatemachine.md#handlertimeout)
 * [handlers](istatemachine.md#handlers)
 * [hasEventTimer](istatemachine.md#haseventtimer)
@@ -44,6 +45,13 @@ Public interface of a state machine.
 
 ## Properties
 
+<a id="dataproxy"></a>
+
+### `<Optional>` dataProxy
+
+**● dataProxy**: *[DataProxy](../#dataproxy)<`TData`>*
+
+___
 <a id="handlertimeout"></a>
 
 ### `<Optional>` handlerTimeout

@@ -560,6 +560,7 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 * [RepeatStateAndData](classes/repeatstateanddata.md)
 * [RepeatStateBuilder](classes/repeatstatebuilder.md)
 * [ReplyAction](classes/replyaction.md)
+* [Response](classes/response.md)
 * [ResultBuilder](classes/resultbuilder.md)
 * [StateMachine](classes/statemachine.md)
 * [StateTimeoutAction](classes/statetimeoutaction.md)
@@ -575,6 +576,7 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 
 * [ActionType](#actiontype)
 * [ComplexState](#complexstate)
+* [DataProxy](#dataproxy)
 * [EventContext](#eventcontext)
 * [EventExtra](#eventextra)
 * [EventType](#eventtype)
@@ -631,6 +633,32 @@ ___
 *
 
 A complex state. If an object, must have a 'name' key which specifies the base state name.
+
+___
+<a id="dataproxy"></a>
+
+###  DataProxy
+
+**Ƭ DataProxy**: *`object`*
+
+#### Type declaration
+
+ get : function
+▸ **get**(): `T`
+
+**Returns:** `T`
+
+ set : function
+▸ **set**(value: *`T`*, state: *[State](#state)*): `void`
+
+**Parameters:**
+
+| Param | Type |
+| ------ | ------ |
+| value | `T` |
+| state | [State](#state) |
+
+**Returns:** `void`
 
 ___
 <a id="eventcontext"></a>

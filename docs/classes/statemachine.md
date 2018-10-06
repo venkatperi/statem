@@ -26,6 +26,10 @@ State Machine
 
 * [constructor](statemachine.md#constructor)
 
+### Properties
+
+* [dataProxy](statemachine.md#dataproxy)
+
 ### Methods
 
 * [addListener](statemachine.md#addlistener)
@@ -63,6 +67,16 @@ Creates a StateMachine
 | `Optional` init | [SMOptions](../interfaces/smoptions.md)<`TData`> |  initialization options |
 
 **Returns:** [StateMachine](statemachine.md)
+
+___
+
+## Properties
+
+<a id="dataproxy"></a>
+
+### `<Optional>` dataProxy
+
+**● dataProxy**: *[DataProxy](../#dataproxy)<`TData`>*
 
 ___
 

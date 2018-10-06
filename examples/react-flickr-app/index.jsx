@@ -1,22 +1,22 @@
 class AppStateMachine extends StateMachine {
 
   handlers = [
-    ['cast#search#*_', ( { event } ) => nextState( 'load' )
-      .data( {
-        query: { $set: event.extra },
-        items: { $set: [] },
-      } )
-      .emit( 'load', event.extra )],
+    ['cast#search#*_', ( { event } ) =>
+      nextState( 'load' )
+        .data( { items: { $set: [] } } )
+        .emit( 'load', event.extra )],
 
-    ['cast#done#load', ( { event } ) => nextState( 'gallery' )
-      .data( { items: { $set: event.extra } } )],
+    ['cast#done#load', ( { event } ) =>
+      nextState( 'gallery' )
+        .data( { items: { $set: event.extra } } )],
 
     ['cast#error#load', 'error'],
 
     ['cast#cancel#load', 'gallery'],
 
-    ['cast#showPhoto#gallery', ( { event } ) => nextState( 'photo' )
-      .data( { photo: { $set: event.extra } } )],
+    ['cast#showPhoto#gallery', ( { event } ) =>
+      nextState( 'photo' )
+        .data( { photo: { $set: event.extra } } )],
 
     ['cast#done#photo', 'gallery'],
   ]
@@ -50,7 +50,6 @@ class App extends React.Component {
     super();
 
     this.state = {
-      query: '',
       items: [],
     };
 

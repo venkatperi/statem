@@ -16,6 +16,7 @@ State Machine Initialization options
 
 ### Properties
 
+* [dataProxy](smoptions.md#dataproxy)
 * [handlerTimeout](smoptions.md#handlertimeout)
 * [handlers](smoptions.md#handlers)
 * [initialData](smoptions.md#initialdata)
@@ -25,6 +26,13 @@ State Machine Initialization options
 
 ## Properties
 
+<a id="dataproxy"></a>
+
+### `<Optional>` dataProxy
+
+**● dataProxy**: *[DataProxy](../#dataproxy)<`TData`>*
+
+___
 <a id="handlertimeout"></a>
 
 ### `<Optional>` handlerTimeout
