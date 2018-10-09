@@ -1,4 +1,583 @@
 
+Index
+-----
+
+### Enumerations
+
+*   [Priority](enums/priority.md)
+
+### Classes
+
+*   [CallEvent](classes/callevent.md)
+*   [CastEvent](classes/castevent.md)
+*   [EmitAction](classes/emitaction.md)
+*   [EnterEvent](classes/enterevent.md)
+*   [EventTimeoutAction](classes/eventtimeoutaction.md)
+*   [EventTimeoutEvent](classes/eventtimeoutevent.md)
+*   [GenericTimeoutAction](classes/generictimeoutaction.md)
+*   [GenericTimeoutEvent](classes/generictimeoutevent.md)
+*   [InternalEvent](classes/internalevent.md)
+*   [KeepState](classes/keepstate.md)
+*   [KeepStateAndData](classes/keepstateanddata.md)
+*   [KeepStateBuilder](classes/keepstatebuilder.md)
+*   [NextEventAction](classes/nexteventaction.md)
+*   [NextState](classes/nextstate.md)
+*   [NextStateBuilder](classes/nextstatebuilder.md)
+*   [NextStateWithData](classes/nextstatewithdata.md)
+*   [RepeatState](classes/repeatstate.md)
+*   [RepeatStateAndData](classes/repeatstateanddata.md)
+*   [RepeatStateBuilder](classes/repeatstatebuilder.md)
+*   [ReplyAction](classes/replyaction.md)
+*   [Response](classes/response.md)
+*   [ResultBuilder](classes/resultbuilder.md)
+*   [StateMachine](classes/statemachine.md)
+*   [StateTimeoutAction](classes/statetimeoutaction.md)
+*   [StateTimeoutEvent](classes/statetimeoutevent.md)
+*   [Stop](classes/stop.md)
+
+### Interfaces
+
+*   [IStateMachine](interfaces/istatemachine.md)
+*   [SMOptions](interfaces/smoptions.md)
+
+### Type aliases
+
+*   [ActionType](#actiontype)
+*   [ComplexState](#complexstate)
+*   [DataProxy](#dataproxy)
+*   [EventContext](#eventcontext)
+*   [EventExtra](#eventextra)
+*   [EventType](#eventtype)
+*   [From](#from)
+*   [Handler](#handler)
+*   [HandlerFn](#handlerfn)
+*   [HandlerOpts](#handleropts)
+*   [HandlerResult](#handlerresult)
+*   [HandlerResult2](#handlerresult2)
+*   [HandlerRoute](#handlerroute)
+*   [HandlerSpec](#handlerspec)
+*   [Handlers](#handlers)
+*   [NamedPrimitiveObject](#namedprimitiveobject)
+*   [NextStateWithEventTimeout](#nextstatewitheventtimeout)
+*   [Primitive](#primitive)
+*   [PrimitiveObject](#primitiveobject)
+*   [ResultType](#resulttype)
+*   [State](#state)
+*   [Timeout](#timeout)
+
+### Functions
+
+*   [data](#data)
+*   [eventTimeout](#eventtimeout)
+*   [internalEvent](#internalevent)
+*   [isPromiseResult](#ispromiseresult)
+*   [keepState](#keepstate)
+*   [nextEvent](#nextevent)
+*   [nextState](#nextstate)
+*   [repeatState](#repeatstate)
+*   [reply](#reply)
+*   [stateTimeout](#statetimeout)
+*   [timeout](#timeout)
+
+* * *
+
+Type aliases
+------------
+
+### ActionType
+
+**Ƭ ActionType**: \* "reply" | "nextEvent" | "postpone" | "stateTimeout" | "eventTimeout" | "genericTimeout" | "emit" *
+
+Transition actions
+
+* * *
+
+### ComplexState
+
+**Ƭ ComplexState**: \* `Array`<`string`\> | [NamedPrimitiveObject](#namedprimitiveobject) *
+
+A complex state. If an object, must have a 'name' key which specifies the base state name.
+
+* * *
+
+### DataProxy
+
+**Ƭ DataProxy**: _`object`_
+
+#### Type declaration
+
+get : function ▸ **get**(): `T`
+
+**Returns:** `T`
+
+set : function ▸ **set**(value: _`T`_, state: _[State](#state)_): `void`
+
+**Parameters:**
+
+Param
+
+Type
+
+value
+
+`T`
+
+state
+
+[State](#state)
+
+**Returns:** `void`
+
+* * *
+
+### EventContext
+
+**Ƭ EventContext**: \* [Primitive](#primitive) | [PrimitiveObject](#primitiveobject) *
+
+Events can accept simple arguments of type {Primitive}, or a {PrimitiveObject}
+
+* * *
+
+### EventExtra
+
+**Ƭ EventExtra**: _`any`_
+
+Non {Primitive|PrimitiveObject} arguments to events.
+
+* * *
+
+### EventType
+
+**Ƭ EventType**: \* "call" | "cast" | "enter" | "eventTimeout" | "stateTimeout" | "genericTimeout" | "internal" *
+
+State machine events
+
+* * *
+
+### From
+
+**Ƭ From**: _`string`_
+
+The caller's address for a {CallEvent}
+
+* * *
+
+### Handler
+
+**Ƭ Handler**: \* [HandlerFn](#handlerfn)<`TData`\> | [State](#state) | [NextStateWithEventTimeout](#nextstatewitheventtimeout) *
+
+Route handler. Can be a function, a state or a \[state, event timeout\] tuple
+
+* * *
+
+### HandlerFn
+
+**Ƭ HandlerFn**: _`function`_
+
+Handler function
+
+#### Type declaration
+
+▸(opts: _[HandlerOpts](#handleropts)<`TData`>_): [HandlerResult2](#handlerresult2)<`TData`>
+
+**Parameters:**
+
+Param
+
+Type
+
+opts
+
+[HandlerOpts](#handleropts)<`TData`>
+
+**Returns:** [HandlerResult2](#handlerresult2)<`TData`>
+
+* * *
+
+### HandlerOpts
+
+**Ƭ HandlerOpts**: _`object`_
+
+Values passed to a {Handler}
+
+#### Type declaration
+
+args: `object`
+
+current: [State](#state)
+
+data: `TData`
+
+event: `Event`
+
+route: `string`
+
+* * *
+
+### HandlerResult
+
+**Ƭ HandlerResult**: \* `Result` | `ResultWithData`<`TData`\> | [ResultBuilder](classes/resultbuilder.md) | `void` *
+
+Result of a handler invocation. {ResultBuilder.getResult()} is invoked to convert a {ResultBuilder} to a {Result} {void} implies {KeepStateWithData}
+
+* * *
+
+### HandlerResult2
+
+**Ƭ HandlerResult2**: \* [HandlerResult](#handlerresult)<`TData`\> | `Promise`<[HandlerResult](#handlerresult)<`TData`>\> *
+
+* * *
+
+### HandlerRoute
+
+**Ƭ HandlerRoute**: \* `string` | `Array`<`string`\> *
+
+The key of a handler. Can be {string|Array}. If {Array}, the routes are treated as a boolean OR. Any matching route in the array will invoke the handler.
+
+* * *
+
+### HandlerSpec
+
+**Ƭ HandlerSpec**: \* \[[HandlerRoute](#handlerroute), [Handler](#handler)<`TData`>\] | `object` *
+
+A {HandlerRoute} to {Handler} entry. Can be a tuple or object with string keys. If an object, the keys are treated as {string} routes.
+
+* * *
+
+### Handlers
+
+**Ƭ Handlers**: _`Array`<[HandlerSpec](#handlerspec)<`TData`>>_
+
+List of route handlers
+
+* * *
+
+### NamedPrimitiveObject
+
+**Ƭ NamedPrimitiveObject**: _`object`_
+
+Like {PrimitiveObject}, but expects a key 'name'
+
+#### Type declaration
+
+name: `string`
+
+* * *
+
+### NextStateWithEventTimeout
+
+**Ƭ NextStateWithEventTimeout**: _\[[State](#state), [Timeout](#timeout)\]_
+
+Handlers can be specified as a tuple of the next {State} and a {EventTimeout}
+
+* * *
+
+### Primitive
+
+**Ƭ Primitive**: \* `number` | `string` | `boolean` | `null` | `undefined` *
+
+Our definition of primitives (doesn't include symbol)
+
+* * *
+
+### PrimitiveObject
+
+**Ƭ PrimitiveObject**: _`object`_
+
+Object with string keys and primitive values
+
+#### Type declaration
+
+* * *
+
+### ResultType
+
+**Ƭ ResultType**: \* "none" | "keepState" | "keepStateAndData" | "nextState" | "nextStateWithData" | "repeatState" | "repeatStateAndData" | "stop" | "builder" *
+
+Hander results
+
+* * *
+
+### State
+
+**Ƭ State**: \* `string` | [ComplexState](#complexstate) *
+
+A State in the state machine.
+
+* * *
+
+### Timeout
+
+**Ƭ Timeout**: \* `number` | `string` *
+
+Timeout values. Milliseconds if {number}. For string values, see {NTimer}
+
+* * *
+
+Functions
+---------
+
+### data
+
+▸ **data**<`TData`>(spec: _`Spec`<`TData`>_): [ResultBuilder](classes/resultbuilder.md)
+
+Helper to only mutate data
+
+**Type parameters:**
+
+#### TData
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+spec
+
+`Spec`<`TData`>
+
+-
+
+**Returns:** [ResultBuilder](classes/resultbuilder.md)
+
+* * *
+
+### eventTimeout
+
+▸ **eventTimeout**(time: _[Timeout](#timeout)_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Helper function to set the event timeout timer
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+time
+
+[Timeout](#timeout)
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### internalEvent
+
+▸ **internalEvent**(context?: _[EventContext](#eventcontext)_, extra?: _[EventExtra](#eventextra)_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Helper function to insert an 'internal' event
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+`Optional` context
+
+[EventContext](#eventcontext)
+
+-
+
+`Optional` extra
+
+[EventExtra](#eventextra)
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### isPromiseResult
+
+▸ **isPromiseResult**<`TData`>(r: _`any`_): `boolean`
+
+**Type parameters:**
+
+#### TData
+
+**Parameters:**
+
+Param
+
+Type
+
+r
+
+`any`
+
+**Returns:** `boolean`
+
+* * *
+
+### keepState
+
+▸ **keepState**(): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Returns a [KeepStateBuilder](classes/keepstatebuilder.md)
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### nextEvent
+
+▸ **nextEvent**(type: _[EventType](#eventtype)_, context?: _[EventContext](#eventcontext)_, extra?: _[EventExtra](#eventextra)_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Helper function to insert a new event
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+type
+
+[EventType](#eventtype)
+
+-
+
+`Optional` context
+
+[EventContext](#eventcontext)
+
+-
+
+`Optional` extra
+
+[EventExtra](#eventextra)
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### nextState
+
+▸ **nextState**(state: _[State](#state)_): [NextStateBuilder](classes/nextstatebuilder.md)
+
+Returns a [NextStateBuilder](classes/nextstatebuilder.md)
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+state
+
+[State](#state)
+
+-
+
+**Returns:** [NextStateBuilder](classes/nextstatebuilder.md)
+
+* * *
+
+### repeatState
+
+▸ **repeatState**(): [RepeatStateBuilder](classes/repeatstatebuilder.md)
+
+Returns a [RepeatStateBuilder](classes/repeatstatebuilder.md)
+
+**Returns:** [RepeatStateBuilder](classes/repeatstatebuilder.md)
+
+* * *
+
+### reply
+
+▸ **reply**(from: _`string`_, msg: _`any`_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Helper function to return a reply
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+from
+
+`string`
+
+-
+
+msg
+
+`any`
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### stateTimeout
+
+▸ **stateTimeout**(time: _[Timeout](#timeout)_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+Helper function to set a state timeout (keeps state and data)
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+time
+
+[Timeout](#timeout)
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
+
+### timeout
+
+▸ **timeout**(time: _[Timeout](#timeout)_): [KeepStateBuilder](classes/keepstatebuilder.md)
+
+helper function to set a generic timer
+
+**Parameters:**
+
+Param
+
+Type
+
+Description
+
+time
+
+[Timeout](#timeout)
+
+-
+
+**Returns:** [KeepStateBuilder](classes/keepstatebuilder.md)
+
+* * *
 
 ## Index
 

@@ -10,7 +10,7 @@
     "build": "tsc && webpack && npm run docs",
     "prepare": "npm run clean && npm run build && cp docs/README.md .",
     "lint": "tslint --project .",
-    "docs": "typedoc  --out docs --readme r.md --mode file --theme markdown --mdHideSources --excludePrivate --excludeProtected --excludeExternals ",
+    "docs": "typedoc  --out docs --readme doc/R.md --mode file --theme markdown --mdHideSources --excludePrivate --excludeProtected --excludeExternals ",
     "postpublish": "cp docs/README.md ."
   },
   "files": [
