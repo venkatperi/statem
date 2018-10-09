@@ -8,7 +8,7 @@
     "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",
     "build": "tsc && webpack && npm run docs",
-    "prepare": "npm run clean && npm run build",
+    "prepare": "npm run clean && npm run build && cp docs/README.md .",
     "lint": "tslint --project .",
     "docs": "typedoc  --out docs --readme r.md --mode file --theme markdown --mdHideSources --excludePrivate --excludeProtected --excludeExternals ",
     "postpublish": "cp docs/README.md ."
