@@ -28,6 +28,7 @@ State Machine
 
 ### Properties
 
+* [animation](statemachine.md#animation)
 * [dataProxy](statemachine.md#dataproxy)
 
 ### Methods
@@ -72,6 +73,13 @@ ___
 
 ## Properties
 
+<a id="animation"></a>
+
+### `<Optional>` animation
+
+**● animation**: *[AnimOptions](../#animoptions)*
+
+___
 <a id="dataproxy"></a>
 
 ### `<Optional>` dataProxy

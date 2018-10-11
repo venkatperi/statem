@@ -20,6 +20,7 @@ Public interface of a state machine.
 
 ### Properties
 
+* [animation](istatemachine.md#animation)
 * [dataProxy](istatemachine.md#dataproxy)
 * [handlerTimeout](istatemachine.md#handlertimeout)
 * [handlers](istatemachine.md#handlers)
@@ -45,11 +46,22 @@ Public interface of a state machine.
 
 ## Properties
 
+<a id="animation"></a>
+
+### `<Optional>` animation
+
+**● animation**: *[AnimOptions](../#animoptions)*
+
+Animation options (debugging)
+
+___
 <a id="dataproxy"></a>
 
 ### `<Optional>` dataProxy
 
 **● dataProxy**: *[DataProxy](../#dataproxy)<`TData`>*
+
+External data provider
 
 ___
 <a id="handlertimeout"></a>

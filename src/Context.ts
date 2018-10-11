@@ -48,6 +48,8 @@ export class Context<TData> {
 
     stateTimeout?: Timeout
 
+    usingDefaultHandler = false
+
     // @ts-ignore
     private _data: TData
 

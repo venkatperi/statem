@@ -27,11 +27,31 @@ import { DataProxy, Handlers } from "./types"
  */
 export type DataFn<TData> = () => TData
 
+export type AnimOptions = {
+    /**
+     * Delay between context switches
+     */
+    delay?: number
+
+    /**
+     * Include switching when a default handler is involved
+     */
+    includeDefault?: boolean
+}
+
 /**
  * State Machine Initialization options
  */
 export interface SMOptions<TData = void> {
 
+    /**
+     * Animation options (debugging)
+     */
+    animation?: AnimOptions
+
+    /**
+     * External data provider
+     */
     dataProxy?: DataProxy<TData>
 
     /**

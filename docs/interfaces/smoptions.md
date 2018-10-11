@@ -16,6 +16,7 @@ State Machine Initialization options
 
 ### Properties
 
+* [animation](smoptions.md#animation)
 * [dataProxy](smoptions.md#dataproxy)
 * [handlerTimeout](smoptions.md#handlertimeout)
 * [handlers](smoptions.md#handlers)
@@ -26,11 +27,22 @@ State Machine Initialization options
 
 ## Properties
 
+<a id="animation"></a>
+
+### `<Optional>` animation
+
+**● animation**: *[AnimOptions](../#animoptions)*
+
+Animation options (debugging)
+
+___
 <a id="dataproxy"></a>
 
 ### `<Optional>` dataProxy
 
 **● dataProxy**: *[DataProxy](../#dataproxy)<`TData`>*
+
+External data provider
 
 ___
 <a id="handlertimeout"></a>

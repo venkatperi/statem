@@ -43,13 +43,14 @@ import Result, {
     isResultWithData
 } from "./result";
 import { keepState, nextState, reply } from "./result/builder";
-import { SMOptions } from "./SMOptions"
+import { AnimOptions, SMOptions } from "./SMOptions"
 import { isStringState, State, stateRoute } from "./State";
 import {
     DataProxy, EventContext, EventExtra, Handler, HandlerOpts, HandlerResult,
     HandlerResult2, Handlers, MatchedHandler, Priority, RouteHandlers, Timeout
 } from "./types";
 import './util/ArrayHelpers'
+import delay from "./util/delay"
 import Pending from "./util/Pending";
 import Timers from "./util/Timers";
 
@@ -63,6 +64,8 @@ const Log = Logger("StateMachine");
  */
 export class StateMachine<TData> extends EventEmitter
     implements IStateMachine<TData> {
+
+    animation?: AnimOptions
 
     dataProxy?: DataProxy<TData>
 
@@ -143,6 +146,7 @@ export class StateMachine<TData> extends EventEmitter
     constructor(init?: SMOptions<TData>) {
         super();
         Object.assign(this, init)
+        this.animation = this.animation || {}
     }
 
     /**
@@ -190,6 +194,14 @@ export class StateMachine<TData> extends EventEmitter
         this.doSetState(s)
     }
 
+    private get usingDefaultHandler() {
+        return this._current.usingDefaultHandler
+    }
+
+    private set usingDefaultHandler(v: boolean) {
+        this._next.usingDefaultHandler = v
+    }
+
     /**
      * @hidden
      * add an event handler
@@ -232,7 +244,7 @@ export class StateMachine<TData> extends EventEmitter
         const from = this._pending.create();
         this.log.i(`call`, request, from);
 
-        this.addEvent(new CallEvent(from, request));
+        this.addEvent(new CallEvent(from, request, extra));
         return await this._pending.get(from)
     }
 
@@ -484,6 +496,8 @@ export class StateMachine<TData> extends EventEmitter
         this.processingEvent = true;
         const h = this.getEventHandler(event);
 
+        this.emit('currentEvent', event)
+
         let handlerOpts: HandlerOpts<TData> = {
             args: h ? h.result : {},
             current: this.state,
@@ -500,6 +514,11 @@ export class StateMachine<TData> extends EventEmitter
         res = this.handlerTimeout ? pTimeout(res, this.handlerTimeout) : res
         await res
         this.switchContext(event)
+        if (this.animation && this.animation.delay &&
+            (this.animation.includeDefault || !this.usingDefaultHandler)) {
+            await delay(this.animation.delay)
+        }
+
         this.processingEvent = false;
     }
 
@@ -714,6 +733,7 @@ export class StateMachine<TData> extends EventEmitter
             return nextState(handler[0]).eventTimeout(handler[1]);
         }
 
+        this.usingDefaultHandler = true
         return this.defaultEventHandler(opts);
     }
 

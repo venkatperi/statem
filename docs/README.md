@@ -623,6 +623,7 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 ### Type aliases
 
 * [ActionType](#actiontype)
+* [AnimOptions](#animoptions)
 * [ComplexState](#complexstate)
 * [DataProxy](#dataproxy)
 * [EventContext](#eventcontext)
@@ -671,6 +672,23 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 *
 
 Transition actions
+
+___
+<a id="animoptions"></a>
+
+###  AnimOptions
+
+**Ƭ AnimOptions**: *`object`*
+
+#### Type declaration
+
+`Optional`  delay:  `undefined` &#124; `number`
+
+Delay between context switches
+
+`Optional`  includeDefault:  `undefined` &#124; `false` &#124; `true`
+
+Include switching when a default handler is involved
 
 ___
 <a id="complexstate"></a>
