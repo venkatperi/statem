@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "repository": "https://github.com/venkatperi/statem",
   "scripts": {
-    "pretest": "build:src",
+    "pretest": "npm run build:src",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",
     "build:src": "tsc",
@@ -48,6 +48,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "emittery": "^0.4.1",
     "immutability-helper": "^2.8.1",
     "ntimer": "^0.5.3",
     "object-inspect": "^1.6.0",

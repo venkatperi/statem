@@ -66,7 +66,7 @@ describe('State Machine', () => {
                  */
                 ['enter#old/:old#:state', async ({data, args}) => {
                     await delay(100)
-                    return data.entered[args.state].resolve(args.old)
+                    data.entered[args.state].resolve(args.old)
                 }],
 
                 /**
@@ -132,8 +132,9 @@ describe('State Machine', () => {
         return expect(await data.entered.ONE).to.eq("ONE")
     })
 
-    it("fires node event with state name", async () =>
-        expect(await events.ONE).to.eq("ONE"))
+    it("fires node event with state name", async () => {
+        expect(await events.ONE).to.eq("ONE")
+    })
 
     it("catch-all rule traps unhandled routes", async () => {
         sm.cast('CATCH-ALL')

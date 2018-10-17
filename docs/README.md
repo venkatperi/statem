@@ -646,6 +646,10 @@ Here’s the hotel safe’s state diagram. The collection of `open(/*)` states (
 * [State](#state)
 * [Timeout](#timeout)
 
+### Variables
+
+* [Emittery](#emittery)
+
 ### Functions
 
 * [data](#data)
@@ -936,6 +940,16 @@ ___
 *
 
 Timeout values. Milliseconds if {number}. For string values, see {NTimer}
+
+___
+
+## Variables
+
+<a id="emittery"></a>
+
+### `<Const>` Emittery
+
+**● Emittery**: *`any`* =  require('emittery')
 
 ___
 

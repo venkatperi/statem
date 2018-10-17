@@ -19,8 +19,8 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-import EventEmitter = require("events")
+const Emittery = require('emittery');
+// import EventEmitter = require("events")
 import  StablePriorityQueue = require("stablepriorityqueue")
 import { Timer } from "ntimer"
 import * as pTimeout from "p-timeout"
@@ -62,8 +62,7 @@ const Log = Logger("StateMachine");
 /**
  * State Machine
  */
-export class StateMachine<TData> extends EventEmitter
-    implements IStateMachine<TData> {
+export class StateMachine<TData> implements IStateMachine<TData> {
 
     animation?: AnimOptions
 
@@ -119,6 +118,8 @@ export class StateMachine<TData> extends EventEmitter
 
     private _current = new Context<TData>()
 
+    private _emitter = new Emittery()
+
     private _next = new Context<TData>()
 
     private _pending = new Pending();
@@ -144,7 +145,7 @@ export class StateMachine<TData> extends EventEmitter
      * @param init - initialization options
      */
     constructor(init?: SMOptions<TData>) {
-        super();
+        // super();
         Object.assign(this, init)
         this.animation = this.animation || {}
     }
@@ -344,8 +345,8 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i("startSM");
 
         this.timers
-            .on('createTimer', (...args) => this.emit('createTimer', ...args))
-            .on('cancelTimer', (...args) => this.emit('cancelTimer', ...args))
+            .on('createTimer', (...args) => this.emit('createTimer', args))
+            .on('cancelTimer', (...args) => this.emit('cancelTimer', args))
 
         if (!this.initialState) {
             throw new Error("Initial state must be defined")
@@ -383,6 +384,41 @@ export class StateMachine<TData> extends EventEmitter
         this.log.i(`stop: ${reason}`);
         this._stopped = true
         this.emit("terminate", reason);
+    }
+
+    /**
+     * Trigger an event asynchronously, optionally with some data. Listeners
+     * are called in the order they were added, but execute concurrently.
+     *
+     * Returns a promise for when all the event listeners are done. Done
+     * meaning executed if synchronous or resolved when an
+     * async/promise-returning function. You usually wouldn't want to wait for
+     * this, but you could for example catch possible errors. If any of the
+     * listeners throw/reject, the returned promise will be rejected with the
+     * error, but the other listeners will not be affected.
+     *
+     * @param name
+     * @param args
+     * @return {Promise<void>}
+     */
+    emit(name: string, ...args: Array<any>): Promise<void> {
+        return this._emitter.emit(name, args)
+    }
+
+    /**
+     * Subscribe to an event.
+     * @param name
+     * @param cb
+     * @return {this<TData>}
+     */
+    on(name: string, cb: (...args: Array<any>) => void): this {
+        this._emitter.on(name, (a: any) => {
+            if (Array.isArray(a)) {
+                return cb(...a)
+            }
+            cb(a)
+        })
+        return this
     }
 
     /**
