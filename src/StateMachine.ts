@@ -21,7 +21,6 @@
 
 const Emittery = require('emittery');
 // import EventEmitter = require("events")
-import  StablePriorityQueue = require("stablepriorityqueue")
 import { Timer } from "ntimer"
 import * as pTimeout from "p-timeout"
 import * as Route from "route-parser"
@@ -53,6 +52,8 @@ import './util/ArrayHelpers'
 import delay from "./util/delay"
 import Pending from "./util/Pending";
 import Timers from "./util/Timers";
+
+const StablePriorityQueue = require("stablepriorityqueue")
 
 /**
  * @hidden
@@ -470,18 +471,20 @@ export class StateMachine<TData> implements IStateMachine<TData> {
         const eventRoute = e.toRoute(this.state);
         this.log.i("getEventHandler", String(e), eventRoute);
 
+        let index = 0
         for (let routeHandler of this._routeHandlers) {
             for (let route of routeHandler.routes) {
                 let result = route[1].match(eventRoute)
 
                 if (result) {
                     return {
-                        result,
+                        index, result,
                         route: route[0],
                         routeHandler: routeHandler.handler,
                     }
                 }
             }
+            index++
         }
         return undefined
     }
@@ -549,7 +552,7 @@ export class StateMachine<TData> implements IStateMachine<TData> {
         let res = this.handleResult(result, event);
         res = this.handlerTimeout ? pTimeout(res, this.handlerTimeout) : res
         await res
-        this.switchContext(event)
+        this.switchContext(event, h ? h.index : -1)
         if (this.animation && this.animation.delay &&
             (this.animation.includeDefault || !this.usingDefaultHandler)) {
             await delay(this.animation.delay)
@@ -817,8 +820,9 @@ export class StateMachine<TData> implements IStateMachine<TData> {
     /**
      *
      * @param event
+     * @param handlerIndex
      */
-    private switchContext(event?: Event) {
+    private switchContext(event?: Event, handlerIndex: number = -1): void {
         this.log.i('switchContext')
 
         const prev = this.isInitialState ? this._next : this._current
@@ -860,7 +864,7 @@ export class StateMachine<TData> implements IStateMachine<TData> {
         }
 
         const args: Array<any> = [current.state, prev.state,
-            current.data, event]
+            current.data, event, handlerIndex]
 
         let events: Array<[string, Array<any>]> = this._next.emit
         events.unshift(['state', args])

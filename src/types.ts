@@ -177,6 +177,7 @@ export type RouteHandlers<TData> = Array<RouteHandler<TData>>
  * @hidden
  */
 export type MatchedHandler<TData> = {
+    index?: number,
     routeHandler: Handler<TData>,
     route: string,
     result: { [k in string]: string }

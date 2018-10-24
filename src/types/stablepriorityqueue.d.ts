@@ -19,37 +19,21 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 //  USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+declare module 'stablepriorityqueue' {
+    class StablePriorityQueue<T> {
+        constructor(comparator: (a: T, b: T) => number)
 
-type Timeout = string | number
-type TimerOpts = {
-    name: string,
-    timeout: Timeout,
-    auto?: boolean,
-    repeat?: number
-}
+        add(item: T): void
 
-declare module 'ntimer' {
-    import EventEmitter = require('events')
+        poll(): T | undefined
 
-    namespace ntimer {
+        peek(): T | undefined
 
-        class Timer extends EventEmitter {
-            constructor(opts: TimerOpts)
+        trim(): void
 
-            start(): Timer
+        isEmpty(): boolean
 
-            cancel(): Timer
-        }
-
-        function auto(name: string, timeout: Timeout): Timer
-
-        function repeat(name: string, timeout: Timeout, repeat: number): Timer
-
-        function autoRepeat(name: string, timeout: Timeout,
-            repeat: number): Timer
     }
 
-    function ntimer(name: string, timeout: Timeout): ntimer.Timer
-
-    export = ntimer
+    export = StablePriorityQueue
 }
