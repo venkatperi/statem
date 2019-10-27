@@ -6,14 +6,14 @@
   "types": "dist/index.d.ts",
   "repository": "https://github.com/venkatperi/statem",
   "scripts": {
-    "pretest": "build:src",
+    "pretest": "npm run build:src",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"noImplicitAny\":false}' mocha ",
     "clean": "rm -rf dist",
     "build:src": "tsc",
     "build:umd": "webpack",
     "build:docs": "typedoc  --out docs --readme doc/R.md --mode file --theme markdown --mdHideSources --excludePrivate --excludeProtected --excludeExternals ",
     "postbuild:docs": "cp docs/README.md .",
-    "build": "npm run build:src && npm run build:umd && npm run build:docs",
+    "build": "npm run build:src && npm run build:umd",
     "prepare": "npm run clean && npm run build",
     "lint": "tslint --project ."
   },
