@@ -11,8 +11,8 @@
     "clean": "rm -rf dist",
     "build:src": "tsc",
     "build:umd": "webpack",
-    "build:docs": "typedoc  --out docs --readme doc/R.md --mode file --theme markdown --mdHideSources --excludePrivate --excludeProtected --excludeExternals ",
-    "postbuild:docs": "cp docs/README.md .",
+    "docs:dev": "vuepress dev doc",
+    "docs:build": "vuepress build doc",
     "build": "npm run build:src && npm run build:umd",
     "prepare": "npm run clean && npm run build",
     "lint": "tslint --project ."
@@ -43,6 +43,7 @@
     "typedoc-plugin-markdown": "^1.1.15",
     "typescript": "^3.0.3",
     "uglifyjs-webpack-plugin": "^2.0.1",
+    "vuepress": "^1.2.0",
     "webpack": "^4.20.2",
     "webpack-bundle-analyzer": "^3.0.2",
     "webpack-cli": "^3.1.2"
