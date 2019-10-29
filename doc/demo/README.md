@@ -1,4 +1,6 @@
 ---
+title: Demos
+sidebarDepth: 2
 ---
 
-123 Testing
+* [Hotel Safe Simulator](hotelsafe/)
