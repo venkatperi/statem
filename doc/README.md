@@ -155,7 +155,7 @@ For example:
 | Event | Event Context | Current State | Route |
 |-------|---------------|---------------|-------|
 | cast  |  `"flip"` | off | `"cast#flip#off"` |
-| cast  | `{button: 2}` | locked | `"cast#button/2#off"`|
+| cast  | `{button: 2}` | locked | `"cast#button/2#locked"`|
 | call | `"getInfo"` | one | `"call/internalId#getInfo/2#one"` |
 
 #### Event Handler Routes
